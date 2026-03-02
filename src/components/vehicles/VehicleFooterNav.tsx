@@ -71,10 +71,10 @@ export function VehicleFooterNav({
             path: isMainPage ? '/dashboard' : '/vehicles',
         },
         {
-            id: 'trips',
-            label: 'Lộ trình',
-            icon: Route,
-            path: '/vehicles/trips',
+            id: 'fuel',
+            label: isElectricVehicle ? 'Sạc điện' : 'Nhiên liệu',
+            icon: isElectricVehicle ? Zap : Fuel,
+            path: '/vehicles/fuel',
         },
         {
             id: 'add',
@@ -82,11 +82,12 @@ export function VehicleFooterNav({
             icon: LuClipboardPen,
             prominent: true,
         },
+
         {
-            id: 'fuel',
-            label: isElectricVehicle ? 'Sạc điện' : 'Nhiên liệu',
-            icon: isElectricVehicle ? Zap : Fuel,
-            path: '/vehicles/fuel',
+            id: 'trips',
+            label: 'Lộ trình',
+            icon: Route,
+            path: '/vehicles/trips',
         },
         {
             id: 'maintenance',

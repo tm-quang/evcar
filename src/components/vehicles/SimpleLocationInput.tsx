@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { MapPin, Navigation, Loader2, ExternalLink } from 'lucide-react'
+import { reverseGeocode } from '../../utils/geocoding'
 
 export type SimpleLocationData = {
     address: string
@@ -41,23 +42,14 @@ export function SimpleLocationInput({
                 const lng = position.coords.longitude
 
                 try {
-                    // Use Nominatim (OpenStreetMap) for reverse geocoding - FREE, no API key needed
-                    const response = await fetch(
-                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=vi`
-                    )
+                    const addressStr = await reverseGeocode(lat, lng)
+                    const address = addressStr && addressStr !== `${lat.toFixed(6)}, ${lng.toFixed(6)}`
+                        ? addressStr
+                        : `${lat.toFixed(6)}, ${lng.toFixed(6)}`
 
-                    if (response.ok) {
-                        const data = await response.json()
-                        const address = data.display_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`
-                        onChange(address, { address, lat, lng })
-                    } else {
-                        // Fallback to coordinates if reverse geocoding fails
-                        const address = `${lat.toFixed(6)}, ${lng.toFixed(6)}`
-                        onChange(address, { address, lat, lng })
-                    }
+                    onChange(address, { address, lat, lng })
                 } catch (error) {
                     console.error('Error reverse geocoding:', error)
-                    // Fallback to coordinates
                     const address = `${lat.toFixed(6)}, ${lng.toFixed(6)}`
                     onChange(address, { address, lat, lng })
                 } finally {

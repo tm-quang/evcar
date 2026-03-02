@@ -1177,50 +1177,88 @@ export const DashboardPage = () => {
                   <p className="text-sm text-slate-500">Chưa có giao dịch nào</p>
                 </div>
               ) : (
-                transactions.slice(0, 5).map((transaction) => {
-                  const categoryInfo = getCategoryInfo(transaction.category_id)
-                  const walletColor = getWalletColor(transaction.wallet_id)
+                (() => {
+                  const recentTransactions = transactions.slice(0, 5);
+                  // Group transactions by date
+                  const grouped: Record<string, typeof transactions> = {};
+                  recentTransactions.forEach((t) => {
+                    const date = new Date(t.transaction_date);
+                    const day = String(date.getDate()).padStart(2, '0')
+                    const month = String(date.getMonth() + 1).padStart(2, '0')
+                    const year = String(date.getFullYear()).slice(-2)
+                    const dateKey = `${day}/${month}/${year}`
+                    if (!grouped[dateKey]) {
+                      grouped[dateKey] = []
+                    }
+                    grouped[dateKey].push(t)
+                  })
 
-                  // Format date with relative time (Hôm nay, Hôm qua, etc.)
-                  const formatTransactionDate = (date: Date) => {
+                  return Object.entries(grouped).map(([dateKey, txs]) => {
+                    // Format date for display (Hôm nay, Hôm qua, etc.)
+                    const [day, month, year] = dateKey.split('/').map(Number)
+                    const fullYear = 2000 + year
+                    const date = new Date(fullYear, month - 1, day)
                     const today = new Date()
                     today.setHours(0, 0, 0, 0)
                     const yesterday = new Date(today)
                     yesterday.setDate(yesterday.getDate() - 1)
+                    date.setHours(0, 0, 0, 0)
 
-                    const transactionDay = new Date(date)
-                    transactionDay.setHours(0, 0, 0, 0)
-
-                    if (transactionDay.getTime() === today.getTime()) {
-                      return 'Hôm nay'
-                    } else if (transactionDay.getTime() === yesterday.getTime()) {
-                      return 'Hôm qua'
-                    } else {
-                      return date.toLocaleDateString('vi-VN', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                      })
+                    let dayLabel = dateKey
+                    if (date.getTime() === today.getTime()) {
+                      dayLabel = 'Hôm nay'
+                    } else if (date.getTime() === yesterday.getTime()) {
+                      dayLabel = 'Hôm qua'
                     }
-                  }
 
-                  return (
-                    <TransactionCard
-                      key={transaction.id}
-                      transaction={transaction}
-                      categoryInfo={categoryInfo}
-                      walletInfo={{
-                        name: getWalletName(transaction.wallet_id),
-                        color: walletColor,
-                      }}
-                      onLongPressStart={handleLongPressStart}
-                      onLongPressEnd={handleLongPressEnd}
-                      onLongPressCancel={handleLongPressCancel}
-                      formatCurrency={formatCurrency}
-                      formatDate={formatTransactionDate}
-                    />
-                  )
-                })
+                    // calculate total net amount for the date
+                    const dayTotal = txs.reduce((sum, t) => {
+                      if (t.type === 'Thu') return sum + t.amount
+                      if (t.type === 'Chi') return sum - t.amount
+                      return sum
+                    }, 0)
+
+                    return (
+                      <div key={dateKey}>
+                        {/* Date separator */}
+                        <div className="mb-3 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-sky-400" />
+                            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">{dayLabel}</span>
+                          </div>
+                          <span className={`text-[13px] font-black ${dayTotal >= 0 ? 'text-emerald-500' : 'text-slate-500'}`}>
+                            {dayTotal >= 0 ? '+' : ''}{Math.round(dayTotal).toLocaleString('vi-VN')}đ
+                          </span>
+                        </div>
+                        <div className="space-y-3 pl-3.5 border-l-2 ml-[3px] py-1 border-slate-100">
+                          {txs.map((transaction) => {
+                            const categoryInfo = getCategoryInfo(transaction.category_id)
+                            const walletColor = getWalletColor(transaction.wallet_id)
+
+                            const formatTransactionDate = () => dayLabel;
+
+                            return (
+                              <TransactionCard
+                                key={transaction.id}
+                                transaction={transaction}
+                                categoryInfo={categoryInfo}
+                                walletInfo={{
+                                  name: getWalletName(transaction.wallet_id),
+                                  color: walletColor,
+                                }}
+                                onLongPressStart={handleLongPressStart}
+                                onLongPressEnd={handleLongPressEnd}
+                                onLongPressCancel={handleLongPressCancel}
+                                formatCurrency={formatCurrency}
+                                formatDate={formatTransactionDate}
+                              />
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )
+                  })
+                })()
               )}
             </div>
           </section>

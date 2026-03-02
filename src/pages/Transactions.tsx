@@ -542,58 +542,49 @@ const TransactionsPage = () => {
             ) : (
               <>
                 {transactionsByDate.map(([dateKey, transactions]) => {
-                  // Format date for display (relative time)
-                  const formatTransactionDate = (date: Date) => {
-                    const today = new Date()
-                    today.setHours(0, 0, 0, 0)
-                    const yesterday = new Date(today)
-                    yesterday.setDate(yesterday.getDate() - 1)
+                  // Format date for display
+                  const [day, month, year] = dateKey.split('/').map(Number)
+                  const fullYear = 2000 + year
+                  const date = new Date(fullYear, month - 1, day)
+                  const today = new Date()
+                  today.setHours(0, 0, 0, 0)
+                  const yesterday = new Date(today)
+                  yesterday.setDate(yesterday.getDate() - 1)
+                  date.setHours(0, 0, 0, 0)
 
-                    const transactionDay = new Date(date)
-                    transactionDay.setHours(0, 0, 0, 0)
-
-                    if (transactionDay.getTime() === today.getTime()) {
-                      return 'Hôm nay'
-                    } else if (transactionDay.getTime() === yesterday.getTime()) {
-                      return 'Hôm qua'
-                    } else {
-                      return date.toLocaleDateString('vi-VN', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                      })
-                    }
+                  let dayLabel = dateKey
+                  if (date.getTime() === today.getTime()) {
+                    dayLabel = 'Hôm nay'
+                  } else if (date.getTime() === yesterday.getTime()) {
+                    dayLabel = 'Hôm qua'
                   }
 
-                  return (
-                    <div key={dateKey} className="space-y-3">
-                      {/* Date Header */}
-                      <div className="flex items-center gap-2 px-1">
-                        <span className="text-sm font-bold text-slate-900">{dateKey}</span>
-                        {(() => {
-                          const [day, month, year] = dateKey.split('/').map(Number)
-                          const fullYear = 2000 + year
-                          const date = new Date(fullYear, month - 1, day)
-                          const today = new Date()
-                          today.setHours(0, 0, 0, 0)
-                          const yesterday = new Date(today)
-                          yesterday.setDate(yesterday.getDate() - 1)
-                          date.setHours(0, 0, 0, 0)
+                  // calculate total net amount for the date
+                  const dayTotal = transactions.reduce((sum, t) => {
+                    if (t.type === 'Thu') return sum + t.amount
+                    if (t.type === 'Chi') return sum - t.amount
+                    return sum
+                  }, 0)
 
-                          if (date.getTime() === today.getTime()) {
-                            return <span className="text-xs text-slate-500">Hôm nay</span>
-                          } else if (date.getTime() === yesterday.getTime()) {
-                            return <span className="text-xs text-slate-500">Hôm qua</span>
-                          }
-                          return null
-                        })()}
+                  return (
+                    <div key={dateKey}>
+                      {/* Date Header */}
+                      <div className="mb-3 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="h-2 w-2 rounded-full bg-sky-400" />
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">{dayLabel}</span>
+                        </div>
+                        <span className={`text-[13px] font-black ${dayTotal >= 0 ? 'text-emerald-500' : 'text-slate-500'}`}>
+                          {dayTotal >= 0 ? '+' : ''}{Math.round(dayTotal).toLocaleString('vi-VN')}đ
+                        </span>
                       </div>
 
                       {/* Transactions for this date */}
-                      <div className="space-y-3">
+                      <div className="space-y-3 pl-3.5 border-l-2 ml-[3px] py-1 border-slate-100">
                         {transactions.map((transaction) => {
                           const categoryInfo = getCategoryInfo(transaction.category_id)
                           const walletColor = getWalletColor(transaction.wallet_id)
+                          const formatTransactionDate = () => dayLabel;
 
                           return (
                             <TransactionCard

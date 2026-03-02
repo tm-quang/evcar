@@ -475,7 +475,7 @@ export default function VehicleExpenses() {
                 <div className="h-[150px] w-full flex-shrink-0"></div>
             </main>
 
-            <VehicleFooterNav onAddClick={() => setShowAddModal(true)} addLabel="Chi phí" />
+            <VehicleFooterNav onAddClick={() => setShowAddModal(true)} addLabel="Chi phí" isElectricVehicle={selectedVehicle?.fuel_type === 'electric'} />
 
             {showAddModal && selectedVehicle && (
                 <AddExpenseModal

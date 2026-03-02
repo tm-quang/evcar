@@ -258,15 +258,15 @@ export default function VehicleReports() {
                             <div className="h-48 animate-pulse rounded-xl bg-slate-100" />
                         ) : (
                             <ResponsiveContainer width="100%" height={200}>
-                                <BarChart data={monthly} margin={{ top: 4, right: 4, left: 0, bottom: 0 }} barSize={14}>
+                                <BarChart data={monthly} margin={{ top: 4, right: 4, left: 0, bottom: 0 }} style={{ outline: 'none' }}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                     <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                                     <YAxis tickFormatter={fmtK} tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={36} />
-                                    <Tooltip content={<CurrencyTooltip />} />
+                                    <Tooltip content={<CurrencyTooltip />} cursor={{ fill: 'transparent' }} />
                                     <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
-                                    <Bar dataKey="fuel" name={isElectric ? 'Sạc điện' : 'Nhiên liệu'} stackId="a" fill={isElectric ? '#22c55e' : '#f97316'} radius={[0, 0, 0, 0]} />
-                                    <Bar dataKey="maintenance" name="Bảo dưỡng" stackId="a" fill="#8b5cf6" />
-                                    <Bar dataKey="expenses" name="Chi phí khác" stackId="a" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+                                    <Bar dataKey="fuel" name={isElectric ? 'Sạc điện' : 'Nhiên liệu'} fill={isElectric ? '#22c55e' : '#f97316'} radius={[4, 4, 0, 0]} barSize={10} activeBar={false} style={{ outline: 'none' }} />
+                                    <Bar dataKey="maintenance" name="Bảo dưỡng" fill="#8b5cf6" radius={[4, 4, 0, 0]} barSize={10} activeBar={false} style={{ outline: 'none' }} />
+                                    <Bar dataKey="expenses" name="Chi phí khác" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={10} activeBar={false} style={{ outline: 'none' }} />
                                 </BarChart>
                             </ResponsiveContainer>
                         )}
@@ -281,11 +281,11 @@ export default function VehicleReports() {
                             <div className="h-40 animate-pulse rounded-xl bg-slate-100" />
                         ) : (
                             <ResponsiveContainer width="100%" height={160}>
-                                <LineChart data={monthly} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                                <LineChart data={monthly} margin={{ top: 4, right: 4, left: 0, bottom: 0 }} style={{ outline: 'none' }}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                     <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                                     <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={30} />
-                                    <Tooltip formatter={(v) => [`${Number(v ?? 0).toLocaleString()} km`, 'Quãng đường']} labelStyle={{ fontWeight: 700 }} />
+                                    <Tooltip formatter={(v) => [`${Number(v ?? 0).toLocaleString()} km`, 'Quãng đường']} labelStyle={{ fontWeight: 700 }} cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '3 3' }} />
                                     <Line dataKey="distance" name="km" type="monotone"
                                         stroke={isElectric ? '#22c55e' : isMoto ? '#f97316' : '#3b82f6'}
                                         strokeWidth={2.5} dot={{ r: 4, fill: 'white', strokeWidth: 2.5 }}
@@ -303,9 +303,9 @@ export default function VehicleReports() {
                         <div className="rounded-2xl bg-white border border-slate-100 shadow-md p-4">
                             <div className="flex items-center gap-4">
                                 <ResponsiveContainer width={120} height={120}>
-                                    <PieChart>
-                                        <Pie data={tripTypeData} innerRadius={32} outerRadius={52} dataKey="value" paddingAngle={2}>
-                                            {tripTypeData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                                    <PieChart style={{ outline: 'none' }}>
+                                        <Pie data={tripTypeData} innerRadius={32} outerRadius={52} dataKey="value" paddingAngle={2} style={{ outline: 'none' }}>
+                                            {tripTypeData.map((entry, i) => <Cell key={i} fill={entry.color} style={{ outline: 'none' }} />)}
                                         </Pie>
                                     </PieChart>
                                 </ResponsiveContainer>
@@ -451,7 +451,7 @@ export default function VehicleReports() {
                 <div className="h-[150px] w-full flex-shrink-0"></div>
             </main>
 
-            <VehicleFooterNav addLabel="Ghi chép" />
+            <VehicleFooterNav addLabel="Ghi chép" isElectricVehicle={isElectric} />
         </div>
     )
 }

@@ -5,7 +5,7 @@ import {
     BatteryCharging, Activity, TrendingUp, Clock, ChevronDown, ChevronUp,
     Bolt, Gauge, Check, Gift, DollarSign, Image, Loader2,
     Fuel, CreditCard, ScanLine, X, CheckSquare, Square, Save,
-    ChevronLeft, ChevronRight, Edit2, Search
+    ChevronLeft, ChevronRight, Edit, Search
 } from 'lucide-react'
 import { createFuelLog, deleteFuelLog, updateFuelLog, type VehicleRecord, type FuelLogRecord } from '../../lib/vehicles/vehicleService'
 import { useVehicles, useVehicleFuel, vehicleKeys } from '../../lib/vehicles/useVehicleQueries'
@@ -214,7 +214,7 @@ function ChargeLogCard({
         new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(v)
 
     return (
-        <div className="overflow-hidden rounded-2xl bg-white shadow-md transition-all hover:shadow-lg border border-slate-100">
+        <div className="overflow-hidden rounded-2xl bg-white shadow-md transition-all hover:shadow-md border border-gray-300">
             {/* Top accent bar - solid green */}
             <div className="h-1 w-full bg-green-500" />
 
@@ -223,7 +223,7 @@ function ChargeLogCard({
                 <div className="flex items-start justify-between">
                     <div>
                         <div className="flex items-center gap-2 mb-0.5">
-                            <div className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5">
+                            <div className="flex items-center gap-1 rounded-full bg-green-200 px-2 py-0.5">
                                 <Zap className="h-3 w-3 text-green-600" />
                                 <span className="text-xs font-bold text-green-700">Sạc điện</span>
                             </div>
@@ -249,7 +249,7 @@ function ChargeLogCard({
                             onClick={() => onEdit(log)}
                             className="ml-2 rounded-3xl p-2 text-blue-400 transition-colors bg-blue-50 hover:bg-blue-50 hover:text-blue-600"
                         >
-                            <Edit2 className="h-4 w-4" />
+                            <Edit className="h-4 w-4" />
                         </button>
                         <button
                             onClick={() => onDelete(log.id)}
@@ -377,7 +377,7 @@ function FuelLogCard({
                             onClick={() => onEdit(log)}
                             className="mr-1 rounded-3xl p-2 text-blue-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                         >
-                            <Edit2 className="h-4 w-4" />
+                            <Edit className="h-4 w-4" />
                         </button>
                         <button
                             onClick={() => onDelete(log.id)}

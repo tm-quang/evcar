@@ -35,7 +35,7 @@ export interface TripRecord {
     user_id: string
     trip_date: string
     trip_time?: string
-    trip_type: 'work' | 'business' | 'leisure' | 'hometown' | 'other'
+    trip_type: 'work' | 'business' | 'leisure' | 'hometown' | 'service' | 'shopping' | 'family' | 'roadtrip' | 'repair' | 'other' | string
     start_km: number
     end_km: number
     distance_km?: number

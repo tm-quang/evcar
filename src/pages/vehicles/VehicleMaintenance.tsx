@@ -479,7 +479,7 @@ export default function VehicleMaintenance() {
                 <div className="h-[150px] w-full flex-shrink-0"></div>
             </main>
 
-            <VehicleFooterNav onAddClick={() => setShowAddModal(true)} addLabel="Bảo dưỡng" />
+            <VehicleFooterNav onAddClick={() => setShowAddModal(true)} addLabel="Bảo dưỡng" isElectricVehicle={selectedVehicle?.fuel_type === 'electric'} />
 
             {showSettingsModal && selectedVehicle && (
                 <MaintenanceSettingsModal

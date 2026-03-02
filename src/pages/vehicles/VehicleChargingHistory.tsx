@@ -361,19 +361,19 @@ export default function VehicleChargingHistory() {
 
                 {/* 4 Cards Grid */}
                 <div className="grid grid-cols-2 gap-3 mb-6">
-                    <div className="bg-[#f0fdf4] rounded-[20px] p-5 flex flex-col items-center justify-center text-center shadow-md border border-slate-50/50">
+                    <div className="bg-[#f0fdf4] rounded-[20px] p-5 flex flex-col items-center justify-center text-center shadow-md border border-emerald-200">
                         <p className="text-[10px] font-bold text-emerald-600 tracking-widest uppercase mb-1.5 leading-none">Năng lượng</p>
                         <p className="text-xl font-black text-emerald-700 leading-none">{Math.round(totalKwh)} kWh</p>
                     </div>
-                    <div className="bg-[#fdf4ff] rounded-[20px] p-5 flex flex-col items-center justify-center text-center shadow-md border border-slate-50/50">
+                    <div className="bg-[#fdf4ff] rounded-[20px] p-5 flex flex-col items-center justify-center text-center shadow-md border border-fuchsia-200">
                         <p className="text-[10px] font-bold text-fuchsia-600 tracking-widest uppercase mb-1.5 leading-none">Cắm sạc</p>
                         <p className="text-xl font-black text-fuchsia-700 leading-none">{pluggedDisplay}</p>
                     </div>
-                    <div className="bg-[#eff6ff] rounded-[20px] p-5 flex flex-col items-center justify-center text-center shadow-md border border-slate-50/50">
+                    <div className="bg-[#eff6ff] rounded-[20px] p-5 flex flex-col items-center justify-center text-center shadow-md border border-blue-200">
                         <p className="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-1.5 leading-none">Chi phí</p>
                         <p className="text-xl font-black text-blue-700 leading-none">{formatCurrency(totalCost).replace('₫', 'đ').trim()}</p>
                     </div>
-                    <div className="bg-[#fffbeb] rounded-[20px] p-5 flex flex-col items-center justify-center text-center shadow-md border border-slate-50/50">
+                    <div className="bg-[#fffbeb] rounded-[20px] p-5 flex flex-col items-center justify-center text-center shadow-md border border-amber-200">
                         <p className="text-[10px] font-bold text-amber-600 tracking-widest uppercase mb-1.5 leading-none">Tiết kiệm</p>
                         <p className="text-xl font-black text-amber-600 leading-none">{formatCurrency(totalSaved).replace('₫', 'đ').trim()}</p>
                     </div>
@@ -414,7 +414,7 @@ export default function VehicleChargingHistory() {
                         const subtitle = locationParts[1] || 'Không rõ địa điểm'
 
                         return (
-                            <div key={log.id} onClick={() => setEditingLog(log as FuelLogRecord)} className="bg-white rounded-[20px] p-5 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-slate-100 flex flex-col gap-4 cursor-pointer hover:shadow-md transition-shadow active:scale-[0.98]">
+                            <div key={log.id} onClick={() => setEditingLog(log as FuelLogRecord)} className="bg-white rounded-[20px] p-5 shadow-md border border-gray-300 flex flex-col gap-4 cursor-pointer hover:shadow-md transition-shadow active:scale-[0.98]">
                                 {/* Header */}
                                 <div className="flex justify-between items-start gap-3">
                                     <div className="flex-1 min-w-0">

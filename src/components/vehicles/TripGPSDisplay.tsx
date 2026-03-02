@@ -136,34 +136,54 @@ export function TripGPSDisplay({ trip }: { trip: any }) {
                             <div className="flex-1 bg-slate-50 border border-slate-100 rounded-xl p-3 shadow-sm">
                                 <div className="flex items-start justify-between mb-1.5">
                                     <div className="flex items-center gap-1.5">
-                                        <span className={`text-xs font-bold ${colorAttr.split(' ')[0]}`}>{node.label}</span>
-                                        <span className="text-[10px] text-slate-400 font-medium">({timeStr})</span>
+                                        <span className={`text-[13px] font-bold ${colorAttr.split(' ')[0]}`}>{node.label}</span>
+                                        <span className="text-[10.5px] text-slate-400 font-medium">({timeStr})</span>
                                     </div>
-                                    {node.odo !== undefined && (
-                                        <div className="text-xs font-mono font-semibold text-slate-600">
+                                    {node.odo !== undefined ? (
+                                        <div className="text-xs font-mono font-semibold text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded-md">
                                             {node.odo.toLocaleString()} km
+                                        </div>
+                                    ) : (
+                                        <div className="text-xs font-mono font-semibold text-slate-400 bg-white border border-slate-100 px-2 py-0.5 rounded-md">
+                                            -- km
                                         </div>
                                     )}
                                 </div>
 
                                 {node.address && (
-                                    <p className="text-xs font-medium text-slate-700 leading-tight mb-1.5">
+                                    <p className="text-[13px] font-medium text-slate-700 leading-snug mb-2">
                                         {node.address}
                                     </p>
                                 )}
 
-                                {node.lat && node.lng && (
-                                    <div className="flex items-center justify-between mt-2">
-                                        <p className="text-[10px] font-mono text-slate-500">
-                                            {node.lat.toFixed(6)}, {node.lng.toFixed(6)}
-                                        </p>
-                                        {node.url && (
-                                            <a href={node.url} target="_blank" rel="noopener noreferrer" className="text-[10px] flex items-center gap-1 font-semibold text-blue-500 hover:text-blue-600 transition-colors">
-                                                <ExternalLink className="h-3 w-3" /> Bản đồ
-                                            </a>
-                                        )}
-                                    </div>
-                                )}
+                                {(() => {
+                                    const mapUrl = node.url ||
+                                        (node.lat && node.lng ? `https://www.google.com/maps?q=${node.lat},${node.lng}` :
+                                            node.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(node.address)}` : null);
+
+                                    return (
+                                        <>
+                                            {(node.lat && node.lng) ? (
+                                                <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100/60">
+                                                    <p className="text-[10px] font-mono text-slate-500 flex-1">
+                                                        {node.lat.toFixed(6)}, {node.lng.toFixed(6)}
+                                                    </p>
+                                                    {mapUrl && (
+                                                        <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="text-[10.5px] shrink-0 flex items-center gap-1 font-semibold text-blue-600 bg-blue-50/80 hover:bg-blue-100 border border-blue-100 px-2.5 py-1 rounded-lg transition-colors">
+                                                            <ExternalLink className="h-3 w-3" /> Bản đồ
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            ) : mapUrl ? (
+                                                <div className="flex justify-end mt-2 pt-2 border-t border-slate-100/60">
+                                                    <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="text-[10.5px] flex items-center gap-1 font-semibold text-blue-600 bg-blue-50/80 hover:bg-blue-100 border border-blue-100 px-2.5 py-1 rounded-lg transition-colors">
+                                                        <ExternalLink className="h-3 w-3" /> Xem bản đồ
+                                                    </a>
+                                                </div>
+                                            ) : null}
+                                        </>
+                                    )
+                                })()}
 
                                 {prevNode && (dist !== null || mins !== null) && (
                                     <div className="mt-2.5 pt-2.5 border-t border-slate-200/60 flex items-center gap-4 text-xs">
