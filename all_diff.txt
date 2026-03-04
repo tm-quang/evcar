@@ -1,0 +1,2322 @@
+diff --git a/src/components/categories/CategoryPickerModal.tsx b/src/components/categories/CategoryPickerModal.tsx
+index d0a53c0..82fad50 100644
+--- a/src/components/categories/CategoryPickerModal.tsx
++++ b/src/components/categories/CategoryPickerModal.tsx
+@@ -109 +109 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
+-    
++
+@@ -124 +124 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
+-    <div className="fixed inset-0 z-[9999] flex flex-col bg-[#F7F9FC]">
++    <div className="fixed inset-0 z-[9999] mx-auto w-full max-w-md flex flex-col bg-[#F7F9FC]">
+@@ -126,2 +126,2 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
+-      <HeaderBar 
+-        variant="page" 
++      <HeaderBar
++        variant="page"
+@@ -155,2 +155,2 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
+-              <button
+-                onClick={() => setSearchTerm('')}
++                <button
++                  onClick={() => setSearchTerm('')}
+@@ -158,2 +158,2 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
+-                aria-label="Xóa tìm kiếm"
+-              >
++                  aria-label="Xóa tìm kiếm"
++                >
+@@ -161 +161 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
+-              </button>
++                </button>
+@@ -168,11 +168,3 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
+-          {isLoading ? (
+-            <div className="p-4">
+-              <CategoryListSkeleton count={12} />
+-            </div>
+-          ) : (
+-            <>
+-              {/* All Categories List */}
+-              {filteredCategories.length === 0 ? (
+-            <div className="flex flex-col items-center justify-center py-20 px-4">
+-              <div className="mb-4 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 p-5 shadow-sm">
+-                <FaFolder className="h-10 w-10 text-slate-400" />
++            {isLoading ? (
++              <div className="p-4">
++                <CategoryListSkeleton count={12} />
+@@ -180,92 +172,7 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
+-              <h4 className="text-lg font-semibold text-slate-900 mb-2">
+-                {searchTerm ? 'Không tìm thấy hạng mục' : 'Chưa có hạng mục'}
+-              </h4>
+-              <p className="text-sm text-slate-500 text-center max-w-xs">
+-                {searchTerm
+-                  ? 'Thử tìm kiếm với từ khóa khác'
+-                  : 'Hãy tạo hạng mục mới để bắt đầu sử dụng'}
+-              </p>
+-            </div>
+-          ) : (
+-            <div className="py-3 shadow-sm ring-1 rounded-2xl mx-4 mt-2 bg-white ring-slate-200">
+-              {filteredCategories.map((parent, index) => {
+-                const hasChildren = parent.children && parent.children.length > 0
+-                const isExpanded = expandedParents.has(parent.id) || searchTerm.length > 0 // Auto-expand when searching
+-                const isSelected = selectedCategoryId === parent.id
+-
+-                return (
+-                  <div key={parent.id}>
+-                    {/* Divider */}
+-                    {index > 0 && (
+-                      <div className="mx-4 border-t border-slate-200" />
+-                    )}
+-                    <div className="px-4">
+-                      {/* Parent Category */}
+-                      <div
+-                        className={`group flex items-center gap-2 px-3 py-1 rounded-xl transition-all cursor-pointer ${
+-                          isSelected
+-                            ? 'bg-gradient-to-r from-sky-50 to-blue-50 ring-2 ring-sky-500 shadow-sm'
+-                            : 'hover:bg-slate-50 active:bg-slate-100'
+-                        }`}
+-                        onClick={() => handleCategorySelect(parent.id)}
+-                      >
+-                      {/* Expand/Collapse Button */}
+-                      {hasChildren ? (
+-                        <button
+-                          type="button"
+-                          onClick={(e) => {
+-                            e.stopPropagation()
+-                            toggleParentExpanded(parent.id, e)
+-                          }}
+-                          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all ${
+-                            isExpanded
+-                              ? 'bg-sky-200 text-sky-600'
+-                              : 'bg-slate-200 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-600'
+-                          }`}
+-                        >
+-                          <FaChevronRight
+-                            className={`h-5 w-5 transition-transform duration-200 ${
+-                              isExpanded ? 'rotate-90' : ''
+-                            }`}
+-                          />
+-                        </button>
+-                      ) : (
+-                        <div className="w-7" />
+-                      )}
+-
+-                      {/* Icon */}
+-                      <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full transition-all">
+-                        <CategoryIcon
+-                          iconId={parent.icon_id}
+-                          iconUrl={parent.icon_url}
+-                          className="h-14 w-14"
+-                          fallback={
+-                            <span className="text-3xl font-semibold text-slate-400">
+-                              {parent.name[0]?.toUpperCase() || '?'}
+-                            </span>
+-                          }
+-                        />
+-                      </div>
+-
+-                      {/* Name */}
+-                      <div className="flex-1 min-w-0">
+-                        <p className={`truncate text-base font-semibold ${
+-                          isSelected ? 'text-sky-900' : 'text-slate-900'
+-                        }`}>
+-                          {parent.name}
+-                        </p>
+-                        {hasChildren && parent.children && (
+-                          <p className="text-xs text-slate-500 mt-0.5">
+-                            {parent.children.length} {parent.children.length === 1 ? 'hạng mục con' : 'hạng mục con'}
+-                          </p>
+-                        )}
+-                      </div>
+-
+-                      {/* Selected Indicator */}
+-                      {isSelected && (
+-                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sky-600 text-white shadow-md">
+-                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+-                          </svg>
+-                        </div>
+-                      )}
++            ) : (
++              <>
++                {/* All Categories List */}
++                {filteredCategories.length === 0 ? (
++                  <div className="flex flex-col items-center justify-center py-20 px-4">
++                    <div className="mb-4 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 p-5 shadow-sm">
++                      <FaFolder className="h-10 w-10 text-slate-400" />
+@@ -272,0 +180,15 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
++                    <h4 className="text-lg font-semibold text-slate-900 mb-2">
++                      {searchTerm ? 'Không tìm thấy hạng mục' : 'Chưa có hạng mục'}
++                    </h4>
++                    <p className="text-sm text-slate-500 text-center max-w-xs">
++                      {searchTerm
++                        ? 'Thử tìm kiếm với từ khóa khác'
++                        : 'Hãy tạo hạng mục mới để bắt đầu sử dụng'}
++                    </p>
++                  </div>
++                ) : (
++                  <div className="py-3 shadow-sm ring-1 rounded-2xl mx-4 mt-2 bg-white ring-slate-200">
++                    {filteredCategories.map((parent, index) => {
++                      const hasChildren = parent.children && parent.children.length > 0
++                      const isExpanded = expandedParents.has(parent.id) || searchTerm.length > 0 // Auto-expand when searching
++                      const isSelected = selectedCategoryId === parent.id
+@@ -274,6 +196,8 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
+-                    {/* Children Categories - Only show if expanded */}
+-                    {hasChildren && isExpanded && parent.children && parent.children.length > 0 && (
+-                      <div className="ml-4 mt-0.5 space-y-0.5 border-l-2 border-slate-200 pl-1">
+-                        {parent.children.map((child, index) => {
+-                          const isChildSelected = selectedCategoryId === child.id
+-                          return (
++                      return (
++                        <div key={parent.id}>
++                          {/* Divider */}
++                          {index > 0 && (
++                            <div className="mx-4 border-t border-slate-200" />
++                          )}
++                          <div className="px-4">
++                            {/* Parent Category */}
+@@ -281,3 +205 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
+-                              key={child.id}
+-                              className={`group flex items-center gap-2 px-3 py-1 rounded-xl transition-all cursor-pointer ${
+-                                isChildSelected
++                              className={`group flex items-center gap-2 px-3 py-1 rounded-xl transition-all cursor-pointer ${isSelected
+@@ -286,3 +208,2 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
+-                              }`}
+-                              onClick={() => handleCategorySelect(child.id)}
+-                              style={{ animationDelay: `${index * 30}ms` }}
++                                }`}
++                              onClick={() => handleCategorySelect(parent.id)}
+@@ -290,2 +211,21 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
+-                              {/* Spacer for alignment */}
+-                              <div className="w-5" />
++                              {/* Expand/Collapse Button */}
++                              {hasChildren ? (
++                                <button
++                                  type="button"
++                                  onClick={(e) => {
++                                    e.stopPropagation()
++                                    toggleParentExpanded(parent.id, e)
++                                  }}
++                                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all ${isExpanded
++                                      ? 'bg-sky-200 text-sky-600'
++                                      : 'bg-slate-200 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-600'
++                                    }`}
++                                >
++                                  <FaChevronRight
++                                    className={`h-5 w-5 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''
++                                      }`}
++                                  />
++                                </button>
++                              ) : (
++                                <div className="w-7" />
++                              )}
+@@ -294 +234 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
+-                              <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full transition-all">
++                              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full transition-all">
+@@ -296,2 +236,2 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
+-                                  iconId={child.icon_id}
+-                                  iconUrl={child.icon_url}
++                                  iconId={parent.icon_id}
++                                  iconUrl={parent.icon_url}
+@@ -300,2 +240,2 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
+-                                    <span className="text-2xl font-semibold text-slate-400">
+-                                      {child.name[0]?.toUpperCase() || '?'}
++                                    <span className="text-3xl font-semibold text-slate-400">
++                                      {parent.name[0]?.toUpperCase() || '?'}
+@@ -309,4 +249,3 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
+-                                <p className={`truncate text-sm font-semibold ${
+-                                  isChildSelected ? 'text-sky-900' : 'text-slate-900'
+-                                }`}>
+-                                  {child.name}
++                                <p className={`truncate text-base font-semibold ${isSelected ? 'text-sky-900' : 'text-slate-900'
++                                  }`}>
++                                  {parent.name}
+@@ -313,0 +253,5 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
++                                {hasChildren && parent.children && (
++                                  <p className="text-xs text-slate-500 mt-0.5">
++                                    {parent.children.length} {parent.children.length === 1 ? 'hạng mục con' : 'hạng mục con'}
++                                  </p>
++                                )}
+@@ -317,3 +261,3 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
+-                              {isChildSelected && (
+-                                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sky-600 text-white shadow-md">
+-                                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
++                              {isSelected && (
++                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sky-600 text-white shadow-md">
++                                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+@@ -325,2 +269,55 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
+-                          )
+-                        })}
++
++                            {/* Children Categories - Only show if expanded */}
++                            {hasChildren && isExpanded && parent.children && parent.children.length > 0 && (
++                              <div className="ml-4 mt-0.5 space-y-0.5 border-l-2 border-slate-200 pl-1">
++                                {parent.children.map((child, index) => {
++                                  const isChildSelected = selectedCategoryId === child.id
++                                  return (
++                                    <div
++                                      key={child.id}
++                                      className={`group flex items-center gap-2 px-3 py-1 rounded-xl transition-all cursor-pointer ${isChildSelected
++                                          ? 'bg-gradient-to-r from-sky-50 to-blue-50 ring-2 ring-sky-500 shadow-sm'
++                                          : 'hover:bg-slate-50 active:bg-slate-100'
++                                        }`}
++                                      onClick={() => handleCategorySelect(child.id)}
++                                      style={{ animationDelay: `${index * 30}ms` }}
++                                    >
++                                      {/* Spacer for alignment */}
++                                      <div className="w-5" />
++
++                                      {/* Icon */}
++                                      <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full transition-all">
++                                        <CategoryIcon
++                                          iconId={child.icon_id}
++                                          iconUrl={child.icon_url}
++                                          className="h-14 w-14"
++                                          fallback={
++                                            <span className="text-2xl font-semibold text-slate-400">
++                                              {child.name[0]?.toUpperCase() || '?'}
++                                            </span>
++                                          }
++                                        />
++                                      </div>
++
++                                      {/* Name */}
++                                      <div className="flex-1 min-w-0">
++                                        <p className={`truncate text-sm font-semibold ${isChildSelected ? 'text-sky-900' : 'text-slate-900'
++                                          }`}>
++                                          {child.name}
++                                        </p>
++                                      </div>
++
++                                      {/* Selected Indicator */}
++                                      {isChildSelected && (
++                                        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sky-600 text-white shadow-md">
++                                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
++                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
++                                          </svg>
++                                        </div>
++                                      )}
++                                    </div>
++                                  )
++                                })}
++                              </div>
++                            )}
++                          </div>
+@@ -328,2 +325,2 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
+-                      )}
+-                    </div>
++                      )
++                    })}
+@@ -331,6 +328,3 @@ export const CategoryPickerModal: React.FC<CategoryPickerModalProps> = ({
+-                )
+-              })}
+-            </div>
+-              )}
+-            </>
+-          )}
++                )}
++              </>
++            )}
+diff --git a/src/components/categories/FavoriteCategoriesModal.tsx b/src/components/categories/FavoriteCategoriesModal.tsx
+index 3c697f8..c3e663f 100644
+--- a/src/components/categories/FavoriteCategoriesModal.tsx
++++ b/src/components/categories/FavoriteCategoriesModal.tsx
+@@ -173 +173 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
+-    <div className="fixed inset-0 z-[99999] flex flex-col bg-[#F7F9FC]">
++    <div className="fixed inset-0 z-[99999] mx-auto w-full max-w-md flex flex-col bg-[#F7F9FC]">
+@@ -175,2 +175,2 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
+-      <HeaderBar 
+-        variant="page" 
++      <HeaderBar
++        variant="page"
+@@ -220,8 +220,3 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
+-          {isLoading ? (
+-            <div className="p-4">
+-              <CategoryListSkeleton count={8} />
+-            </div>
+-          ) : filteredCategories.length === 0 ? (
+-            <div className="flex flex-col items-center justify-center py-16 px-4">
+-              <div className="mb-4 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 p-4 shadow-sm">
+-                <FaSearch className="h-8 w-8 text-slate-400" />
++            {isLoading ? (
++              <div className="p-4">
++                <CategoryListSkeleton count={8} />
+@@ -229,10 +224,14 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
+-              <h4 className="text-base font-semibold text-slate-900 mb-1">
+-                Không tìm thấy hạng mục
+-              </h4>
+-              <p className="text-sm text-slate-500 text-center max-w-xs">
+-                Thử tìm kiếm với từ khóa khác
+-              </p>
+-            </div>
+-          ) : (
+-            <div className={`py-3 shadow-sm ring-1 rounded-2xl mx-4 mt-4 ${
+-              categoryType === 'Chi tiêu'
++            ) : filteredCategories.length === 0 ? (
++              <div className="flex flex-col items-center justify-center py-16 px-4">
++                <div className="mb-4 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 p-4 shadow-sm">
++                  <FaSearch className="h-8 w-8 text-slate-400" />
++                </div>
++                <h4 className="text-base font-semibold text-slate-900 mb-1">
++                  Không tìm thấy hạng mục
++                </h4>
++                <p className="text-sm text-slate-500 text-center max-w-xs">
++                  Thử tìm kiếm với từ khóa khác
++                </p>
++              </div>
++            ) : (
++              <div className={`py-3 shadow-sm ring-1 rounded-2xl mx-4 mt-4 ${categoryType === 'Chi tiêu'
+@@ -241,9 +240,9 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
+-            }`}>
+-              {filteredCategories.map((parent) => {
+-                if (!parent) return null
+-                const hasChildren = parent.children && parent.children.length > 0
+-                const isExpanded = expandedParents.has(parent.id) || searchTerm.length > 0
+-                const parentId = parent.id
+-                const parentIconId = parent.icon_id
+-                const parentName = parent.name
+-                const parentChildren = parent.children
++                }`}>
++                {filteredCategories.map((parent) => {
++                  if (!parent) return null
++                  const hasChildren = parent.children && parent.children.length > 0
++                  const isExpanded = expandedParents.has(parent.id) || searchTerm.length > 0
++                  const parentId = parent.id
++                  const parentIconId = parent.icon_id
++                  const parentName = parent.name
++                  const parentChildren = parent.children
+@@ -251,6 +250,5 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
+-                return (
+-                  <div key={parentId} className="mb-0.5 px-4">
+-                    {/* Parent Category */}
+-                    <div
+-                      className={`group flex items-center gap-3 px-4 py-2 rounded-xl transition-all ${
+-                        favoriteIds.has(parentId)
++                  return (
++                    <div key={parentId} className="mb-0.5 px-4">
++                      {/* Parent Category */}
++                      <div
++                        className={`group flex items-center gap-3 px-4 py-2 rounded-xl transition-all ${favoriteIds.has(parentId)
+@@ -259,12 +257,11 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
+-                      }`}
+-                    >
+-                      {/* Expand/Collapse Button */}
+-                      {hasChildren ? (
+-                        <button
+-                          type="button"
+-                          onClick={(e) => {
+-                            e.stopPropagation()
+-                            toggleParentExpanded(parentId, e)
+-                          }}
+-                          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all ${
+-                            isExpanded
++                          }`}
++                      >
++                        {/* Expand/Collapse Button */}
++                        {hasChildren ? (
++                          <button
++                            type="button"
++                            onClick={(e) => {
++                              e.stopPropagation()
++                              toggleParentExpanded(parentId, e)
++                            }}
++                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all ${isExpanded
+@@ -273,11 +270,10 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
+-                          }`}
+-                        >
+-                          <FaChevronUp
+-                            className={`h-3.5 w-3.5 transition-transform duration-200 ${
+-                              isExpanded ? '' : 'rotate-180'
+-                            }`}
+-                          />
+-                        </button>
+-                      ) : (
+-                        <div className="w-7" />
+-                      )}
++                              }`}
++                          >
++                            <FaChevronUp
++                              className={`h-3.5 w-3.5 transition-transform duration-200 ${isExpanded ? '' : 'rotate-180'
++                                }`}
++                            />
++                          </button>
++                        ) : (
++                          <div className="w-7" />
++                        )}
+@@ -285,13 +281,13 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
+-                      {/* Icon */}
+-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-all">
+-                        <CategoryIcon
+-                          iconId={parentIconId}
+-                          iconUrl={parent.icon_url}
+-                          className="h-6 w-6"
+-                          fallback={
+-                            <span className="text-lg font-semibold text-slate-400">
+-                              {parentName[0]?.toUpperCase() || '?'}
+-                            </span>
+-                          }
+-                        />
+-                      </div>
++                        {/* Icon */}
++                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-all">
++                          <CategoryIcon
++                            iconId={parentIconId}
++                            iconUrl={parent.icon_url}
++                            className="h-6 w-6"
++                            fallback={
++                              <span className="text-lg font-semibold text-slate-400">
++                                {parentName[0]?.toUpperCase() || '?'}
++                              </span>
++                            }
++                          />
++                        </div>
+@@ -299,6 +295,6 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
+-                      {/* Name */}
+-                      <div className="flex-1 min-w-0">
+-                        <p className="truncate text-base font-semibold text-slate-900">
+-                          {parentName}
+-                        </p>
+-                      </div>
++                        {/* Name */}
++                        <div className="flex-1 min-w-0">
++                          <p className="truncate text-base font-semibold text-slate-900">
++                            {parentName}
++                          </p>
++                        </div>
+@@ -306,6 +302,5 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
+-                      {/* Favorite Toggle */}
+-                      <button
+-                        type="button"
+-                        onClick={() => toggleFavorite(parentId)}
+-                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all ${
+-                          favoriteIds.has(parentId)
++                        {/* Favorite Toggle */}
++                        <button
++                          type="button"
++                          onClick={() => toggleFavorite(parentId)}
++                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all ${favoriteIds.has(parentId)
+@@ -314,9 +309,8 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
+-                        }`}
+-                      >
+-                        <FaStar
+-                          className={`h-5 w-5 ${
+-                            favoriteIds.has(parentId) ? 'fill-current drop-shadow-sm' : ''
+-                          }`}
+-                        />
+-                      </button>
+-                    </div>
++                            }`}
++                        >
++                          <FaStar
++                            className={`h-5 w-5 ${favoriteIds.has(parentId) ? 'fill-current drop-shadow-sm' : ''
++                              }`}
++                          />
++                        </button>
++                      </div>
+@@ -324,8 +318,7 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
+-                    {/* Children Categories */}
+-                    {hasChildren && isExpanded && parentChildren && parentChildren.length > 0 && (
+-                      <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-slate-200 pl-3">
+-                        {parentChildren.map((child) => (
+-                          <div
+-                            key={child.id}
+-                            className={`group flex items-center gap-3 px-4 py-1.5 rounded-xl transition-all ${
+-                              favoriteIds.has(child.id)
++                      {/* Children Categories */}
++                      {hasChildren && isExpanded && parentChildren && parentChildren.length > 0 && (
++                        <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-slate-200 pl-3">
++                          {parentChildren.map((child) => (
++                            <div
++                              key={child.id}
++                              className={`group flex items-center gap-3 px-4 py-1.5 rounded-xl transition-all ${favoriteIds.has(child.id)
+@@ -334,3 +327,3 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
+-                            }`}
+-                          >
+-                            <div className="w-7" />
++                                }`}
++                            >
++                              <div className="w-7" />
+@@ -338,4 +331,3 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
+-                            {/* Icon */}
+-                            <div
+-                              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all shadow-sm ${
+-                                favoriteIds.has(child.id)
++                              {/* Icon */}
++                              <div
++                                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all shadow-sm ${favoriteIds.has(child.id)
+@@ -344,15 +336,14 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
+-                              }`}
+-                            >
+-                              <CategoryIcon
+-                                iconId={child.icon_id}
+-                                iconUrl={child.icon_url}
+-                                className={`h-5 w-5 ${favoriteIds.has(child.id) ? 'text-white' : ''}`}
+-                                fallback={
+-                                  <span className={`text-base font-semibold ${
+-                                    favoriteIds.has(child.id) ? 'text-white' : 'text-slate-600'
+-                                  }`}>
+-                                    {child.name[0]?.toUpperCase() || '?'}
+-                                  </span>
+-                                }
+-                              />
+-                            </div>
++                                  }`}
++                              >
++                                <CategoryIcon
++                                  iconId={child.icon_id}
++                                  iconUrl={child.icon_url}
++                                  className={`h-5 w-5 ${favoriteIds.has(child.id) ? 'text-white' : ''}`}
++                                  fallback={
++                                    <span className={`text-base font-semibold ${favoriteIds.has(child.id) ? 'text-white' : 'text-slate-600'
++                                      }`}>
++                                      {child.name[0]?.toUpperCase() || '?'}
++                                    </span>
++                                  }
++                                />
++                              </div>
+@@ -360,6 +351,6 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
+-                            {/* Name */}
+-                            <div className="flex-1 min-w-0">
+-                              <p className="truncate text-sm font-semibold text-slate-900">
+-                                {child.name}
+-                              </p>
+-                            </div>
++                              {/* Name */}
++                              <div className="flex-1 min-w-0">
++                                <p className="truncate text-sm font-semibold text-slate-900">
++                                  {child.name}
++                                </p>
++                              </div>
+@@ -367,6 +358,5 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
+-                            {/* Favorite Toggle */}
+-                            <button
+-                              type="button"
+-                              onClick={() => toggleFavorite(child.id)}
+-                              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all ${
+-                                favoriteIds.has(child.id)
++                              {/* Favorite Toggle */}
++                              <button
++                                type="button"
++                                onClick={() => toggleFavorite(child.id)}
++                                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all ${favoriteIds.has(child.id)
+@@ -375,17 +365,16 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
+-                              }`}
+-                            >
+-                              <FaStar
+-                                className={`h-4 w-4 ${
+-                                  favoriteIds.has(child.id) ? 'fill-current drop-shadow-sm' : ''
+-                                }`}
+-                              />
+-                            </button>
+-                          </div>
+-                        ))}
+-                      </div>
+-                    )}
+-                  </div>
+-                )
+-              })}
+-            </div>
+-          )}
++                                  }`}
++                              >
++                                <FaStar
++                                  className={`h-4 w-4 ${favoriteIds.has(child.id) ? 'fill-current drop-shadow-sm' : ''
++                                    }`}
++                                />
++                              </button>
++                            </div>
++                          ))}
++                        </div>
++                      )}
++                    </div>
++                  )
++                })}
++              </div>
++            )}
+@@ -397 +386 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
+-      <div className="fixed bottom-0 left-0 right-0 z-40 shrink-0 bg-[#F7F9FC] px-4 py-4 shadow-lg sm:px-6">
++      <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md z-40 shrink-0 bg-[#F7F9FC] px-4 py-4 shadow-lg sm:px-6">
+diff --git a/src/components/categories/IconPicker.tsx b/src/components/categories/IconPicker.tsx
+index c25587a..afc645d 100644
+--- a/src/components/categories/IconPicker.tsx
++++ b/src/components/categories/IconPicker.tsx
+@@ -172 +172 @@ export const IconPicker: React.FC<IconPickerProps> = ({
+-        <div className="fixed inset-0 z-[60] flex flex-col bg-white">
++        <div className="fixed inset-0 z-[60] mx-auto w-full max-w-md flex flex-col bg-white">
+@@ -231,2 +231,2 @@ export const IconPicker: React.FC<IconPickerProps> = ({
+-                                            ? 'ring-2 ring-sky-500 ring-offset-1'
+-                                            : 'hover:opacity-80'
++                                        ? 'ring-2 ring-sky-500 ring-offset-1'
++                                        : 'hover:opacity-80'
+diff --git a/src/components/layout/ProfileModal.tsx b/src/components/layout/ProfileModal.tsx
+index 9cd562e..0a6d604 100644
+--- a/src/components/layout/ProfileModal.tsx
++++ b/src/components/layout/ProfileModal.tsx
+@@ -65 +65 @@ export const ProfileModal = ({ isOpen, onClose, userName, avatarUrl, avatarText
+-            <div className="fixed inset-x-0 bottom-0 z-[100] flex flex-col bg-white rounded-t-3xl shadow-2xl animate-in slide-in-from-bottom duration-300 pointer-events-auto max-h-[90vh]">
++            <div className="fixed inset-x-0 bottom-0 z-[100] mx-auto w-full max-w-md flex flex-col bg-white rounded-t-3xl shadow-2xl animate-in slide-in-from-bottom duration-300 pointer-events-auto max-h-[90vh]">
+diff --git a/src/components/notesPlans/UnifiedItemModal.tsx b/src/components/notesPlans/UnifiedItemModal.tsx
+index 8bbb98a..ef3e115 100644
+--- a/src/components/notesPlans/UnifiedItemModal.tsx
++++ b/src/components/notesPlans/UnifiedItemModal.tsx
+@@ -558 +558 @@ export const UnifiedItemModal = ({
+-    <div className="fixed inset-0 z-[60] flex flex-col bg-[#F7F9FC]">
++    <div className="fixed inset-0 z-[60] mx-auto w-full max-w-md flex flex-col bg-[#F7F9FC]">
+diff --git a/src/components/quickActions/QuickActionsSettings.tsx b/src/components/quickActions/QuickActionsSettings.tsx
+index eae394b..1f293a3 100644
+--- a/src/components/quickActions/QuickActionsSettings.tsx
++++ b/src/components/quickActions/QuickActionsSettings.tsx
+@@ -152 +152 @@ export const QuickActionsSettings = ({
+-    <div className="fixed inset-0 z-50 flex h-full flex-col overflow-hidden bg-[#F7F9FC] text-slate-900">
++    <div className="fixed inset-0 z-50 mx-auto w-full max-w-md flex h-full flex-col overflow-hidden bg-[#F7F9FC] text-slate-900">
+@@ -180,4 +180,4 @@ export const QuickActionsSettings = ({
+-                      ? 'shadow-md hover:shadow-lg'
+-                      : isDisabled
+-                        ? 'opacity-60'
+-                        : 'hover:shadow-lg'
++                    ? 'shadow-md hover:shadow-lg'
++                    : isDisabled
++                      ? 'opacity-60'
++                      : 'hover:shadow-lg'
+@@ -195,2 +195,2 @@ export const QuickActionsSettings = ({
+-                          ? 'bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-lg'
+-                          : 'bg-slate-100 text-slate-400'
++                        ? 'bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-lg'
++                        : 'bg-slate-100 text-slate-400'
+@@ -208,2 +208,2 @@ export const QuickActionsSettings = ({
+-                              ? 'bg-sky-100 text-sky-700 ring-1 ring-sky-200'
+-                              : 'bg-slate-100 text-slate-500'
++                            ? 'bg-sky-100 text-sky-700 ring-1 ring-sky-200'
++                            : 'bg-slate-100 text-slate-500'
+@@ -253,4 +253,4 @@ export const QuickActionsSettings = ({
+-                                ? 'bg-gradient-to-r from-sky-500 to-blue-600 shadow-lg focus:ring-sky-500'
+-                                : isDisabled
+-                                  ? 'bg-slate-200 cursor-not-allowed opacity-50'
+-                                  : 'bg-slate-300 hover:bg-slate-400 focus:ring-slate-400'
++                              ? 'bg-gradient-to-r from-sky-500 to-blue-600 shadow-lg focus:ring-sky-500'
++                              : isDisabled
++                                ? 'bg-slate-200 cursor-not-allowed opacity-50'
++                                : 'bg-slate-300 hover:bg-slate-400 focus:ring-slate-400'
+@@ -303 +303 @@ export const QuickActionsSettings = ({
+-      <div className="fixed bottom-0 left-0 right-0 z-40 shrink-0 bg-[#F7F9FC] px-4 py-4 shadow-lg sm:px-6">
++      <div className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md z-40 shrink-0 bg-[#F7F9FC] px-4 py-4 shadow-lg sm:px-6">
+diff --git a/src/components/reports/CategoryDetailModal.tsx b/src/components/reports/CategoryDetailModal.tsx
+index 1e3bd7e..b7f50f9 100644
+--- a/src/components/reports/CategoryDetailModal.tsx
++++ b/src/components/reports/CategoryDetailModal.tsx
+@@ -19 +19 @@ const formatDate = (dateString: string) => {
+-  return date.toLocaleDateString('vi-VN', {
++  return date.toLocaleDateString('en-GB', {
+diff --git a/src/components/settings/IconManagementModal.tsx b/src/components/settings/IconManagementModal.tsx
+index 60e1cbf..4814c3a 100644
+--- a/src/components/settings/IconManagementModal.tsx
++++ b/src/components/settings/IconManagementModal.tsx
+@@ -277,20 +277,23 @@ export const IconManagementModal = ({ isOpen, onClose }: IconManagementModalProp
+-        <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-gradient-to-r from-white to-slate-50 px-4 sm:px-6 py-4 sm:py-5">
+-          <div className="min-w-0 flex-1">
+-            <h2 className="text-lg sm:text-xl font-bold text-slate-900">Quản lý Icons</h2>
+-            <p className="mt-1 text-xs sm:text-sm text-slate-500">Quản lý icons cho hạng mục</p>
+-          </div>
+-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+-            <button
+-              onClick={handleCreate}
+-              className="flex items-center gap-1.5 sm:gap-2 rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 px-3 sm:px-4 py-2 text-white text-sm sm:text-base font-semibold shadow-lg hover:from-sky-600 hover:to-blue-700 transition-all"
+-            >
+-              <FaPlus className="h-4 w-4 sm:h-5 sm:w-5" />
+-              <span className="hidden sm:inline">Thêm icon</span>
+-              <span className="sm:hidden">Thêm</span>
+-            </button>
+-            <button
+-              onClick={onClose}
+-              className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all hover:bg-slate-200"
+-            >
+-              <FaTimes className="h-4 w-4 sm:h-5 sm:w-5" />
+-            </button>
++        <div className="flex flex-col border-b border-slate-200 bg-gradient-to-r from-white to-slate-50 px-4 pt-3 pb-4 sm:px-6 sm:pt-4 sm:pb-5">
++          <div className="mx-auto mb-4 h-1.5 w-12 shrink-0 rounded-full bg-slate-200" />
++          <div className="flex shrink-0 items-center justify-between">
++            <div className="min-w-0 flex-1">
++              <h2 className="text-lg sm:text-xl font-bold text-slate-900">Quản lý Icons</h2>
++              <p className="mt-1 text-xs sm:text-sm text-slate-500">Quản lý icons cho hạng mục</p>
++            </div>
++            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
++              <button
++                onClick={handleCreate}
++                className="flex items-center gap-1.5 sm:gap-2 rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 px-3 sm:px-4 py-2 text-white text-sm sm:text-base font-semibold shadow-lg hover:from-sky-600 hover:to-blue-700 transition-all"
++              >
++                <FaPlus className="h-4 w-4 sm:h-5 sm:w-5" />
++                <span className="hidden sm:inline">Thêm icon</span>
++                <span className="sm:hidden">Thêm</span>
++              </button>
++              <button
++                onClick={onClose}
++                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all hover:bg-slate-200"
++              >
++                <FaTimes className="h-4 w-4 sm:h-5 sm:w-5" />
++              </button>
++            </div>
+@@ -345,2 +348,2 @@ export const IconManagementModal = ({ isOpen, onClose }: IconManagementModalProp
+-                        ? 'border-sky-500 bg-sky-50 text-sky-700'
+-                        : 'border-slate-200 bg-white text-slate-700'
++                      ? 'border-sky-500 bg-sky-50 text-sky-700'
++                      : 'border-slate-200 bg-white text-slate-700'
+@@ -355,2 +358,2 @@ export const IconManagementModal = ({ isOpen, onClose }: IconManagementModalProp
+-                        ? 'border-sky-500 bg-sky-50 text-sky-700'
+-                        : 'border-slate-200 bg-white text-slate-700'
++                      ? 'border-sky-500 bg-sky-50 text-sky-700'
++                      : 'border-slate-200 bg-white text-slate-700'
+@@ -365,2 +368,2 @@ export const IconManagementModal = ({ isOpen, onClose }: IconManagementModalProp
+-                        ? 'border-sky-500 bg-sky-50 text-sky-700'
+-                        : 'border-slate-200 bg-white text-slate-700'
++                      ? 'border-sky-500 bg-sky-50 text-sky-700'
++                      : 'border-slate-200 bg-white text-slate-700'
+@@ -375,2 +378,2 @@ export const IconManagementModal = ({ isOpen, onClose }: IconManagementModalProp
+-                        ? 'border-sky-500 bg-sky-50 text-sky-700'
+-                        : 'border-slate-200 bg-white text-slate-700'
++                      ? 'border-sky-500 bg-sky-50 text-sky-700'
++                      : 'border-slate-200 bg-white text-slate-700'
+@@ -445,2 +448,2 @@ export const IconManagementModal = ({ isOpen, onClose }: IconManagementModalProp
+-                                    ? 'border-sky-500 bg-sky-50'
+-                                    : 'border-slate-200 hover:border-slate-300'
++                                  ? 'border-sky-500 bg-sky-50'
++                                  : 'border-slate-200 hover:border-slate-300'
+diff --git a/src/components/settings/NotificationSettingsModal.tsx b/src/components/settings/NotificationSettingsModal.tsx
+index 91c5c1a..7089d09 100644
+--- a/src/components/settings/NotificationSettingsModal.tsx
++++ b/src/components/settings/NotificationSettingsModal.tsx
+@@ -128,4 +128,14 @@ export const NotificationSettingsModal = ({ isOpen, onClose }: NotificationSetti
+-        <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-gradient-to-r from-white to-slate-50 px-4 py-4 sm:px-6 sm:py-5 rounded-t-3xl">
+-          <div>
+-            <h2 className="text-lg font-bold text-slate-900 sm:text-xl">Cài đặt thông báo</h2>
+-            <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">Chủ động kiểm soát thông báo tài chính quan trọng</p>
++        <div className="flex flex-col border-b border-slate-200 bg-gradient-to-r from-white to-slate-50 px-4 pt-3 pb-4 sm:px-6 sm:pt-4 sm:pb-5 rounded-t-3xl">
++          <div className="mx-auto mb-4 h-1.5 w-12 shrink-0 rounded-full bg-slate-200" />
++          <div className="flex shrink-0 items-center justify-between">
++            <div>
++              <h2 className="text-lg font-bold text-slate-900 sm:text-xl">Cài đặt thông báo</h2>
++              <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">Chủ động kiểm soát thông báo tài chính quan trọng</p>
++            </div>
++            <button
++              type="button"
++              onClick={onClose}
++              className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all hover:bg-slate-200 hover:scale-110 active:scale-95 sm:h-10 sm:w-10"
++            >
++              <FaTimes className="h-4 w-4 sm:h-5 sm:w-5" />
++            </button>
+@@ -133,7 +142,0 @@ export const NotificationSettingsModal = ({ isOpen, onClose }: NotificationSetti
+-          <button
+-            type="button"
+-            onClick={onClose}
+-            className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all hover:bg-slate-200 hover:scale-110 active:scale-95 sm:h-10 sm:w-10"
+-          >
+-            <FaTimes className="h-4 w-4 sm:h-5 sm:w-5" />
+-          </button>
+diff --git a/src/components/tasks/TaskDetailModal.tsx b/src/components/tasks/TaskDetailModal.tsx
+index 6b11327..8ac8428 100644
+--- a/src/components/tasks/TaskDetailModal.tsx
++++ b/src/components/tasks/TaskDetailModal.tsx
+@@ -164 +164 @@ export const TaskDetailModal = ({ isOpen, onClose, task, onEdit, onUpdate, onDel
+-      <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F9FC]">
++      <div className="fixed inset-0 z-50 mx-auto w-full max-w-md flex flex-col bg-[#F7F9FC]">
+@@ -206,2 +206 @@ export const TaskDetailModal = ({ isOpen, onClose, task, onEdit, onUpdate, onDel
+-                    className={`ml-auto px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+-                      disableRipple
++                    className={`ml-auto px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${disableRipple
+@@ -210 +209 @@ export const TaskDetailModal = ({ isOpen, onClose, task, onEdit, onUpdate, onDel
+-                    }`}
++                      }`}
+diff --git a/src/components/ui/ModalFooterButtons.tsx b/src/components/ui/ModalFooterButtons.tsx
+index c20bb16..fe7581a 100644
+--- a/src/components/ui/ModalFooterButtons.tsx
++++ b/src/components/ui/ModalFooterButtons.tsx
+@@ -29 +29 @@ export const ModalFooterButtons: React.FC<ModalFooterButtonsProps> = ({
+-    ? `fixed bottom-0 left-0 right-0 z-40 shrink-0 bg-[#F7F9FC] px-4 py-4 shadow-lg sm:px-6 ${className}`
++    ? `fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md z-40 shrink-0 bg-[#F7F9FC] px-4 py-4 shadow-lg sm:px-6 ${className}`
+diff --git a/src/components/ui/NumberPadModal.tsx b/src/components/ui/NumberPadModal.tsx
+index 8084780..ac05d43 100644
+--- a/src/components/ui/NumberPadModal.tsx
++++ b/src/components/ui/NumberPadModal.tsx
+@@ -18,3 +18,3 @@ const getNumericValue = (formatted: string) => formatted.replace(/\./g, '')
+-const NumberButton = ({ 
+-  children, 
+-  onClick, 
++const NumberButton = ({
++  children,
++  onClick,
+@@ -22,2 +22,2 @@ const NumberButton = ({
+-  disabled = false 
+-}: { 
++  disabled = false
++}: {
+@@ -43 +43 @@ const NumberButton = ({
+-    
++
+@@ -47 +47 @@ const NumberButton = ({
+-    
++
+@@ -52 +52 @@ const NumberButton = ({
+-    
++
+@@ -116,2 +116,2 @@ const NumberButton = ({
+-      style={{ 
+-        touchAction: 'manipulation', 
++      style={{
++        touchAction: 'manipulation',
+@@ -143 +143 @@ export const NumberPadModal = ({ isOpen, onClose, value, onChange, onConfirm }:
+-    
++
+@@ -147 +147 @@ export const NumberPadModal = ({ isOpen, onClose, value, onChange, onConfirm }:
+-    
++
+@@ -235 +235 @@ export const NumberPadModal = ({ isOpen, onClose, value, onChange, onConfirm }:
+-      <div 
++      <div
+@@ -245,3 +245,14 @@ export const NumberPadModal = ({ isOpen, onClose, value, onChange, onConfirm }:
+-          <div className="flex shrink-0 items-center justify-between border-b border-slate-200 px-3 py-2" style={{ backgroundColor: '#F2F4F7' }}>
+-            <div>
+-              <h3 className="text-lg font-bold text-slate-900">Nhập số tiền</h3>
++          <div className="flex flex-col shrink-0 border-b border-slate-200 px-3 pt-2 pb-2" style={{ backgroundColor: '#F2F4F7' }}>
++            <div className="mx-auto mb-3 h-1.5 w-12 shrink-0 rounded-full bg-slate-300" />
++            <div className="flex items-center justify-between">
++              <div>
++                <h3 className="text-lg font-bold text-slate-900">Nhập số tiền</h3>
++              </div>
++              <button
++                type="button"
++                onClick={onClose}
++                className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 active:bg-slate-300 active:scale-95 touch-manipulation"
++                style={{ touchAction: 'manipulation' }}
++              >
++                <FaTimes className="h-5 w-5" />
++              </button>
+@@ -249,8 +259,0 @@ export const NumberPadModal = ({ isOpen, onClose, value, onChange, onConfirm }:
+-            <button
+-              type="button"
+-              onClick={onClose}
+-              className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 active:bg-slate-300 active:scale-95 touch-manipulation"
+-              style={{ touchAction: 'manipulation' }}
+-            >
+-              <FaTimes className="h-5 w-5" />
+-            </button>
+@@ -299 +302 @@ export const NumberPadModal = ({ isOpen, onClose, value, onChange, onConfirm }:
+-                onClick={() => {}}
++                onClick={() => { }}
+@@ -306 +309 @@ export const NumberPadModal = ({ isOpen, onClose, value, onChange, onConfirm }:
+-                onClick={() => {}}
++                onClick={() => { }}
+@@ -339 +342 @@ export const NumberPadModal = ({ isOpen, onClose, value, onChange, onConfirm }:
+-                onClick={() => {}}
++                onClick={() => { }}
+@@ -366 +369 @@ export const NumberPadModal = ({ isOpen, onClose, value, onChange, onConfirm }:
+-                onClick={() => {}}
++                onClick={() => { }}
+@@ -413 +416 @@ export const NumberPadModal = ({ isOpen, onClose, value, onChange, onConfirm }:
+-                onClick={() => {}}
++                onClick={() => { }}
+diff --git a/src/components/vehicles/FuelPriceSettings.tsx b/src/components/vehicles/FuelPriceSettings.tsx
+index 56b8833..6163011 100644
+--- a/src/components/vehicles/FuelPriceSettings.tsx
++++ b/src/components/vehicles/FuelPriceSettings.tsx
+@@ -30,4 +30,4 @@ export function FuelPriceSettings({ isOpen, onClose, onSave }: FuelPriceSettings
+-        petrol_a95: 25000,
+-        petrol_e5: 23000,
+-        diesel: 21000,
+-        electric: 3000,
++        petrol_a95: 0,
++        petrol_e5: 0,
++        diesel: 0,
++        electric: 0,
+@@ -98 +98,4 @@ export function FuelPriceSettings({ isOpen, onClose, onSave }: FuelPriceSettings
+-            <div className="w-full max-w-md rounded-t-3xl bg-white p-5 pb-10 shadow-2xl animate-in slide-in-from-bottom duration-300">
++            <div className="w-full max-w-md rounded-t-3xl bg-white p-5 pt-3 pb-10 shadow-2xl animate-in slide-in-from-bottom duration-300">
++                {/* Handle */}
++                <div className="mx-auto mb-4 h-1.5 w-12 shrink-0 rounded-full bg-slate-200" />
++
+diff --git a/src/components/vehicles/SimpleLocationInput.tsx b/src/components/vehicles/SimpleLocationInput.tsx
+index 5339107..14b3a16 100644
+--- a/src/components/vehicles/SimpleLocationInput.tsx
++++ b/src/components/vehicles/SimpleLocationInput.tsx
+@@ -1,2 +1,2 @@
+-import { useState } from 'react'
+-import { MapPin, Navigation, Loader2, ExternalLink } from 'lucide-react'
++import { useState, useEffect } from 'react'
++import { MapPin, Loader2, ExternalLink, X, Plus, Trash2, Search } from 'lucide-react'
+@@ -10,0 +11,7 @@ export type SimpleLocationData = {
++type SavedLocation = {
++    id: string
++    address: string
++    lat?: number
++    lng?: number
++}
++
+@@ -28,0 +36,51 @@ export function SimpleLocationInput({
++    const [isModalOpen, setIsModalOpen] = useState(false)
++
++    // Modal local state
++    const [tempValue, setTempValue] = useState(value)
++    const [tempLocationData, setTempLocationData] = useState<SimpleLocationData | null>(locationData || null)
++    const [savedLocations, setSavedLocations] = useState<SavedLocation[]>([])
++
++    // Load saved locations on mount
++    useEffect(() => {
++        const saved = localStorage.getItem('bofin_saved_locations')
++        if (saved) {
++            try {
++                setSavedLocations(JSON.parse(saved))
++            } catch (e) {
++                console.error(e)
++            }
++        }
++    }, [])
++
++    // Sync temp state when modal opens
++    useEffect(() => {
++        if (isModalOpen) {
++            setTempValue(value)
++            setTempLocationData(locationData || null)
++        }
++    }, [isModalOpen, value, locationData])
++
++    // Save location functionality
++    const saveCurrentLocation = () => {
++        if (!tempValue.trim()) return
++        const newLoc: SavedLocation = {
++            id: Date.now().toString(),
++            address: tempValue.trim(),
++            lat: tempLocationData?.lat,
++            lng: tempLocationData?.lng
++        }
++        const updated = [...savedLocations, newLoc]
++        setSavedLocations(updated)
++        localStorage.setItem('bofin_saved_locations', JSON.stringify(updated))
++    }
++
++    const deleteSavedLocation = (id: string) => {
++        const updated = savedLocations.filter(loc => loc.id !== id)
++        setSavedLocations(updated)
++        localStorage.setItem('bofin_saved_locations', JSON.stringify(updated))
++    }
++
++    const handleConfirm = () => {
++        onChange(tempValue, tempLocationData || undefined)
++        setIsModalOpen(false)
++    }
+@@ -31 +89 @@ export function SimpleLocationInput({
+-    const handleGetCurrentLocation = async () => {
++    const handleGetCurrentLocation = async (isModal: boolean = false) => {
+@@ -50 +108,6 @@ export function SimpleLocationInput({
+-                    onChange(address, { address, lat, lng })
++                    if (isModal) {
++                        setTempValue(address)
++                        setTempLocationData({ address, lat, lng })
++                    } else {
++                        onChange(address, { address, lat, lng })
++                    }
+@@ -54 +117,6 @@ export function SimpleLocationInput({
+-                    onChange(address, { address, lat, lng })
++                    if (isModal) {
++                        setTempValue(address)
++                        setTempLocationData({ address, lat, lng })
++                    } else {
++                        onChange(address, { address, lat, lng })
++                    }
+@@ -92,4 +160,6 @@ export function SimpleLocationInput({
+-            <label className="block text-sm font-medium text-slate-700">
+-                {label}
+-                {required && <span className="text-red-500 ml-1">*</span>}
+-            </label>
++            {label && (
++                <label className="block text-sm font-medium text-slate-700">
++                    {label}
++                    {required && <span className="text-red-500 ml-1">*</span>}
++                </label>
++            )}
+@@ -102 +172,2 @@ export function SimpleLocationInput({
+-                    onChange={(e) => onChange(e.target.value)}
++                    readOnly
++                    onClick={() => setIsModalOpen(true)}
+@@ -105 +176 @@ export function SimpleLocationInput({
+-                    className="w-full rounded-lg border border-slate-300 pl-10 pr-10 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
++                    className="w-full cursor-pointer bg-white rounded-lg border border-slate-300 pl-10 pr-10 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+@@ -110 +181,4 @@ export function SimpleLocationInput({
+-                    onClick={handleGetCurrentLocation}
++                    onClick={(e) => {
++                        e.stopPropagation()
++                        handleGetCurrentLocation(false)
++                    }}
+@@ -118 +192 @@ export function SimpleLocationInput({
+-                        <Navigation className="h-4 w-4" />
++                        <MapPin className="h-4 w-4" />
+@@ -145,0 +220,110 @@ export function SimpleLocationInput({
++
++            {/* Location Select Modal */}
++            {isModalOpen && (
++                <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-[3px]" onClick={() => setIsModalOpen(false)}>
++                    <div className="w-full max-w-md rounded-t-3xl bg-white shadow-2xl h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
++
++                        {/* Handle */}
++                        <div className="flex justify-center pt-3 pb-1 shrink-0">
++                            <div className="h-1.5 w-12 rounded-full bg-slate-200" />
++                        </div>
++
++                        {/* Header */}
++                        <div className="flex items-center justify-between p-4 border-b border-slate-100 shrink-0">
++                            <h3 className="font-bold text-lg text-slate-800">Chọn địa chỉ trạm sạc</h3>
++                            <button onClick={() => setIsModalOpen(false)} className="rounded-full bg-slate-100 p-2 text-slate-600 hover:bg-slate-200 transition-colors">
++                                <X className="h-4 w-4" />
++                            </button>
++                        </div>
++
++                        <div className="p-4 flex-1 overflow-y-auto space-y-6">
++                            {/* GPS Button */}
++                            <button
++                                type="button"
++                                onClick={() => handleGetCurrentLocation(true)}
++                                disabled={isLoadingLocation}
++                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-100 text-blue-600 px-4 py-3.5 font-bold hover:bg-blue-100 transition-colors"
++                            >
++                                {isLoadingLocation ? <Loader2 className="h-5 w-5 animate-spin" /> : <MapPin className="h-5 w-5" />}
++                                Lấy vị trí từ Google Maps
++                            </button>
++
++                            {/* Manual Input */}
++                            <div>
++                                <label className="mb-2 block text-sm font-semibold text-slate-700">Nhập thủ công hoặc tìm kiếm</label>
++                                <div className="flex gap-2">
++                                    <div className="relative flex-1">
++                                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
++                                        <input
++                                            type="text"
++                                            value={tempValue}
++                                            onChange={(e) => {
++                                                setTempValue(e.target.value)
++                                                setTempLocationData(null)
++                                            }}
++                                            placeholder="Nhập địa chỉ trạm sạc"
++                                            className="w-full rounded-xl border border-slate-300 pl-9 pr-3 py-2.5 text-sm font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
++                                        />
++                                    </div>
++                                    <button
++                                        type="button"
++                                        onClick={saveCurrentLocation}
++                                        disabled={!tempValue.trim()}
++                                        className="flex items-center justify-center rounded-xl bg-green-500 text-white px-3.5 hover:bg-green-600 focus:ring-2 focus:ring-green-200 transition-colors disabled:opacity-50 disabled:hover:bg-green-500"
++                                        title="Thêm vào danh sách thường dùng"
++                                    >
++                                        <Plus className="h-5 w-5" />
++                                    </button>
++                                </div>
++                                <p className="mt-1.5 text-xs text-slate-500 italic">Nhập địa chỉ rồi bấm + để lưu vào danh sách rút gọn</p>
++                            </div>
++
++                            {/* Saved Locations */}
++                            <div>
++                                <label className="mb-2 block text-sm font-semibold text-slate-700">Danh sách trạm thường ghé</label>
++                                {savedLocations.length === 0 ? (
++                                    <div className="rounded-xl border border-dashed border-slate-300 p-6 text-center">
++                                        <p className="text-sm text-slate-500 mb-1">Chưa có trạm sạc nào được lưu.</p>
++                                        <p className="text-xs text-slate-400">Hãy thêm trạm bạn thường xuyên sử dụng để chọn nhanh.</p>
++                                    </div>
++                                ) : (
++                                    <div className="space-y-2">
++                                        {savedLocations.map(loc => (
++                                            <div key={loc.id} className={`flex items-center justify-between rounded-xl border p-3 cursor-pointer transition-colors ${tempValue === loc.address ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'
++                                                }`}
++                                                onClick={() => {
++                                                    setTempValue(loc.address)
++                                                    setTempLocationData(loc.lat && loc.lng ? { address: loc.address, lat: loc.lat, lng: loc.lng } : null)
++                                                }}
++                                            >
++                                                <div className="flex items-start gap-2 max-w-[85%]">
++                                                    <MapPin className={`h-4 w-4 mt-0.5 shrink-0 ${tempValue === loc.address ? 'text-blue-600' : 'text-slate-400'}`} />
++                                                    <span className={`text-sm ${tempValue === loc.address ? 'font-bold text-blue-800' : 'font-medium text-slate-700'} break-words line-clamp-2`}>{loc.address}</span>
++                                                </div>
++                                                <button
++                                                    type="button"
++                                                    onClick={(e) => { e.stopPropagation(); deleteSavedLocation(loc.id) }}
++                                                    className="p-1.5 rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors"
++                                                >
++                                                    <Trash2 className="h-4 w-4" />
++                                                </button>
++                                            </div>
++                                        ))}
++                                    </div>
++                                )}
++                            </div>
++                        </div>
++
++                        {/* Footer - Confirm button */}
++                        <div className="p-4 border-t border-slate-100 bg-white shrink-0">
++                            <button
++                                type="button"
++                                onClick={handleConfirm}
++                                className="w-full rounded-2xl bg-blue-600 text-white font-bold py-3.5 hover:bg-blue-700 active:scale-[0.98] transition-all"
++                            >
++                                Xác nhận {tempValue && 'chọn'}
++                            </button>
++                        </div>
++                    </div>
++                </div>
++            )}
+diff --git a/src/components/vehicles/TripPriceModal.tsx b/src/components/vehicles/TripPriceModal.tsx
+index db8f792..866191c 100644
+--- a/src/components/vehicles/TripPriceModal.tsx
++++ b/src/components/vehicles/TripPriceModal.tsx
+@@ -53,3 +53,4 @@ export function TripPriceModal({
+-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+-            <div className="w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-2xl animate-in zoom-in-95 duration-200">
+-                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-5 pt-5 pb-4 text-white">
++        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
++            <div className="w-full max-w-md overflow-hidden rounded-t-3xl bg-white shadow-2xl animate-in slide-in-from-bottom duration-300">
++                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-5 pt-3 pb-4 text-white">
++                    <div className="mx-auto mb-4 h-1.5 w-12 shrink-0 rounded-full bg-white/30" />
+diff --git a/src/components/wallets/WalletTransferModal.tsx b/src/components/wallets/WalletTransferModal.tsx
+index f1aa3de..28b8d42 100644
+--- a/src/components/wallets/WalletTransferModal.tsx
++++ b/src/components/wallets/WalletTransferModal.tsx
+@@ -143 +143 @@ export const WalletTransferModal = ({
+-        
++
+@@ -149 +149 @@ export const WalletTransferModal = ({
+-        
++
+@@ -152 +152 @@ export const WalletTransferModal = ({
+-        
++
+@@ -155 +155 @@ export const WalletTransferModal = ({
+-        
++
+@@ -160 +160 @@ export const WalletTransferModal = ({
+-        
++
+@@ -166 +166 @@ export const WalletTransferModal = ({
+-        
++
+@@ -168 +168 @@ export const WalletTransferModal = ({
+-        
++
+@@ -176 +176 @@ export const WalletTransferModal = ({
+-      
++
+@@ -187 +187 @@ export const WalletTransferModal = ({
+-        buttonRef.current && 
++        buttonRef.current &&
+@@ -213 +213 @@ export const WalletTransferModal = ({
+-    <div className="fixed inset-0 z-50 flex flex-col bg-[#F7F9FC] overflow-hidden">
++    <div className="fixed inset-0 z-50 mx-auto w-full max-w-md flex flex-col bg-[#F7F9FC] overflow-hidden">
+@@ -246 +246 @@ export const WalletTransferModal = ({
+-              
++
+@@ -296,2 +296 @@ export const WalletTransferModal = ({
+-                    className={`flex w-full items-center justify-between rounded-3xl bg-white p-4 text-left transition-all min-h-[64px] shadow-md ${
+-                      isDropdownOpen
++                    className={`flex w-full items-center justify-between rounded-3xl bg-white p-4 text-left transition-all min-h-[64px] shadow-md ${isDropdownOpen
+@@ -300 +299 @@ export const WalletTransferModal = ({
+-                    }`}
++                      }`}
+@@ -343 +342 @@ export const WalletTransferModal = ({
+-                      <div 
++                      <div
+@@ -346 +345 @@ export const WalletTransferModal = ({
+-                        style={{ 
++                        style={{
+@@ -355 +354 @@ export const WalletTransferModal = ({
+-                        <div 
++                        <div
+@@ -357 +356 @@ export const WalletTransferModal = ({
+-                          style={{ 
++                          style={{
+@@ -365 +364 @@ export const WalletTransferModal = ({
+-                            
++
+@@ -374,2 +373 @@ export const WalletTransferModal = ({
+-                                className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition-all hover:scale-[1.01] active:scale-100 ${
+-                                  isSelected
++                                className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition-all hover:scale-[1.01] active:scale-100 ${isSelected
+@@ -378 +376 @@ export const WalletTransferModal = ({
+-                                }`}
++                                  }`}
+@@ -498 +496 @@ export const WalletTransferModal = ({
+-        onConfirm={() => {}}
++        onConfirm={() => { }}
+diff --git a/src/lib/vehicles/chargeReceiptAnalyzer.ts b/src/lib/vehicles/chargeReceiptAnalyzer.ts
+index cdd30c8..40d0f89 100644
+--- a/src/lib/vehicles/chargeReceiptAnalyzer.ts
++++ b/src/lib/vehicles/chargeReceiptAnalyzer.ts
+@@ -135 +135 @@ function parseEVReceipt(rawText: string): ChargeReceiptData {
+-        parts.push(`Ngày ${new Date(result.date).toLocaleDateString('vi-VN')}`)
++        parts.push(`Ngày ${new Date(result.date).toLocaleDateString('en-GB')}`)
+diff --git a/src/lib/vehicles/fuelPriceService.ts b/src/lib/vehicles/fuelPriceService.ts
+index b4358ca..90df8ff 100644
+--- a/src/lib/vehicles/fuelPriceService.ts
++++ b/src/lib/vehicles/fuelPriceService.ts
+@@ -17,4 +17,4 @@ const DEFAULT_PRICES: Record<FuelType, number> = {
+-    petrol_a95: 25000,
+-    petrol_e5: 23000,
+-    diesel: 21000,
+-    electric: 3000,
++    petrol_a95: 0,
++    petrol_e5: 0,
++    diesel: 0,
++    electric: 0,
+diff --git a/src/pages/AdminSettings.tsx b/src/pages/AdminSettings.tsx
+index 5110aa4..5852aad 100644
+--- a/src/pages/AdminSettings.tsx
++++ b/src/pages/AdminSettings.tsx
+@@ -52 +52 @@ export const AdminSettingsPage = () => {
+-  
++
+@@ -143 +143 @@ export const AdminSettingsPage = () => {
+-      
++
+@@ -147 +147 @@ export const AdminSettingsPage = () => {
+-      
++
+@@ -213 +213 @@ export const AdminSettingsPage = () => {
+-      
++
+@@ -217 +217 @@ export const AdminSettingsPage = () => {
+-      
++
+@@ -260 +260 @@ export const AdminSettingsPage = () => {
+-      
++
+@@ -262 +262 @@ export const AdminSettingsPage = () => {
+-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 pt-2 pb-6 sm:px-6 sm:pt-2 sm:pb-6 lg:px-8">
++        <div className="mx-auto flex w-full max-w-md flex-col gap-6 px-4 pt-2 pb-6 sm:px-6 sm:pt-2 sm:pb-6 lg:px-8">
+@@ -268,2 +268 @@ export const AdminSettingsPage = () => {
+-              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+-                selectedCategory === 'all'
++              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${selectedCategory === 'all'
+@@ -272 +271 @@ export const AdminSettingsPage = () => {
+-              }`}
++                }`}
+@@ -281,2 +280 @@ export const AdminSettingsPage = () => {
+-                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+-                  selectedCategory === category
++                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${selectedCategory === category
+@@ -285 +283 @@ export const AdminSettingsPage = () => {
+-                }`}
++                  }`}
+@@ -538,2 +536 @@ export const AdminSettingsPage = () => {
+-                                className={`px-3 py-1.5 rounded-lg text-sm font-semibold ${
+-                                  setting.setting_value === 'true'
++                                className={`px-3 py-1.5 rounded-lg text-sm font-semibold ${setting.setting_value === 'true'
+@@ -542 +539 @@ export const AdminSettingsPage = () => {
+-                                }`}
++                                  }`}
+diff --git a/src/pages/Archive2025.tsx b/src/pages/Archive2025.tsx
+index aec1686..b7eb8bf 100644
+--- a/src/pages/Archive2025.tsx
++++ b/src/pages/Archive2025.tsx
+@@ -60 +60 @@ const ArchiveDashboardPage = () => {
+-                <div className="mx-auto max-w-sm space-y-6">
++                <div className="mx-auto max-w-md space-y-6">
+diff --git a/src/pages/DebtManager.tsx b/src/pages/DebtManager.tsx
+index 03211dd..842ced1 100644
+--- a/src/pages/DebtManager.tsx
++++ b/src/pages/DebtManager.tsx
+@@ -61 +61 @@ const formatDate = (dateString: string): string => {
+-    return new Date(dateString).toLocaleDateString('vi-VN', {
++    return new Date(dateString).toLocaleDateString('en-GB', {
+@@ -711 +711 @@ export const DebtManagerPage = () => {
+-                                                ? new Date(formData.due_date).toLocaleDateString('vi-VN', {
++                                                ? new Date(formData.due_date).toLocaleDateString('en-GB', {
+diff --git a/src/pages/NotesPlans.tsx b/src/pages/NotesPlans.tsx
+index d4fd6ec..7cc3051 100644
+--- a/src/pages/NotesPlans.tsx
++++ b/src/pages/NotesPlans.tsx
+@@ -366 +366 @@ const NotesPlansPage = () => {
+-      return date.toLocaleDateString('vi-VN', {
++      return date.toLocaleDateString('en-GB', {
+diff --git a/src/pages/Notifications.tsx b/src/pages/Notifications.tsx
+index ede19d5..f619dc4 100644
+--- a/src/pages/Notifications.tsx
++++ b/src/pages/Notifications.tsx
+@@ -44 +44 @@ const formatDate = (dateString: string): string => {
+-    return date.toLocaleDateString('vi-VN', {
++    return date.toLocaleDateString('en-GB', {
+diff --git a/src/pages/Reports.tsx b/src/pages/Reports.tsx
+index 8db9b65..cd3ef3a 100644
+--- a/src/pages/Reports.tsx
++++ b/src/pages/Reports.tsx
+@@ -334 +334 @@ const ReportPage = () => {
+-        key = date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })
++        key = date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })
+diff --git a/src/pages/Settings.tsx b/src/pages/Settings.tsx
+index 5416ca4..732d93a 100644
+--- a/src/pages/Settings.tsx
++++ b/src/pages/Settings.tsx
+@@ -248 +248 @@ const SettingsPage = () => {
+-        <div className="mx-auto max-w-2xl space-y-6">
++        <div className="mx-auto max-w-md space-y-6">
+diff --git a/src/pages/Transactions.tsx b/src/pages/Transactions.tsx
+index 4818c03..b008a31 100644
+--- a/src/pages/Transactions.tsx
++++ b/src/pages/Transactions.tsx
+@@ -222 +222 @@ const TransactionsPage = () => {
+-        const createdDate = new Date(t.created_at).toLocaleDateString('vi-VN', {
++        const createdDate = new Date(t.created_at).toLocaleDateString('en-GB', {
+@@ -227 +227 @@ const TransactionsPage = () => {
+-        const transactionDate = new Date(t.transaction_date).toLocaleDateString('vi-VN', {
++        const transactionDate = new Date(t.transaction_date).toLocaleDateString('en-GB', {
+diff --git a/src/pages/vehicles/AddVehicle.tsx b/src/pages/vehicles/AddVehicle.tsx
+index 2e7462c..727ae93 100644
+--- a/src/pages/vehicles/AddVehicle.tsx
++++ b/src/pages/vehicles/AddVehicle.tsx
+@@ -1 +1 @@
+-﻿import { useState } from 'react'
++import { useState } from 'react'
+@@ -40 +40 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-            showError('Vui lòng nhập biển số và loại xe')
++            showError('Vui l�ng nh?p bi?n s? v� lo?i xe')
+@@ -61 +61 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                success('Cập nhật thông tin xe thành công!')
++                success('C?p nh?t th�ng tin xe th�nh c�ng!')
+@@ -64 +64 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                success('Thêm xe mới thành công!')
++                success('Th�m xe m?i th�nh c�ng!')
+@@ -73 +73 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-            const message = err instanceof Error ? err.message : 'Không thể lưu thông tin xe'
++            const message = err instanceof Error ? err.message : 'Kh�ng th? luu th�ng tin xe'
+@@ -84 +84 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                title={vehicle ? 'CẬP NHẬT XE' : 'THÊM XE MỚI'}
++                title={vehicle ? 'C?P NH?T XE' : 'TH�M XE M?I'}
+@@ -87 +87 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-            <main className="flex-1 overflow-y-auto overscroll-contain pb-4">
++            <main className="flex-1 overflow-y-auto overscroll-contain w-full max-w-md mx-auto pb-4">
+@@ -96 +96 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                                {vehicle ? 'Cập nhật thông tin xe' : 'Thêm xe mới của bạn'}
++                                {vehicle ? 'C?p nh?t th�ng tin xe' : 'Th�m xe m?i c?a b?n'}
+@@ -98 +98 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                            <p className="text-sm text-slate-600">Điền đầy đủ thông tin để quản lý tốt hơn</p>
++                            <p className="text-sm text-slate-600">�i?n d?y d? th�ng tin d? qu?n l� t?t hon</p>
+@@ -103 +103 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                            <h3 className="mb-3 font-semibold text-slate-700">Hình ảnh phương tiện</h3>
++                            <h3 className="mb-3 font-semibold text-slate-700">H�nh ?nh phuong ti?n</h3>
+@@ -107 +107 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                                label="Chọn ảnh đại diện cho xe"
++                                label="Ch?n ?nh d?i di?n cho xe"
+@@ -113 +113 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                            <h3 className="mb-3 font-semibold text-slate-700">Loại phương tiện</h3>
++                            <h3 className="mb-3 font-semibold text-slate-700">Lo?i phuong ti?n</h3>
+@@ -138 +138 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                                            Xe máy
++                                            Xe m�y
+@@ -165 +165 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                                            Xe ô tô
++                                            Xe � t�
+@@ -174 +174 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                            <h3 className="mb-4 font-semibold text-slate-700">Thông tin cơ bản</h3>
++                            <h3 className="mb-4 font-semibold text-slate-700">Th�ng tin co b?n</h3>
+@@ -179 +179 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                                        Biển số xe <span className="text-red-500">*</span>
++                                        Bi?n s? xe <span className="text-red-500">*</span>
+@@ -193 +193 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                                        <label className="mb-1 block text-sm font-medium text-slate-700">Hãng xe</label>
++                                        <label className="mb-1 block text-sm font-medium text-slate-700">H�ng xe</label>
+@@ -205 +205 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                                            Loại xe <span className="text-red-500">*</span>
++                                            Lo?i xe <span className="text-red-500">*</span>
+@@ -220 +220 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                                        <label className="mb-1 block text-sm font-medium text-slate-700">Năm sản xuất</label>
++                                        <label className="mb-1 block text-sm font-medium text-slate-700">Nam s?n xu?t</label>
+@@ -232 +232 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                                        <label className="mb-1 block text-sm font-medium text-slate-700">Màu sắc</label>
++                                        <label className="mb-1 block text-sm font-medium text-slate-700">M�u s?c</label>
+@@ -237 +237 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                                            placeholder="Trắng"
++                                            placeholder="Tr?ng"
+@@ -245 +245 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                                        <label className="mb-1 block text-sm font-medium text-slate-700">Số km hiện tại</label>
++                                        <label className="mb-1 block text-sm font-medium text-slate-700">S? km hi?n t?i</label>
+@@ -257 +257 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                                        <label className="mb-1 block text-sm font-medium text-slate-700">Loại nhiên liệu</label>
++                                        <label className="mb-1 block text-sm font-medium text-slate-700">Lo?i nhi�n li?u</label>
+@@ -263,3 +263,3 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                                            <option value="petrol">Xăng</option>
+-                                            <option value="diesel">Dầu diesel</option>
+-                                            <option value="electric">Điện</option>
++                                            <option value="petrol">Xang</option>
++                                            <option value="diesel">D?u diesel</option>
++                                            <option value="electric">�i?n</option>
+@@ -274 +274 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                            <h3 className="mb-4 font-semibold text-slate-700">Bảo hiểm & Đăng kiểm</h3>
++                            <h3 className="mb-4 font-semibold text-slate-700">B?o hi?m & �ang ki?m</h3>
+@@ -278 +278 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                                    <label className="mb-1 block text-sm font-medium text-slate-700">Hạn bảo hiểm</label>
++                                    <label className="mb-1 block text-sm font-medium text-slate-700">H?n b?o hi?m</label>
+@@ -288 +288 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                                    <label className="mb-1 block text-sm font-medium text-slate-700">Hạn đăng kiểm</label>
++                                    <label className="mb-1 block text-sm font-medium text-slate-700">H?n dang ki?m</label>
+@@ -301 +301 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                            <h3 className="mb-4 font-semibold text-slate-700">Nhắc nhở bảo dưỡng</h3>
++                            <h3 className="mb-4 font-semibold text-slate-700">Nh?c nh? b?o du?ng</h3>
+@@ -305 +305 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                                    <label className="mb-1 block text-sm font-medium text-slate-700">Bảo dưỡng lúc (km)</label>
++                                    <label className="mb-1 block text-sm font-medium text-slate-700">B?o du?ng l�c (km)</label>
+@@ -317 +317 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                                    <label className="mb-1 block text-sm font-medium text-slate-700">Bảo dưỡng lúc (ngày)</label>
++                                    <label className="mb-1 block text-sm font-medium text-slate-700">B?o du?ng l�c (ng�y)</label>
+@@ -337 +337 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
+-                confirmText={loading ? 'Đang lưu...' : vehicle ? 'Cập nhật' : 'Thêm xe'}
++                confirmText={loading ? '�ang luu...' : vehicle ? 'C?p nh?t' : 'Th�m xe'}
+diff --git a/src/pages/vehicles/VehicleChargingHistory.tsx b/src/pages/vehicles/VehicleChargingHistory.tsx
+index 0c54738..863d333 100644
+--- a/src/pages/vehicles/VehicleChargingHistory.tsx
++++ b/src/pages/vehicles/VehicleChargingHistory.tsx
+@@ -9 +9,3 @@ import {
+-    Save
++    Save,
++    Search,
++    Filter
+@@ -199,0 +202,2 @@ export default function VehicleChargingHistory() {
++    const [searchTerm, setSearchTerm] = useState('')
++    const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
+@@ -224,0 +229,40 @@ export default function VehicleChargingHistory() {
++
++        if (searchTerm.trim()) {
++            const term = searchTerm.toLowerCase().trim()
++
++            // Smart queries
++            if (term.includes('chi phí cao nhất') || term.includes('tiền nhiều nhất') || term.includes('đắt nhất')) {
++                const maxCost = Math.max(0, ...result.map(l => l.total_cost || l.total_amount || 0))
++                result = result.filter(l => (l.total_cost || l.total_amount || 0) === maxCost && maxCost > 0)
++            } else if (term.includes('chi phí thấp nhất') || term.includes('rẻ nhất')) {
++                const minCost = Math.min(...result.filter(l => (l.total_cost || l.total_amount || 0) > 0).map(l => l.total_cost || l.total_amount || 0))
++                result = result.filter(l => (l.total_cost || l.total_amount || 0) === minCost)
++            } else if (term.includes('nhiều năng lượng') || term.includes('nhiều điện') || term.includes('kwh cao nhất')) {
++                const maxKwh = Math.max(0, ...result.map(l => l.kwh || 0))
++                result = result.filter(l => (l.kwh || 0) === maxKwh && maxKwh > 0)
++            } else if (term.includes('thời gian sạc lâu nhất') || term.includes('sạc lâu')) {
++                const getDuration = (l: FuelLogRecord) => {
++                    let mins = l.charge_duration_minutes || 0
++                    if (l.notes) {
++                        const match = l.notes.match(/Thời gian sạc:\s*(\d+)/)
++                        if (match) mins = parseInt(match[1], 10)
++                    }
++                    return mins
++                }
++                const maxDur = Math.max(0, ...result.map(getDuration))
++                result = result.filter(l => getDuration(l) === maxDur && maxDur > 0)
++            } else {
++                // Normal search
++                result = result.filter(log => {
++                    const searchFields = [
++                        log.station_name,
++                        log.location,
++                        log.notes,
++                        log.kwh?.toString(),
++                        log.total_cost?.toString(),
++                    ].filter(Boolean).map(s => String(s).toLowerCase())
++                    return searchFields.some(field => field.includes(term))
++                })
++            }
++        }
++
+@@ -226 +270 @@ export default function VehicleChargingHistory() {
+-    }, [logs, filterYear, filterMonth])
++    }, [logs, filterYear, filterMonth, searchTerm])
+@@ -299 +343 @@ export default function VehicleChargingHistory() {
+-            <main className="flex-1 overflow-y-auto px-4 pt-4 pb-4">
++            <main className="flex-1 overflow-y-auto w-full max-w-md mx-auto px-4 pt-4 pb-4">
+@@ -310,13 +354,3 @@ export default function VehicleChargingHistory() {
+-                {/* Segmented Control */}
+-                <div className={`flex items-center gap-3 ${filterYear === 'all' ? 'mb-6' : 'mb-3'}`}>
+-                    <button
+-                        onClick={() => setFilterYear('all')}
+-                        className={`px-5 py-2 rounded-xl text-sm font-bold transition-all ${filterYear === 'all'
+-                            ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
+-                            : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+-                            }`}
+-                    >
+-                        Tất cả
+-                    </button>
+-                    <span className="text-slate-300">•</span>
+-                    {availableYears.map(year => (
++                {/* Segmented Control & Filter Button */}
++                <div className={`flex items-center justify-between gap-3 ${filterYear === 'all' ? 'mb-6' : 'mb-3'}`}>
++                    <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide flex-1">
+@@ -324,3 +358,2 @@ export default function VehicleChargingHistory() {
+-                            key={year}
+-                            onClick={() => setFilterYear(year)}
+-                            className={`px-5 py-2 rounded-xl text-sm font-bold transition-all ${filterYear === year
++                            onClick={() => setFilterYear('all')}
++                            className={`px-5 py-2 rounded-xl text-sm font-bold transition-all shrink-0 ${filterYear === 'all'
+@@ -328 +361 @@ export default function VehicleChargingHistory() {
+-                                : 'bg-transparent text-slate-500 hover:bg-slate-100'
++                                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+@@ -331 +364 @@ export default function VehicleChargingHistory() {
+-                            {year}
++                            Tất cả
+@@ -333 +366,23 @@ export default function VehicleChargingHistory() {
+-                    ))}
++                        <span className="text-slate-300">•</span>
++                        {availableYears.map(year => (
++                            <button
++                                key={year}
++                                onClick={() => setFilterYear(year)}
++                                className={`px-5 py-2 rounded-xl text-sm font-bold transition-all shrink-0 ${filterYear === year
++                                    ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
++                                    : 'bg-transparent text-slate-500 hover:bg-slate-100'
++                                    }`}
++                            >
++                                {year}
++                            </button>
++                        ))}
++                    </div>
++                    {/* Filter Icon Button */}
++                    <button
++                        onClick={() => setIsFilterModalOpen(true)}
++                        className={`p-2 rounded-3xl transition-all shadow-xl shrink-0 ${searchTerm ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50 shadow-sm'
++                            }`}
++                        title="Tìm kiếm & Cấu hình lọc"
++                    >
++                        {searchTerm ? <Filter className="h-5 w-5 fill-blue-600/20" /> : <Search className="h-5 w-5" />}
++                    </button>
+@@ -384,16 +439,31 @@ export default function VehicleChargingHistory() {
+-                    {filteredLogs.map(log => {
+-                        let parsedEndTime = ''
+-                        let parsedDurationMins = log.charge_duration_minutes || 0
+-
+-                        // Parse exact times and clean notes
+-                        let cleanNotesStr = ''
+-                        if (log.notes) {
+-                            const lines = log.notes.split('\n')
+-                            for (const line of lines) {
+-                                if (line.includes('Kết thúc:')) {
+-                                    const match = line.match(/Kết thúc:\s*([0-9:]+)/)
+-                                    if (match) parsedEndTime = match[1].trim()
+-                                }
+-                                if (line.includes('Thời gian sạc:')) {
+-                                    const match = line.match(/Thời gian sạc:\s*(\d+)/)
+-                                    if (match) parsedDurationMins = parseInt(match[1], 10)
++                    {filteredLogs.length === 0 ? (
++                        <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
++                            <div className="mb-4 rounded-full bg-slate-100 p-4">
++                                <Search className="h-8 w-8 text-slate-400" />
++                            </div>
++                            <p className="text-sm font-bold text-slate-600">Không tìm thấy kết quả nào</p>
++                            <p className="mt-1 text-xs text-slate-400">Hãy thử thay đổi từ khóa hoặc bộ lọc</p>
++                            {searchTerm && (
++                                <button onClick={() => setSearchTerm('')} className="mt-4 text-sm font-bold text-blue-600 hover:text-blue-700 bg-blue-50 px-4 py-2 rounded-full">
++                                    Xóa tìm kiếm
++                                </button>
++                            )}
++                        </div>
++                    ) : (
++                        filteredLogs.map(log => {
++                            let parsedEndTime = ''
++                            let parsedDurationMins = log.charge_duration_minutes || 0
++
++                            // Parse exact times and clean notes
++                            let cleanNotesStr = ''
++                            if (log.notes) {
++                                const lines = log.notes.split('\n')
++                                for (const line of lines) {
++                                    if (line.includes('Kết thúc:')) {
++                                        const match = line.match(/Kết thúc:\s*([0-9:]+)/)
++                                        if (match) parsedEndTime = match[1].trim()
++                                    }
++                                    if (line.includes('Thời gian sạc:')) {
++                                        const match = line.match(/Thời gian sạc:\s*(\d+)/)
++                                        if (match) parsedDurationMins = parseInt(match[1], 10)
++                                    }
+@@ -401 +470,0 @@ export default function VehicleChargingHistory() {
+-                            }
+@@ -403,3 +472,3 @@ export default function VehicleChargingHistory() {
+-                            const cleanLines = lines.filter(l => !l.includes('📍') && !l.includes('🔗') && !l.includes('GPS:') && !l.includes('https://www.google.com/maps'))
+-                            cleanNotesStr = cleanLines.map(l => l.replace(/[⏱⏳]/g, '').trim()).filter(Boolean).join(' ')
+-                        }
++                                const cleanLines = lines.filter(l => !l.includes('📍') && !l.includes('🔗') && !l.includes('GPS:') && !l.includes('https://www.google.com/maps') && !l.includes('Kết thúc:') && !l.includes('Thời gian sạc:') && !l.includes('Khuyến mãi:'))
++                                cleanNotesStr = cleanLines.map(l => l.replace(/[⏱⏳]/g, '').trim()).filter(Boolean).join(' ')
++                            }
+@@ -407,20 +476,21 @@ export default function VehicleChargingHistory() {
+-                        const dateObj = new Date(log.refuel_date)
+-                        const dateStr = dateObj.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+-                        const startTime = log.refuel_time?.slice(0, 5) || '--:--'
+-                        const endTime = parsedEndTime || calculateEndTime(startTime, parsedDurationMins) || '--:--'
+-                        const price = log.unit_price || 0
+-                        const locationParts = [log.station_name, log.location].filter(Boolean)
+-                        const title = locationParts[0] || 'Trạm sạc'
+-                        const subtitle = locationParts[1] || 'Không rõ địa điểm'
+-
+-                        return (
+-                            <div key={log.id} onClick={() => setEditingLog(log as FuelLogRecord)} className="bg-white rounded-[20px] p-5 shadow-md border border-gray-300 flex flex-col gap-4 cursor-pointer hover:shadow-md transition-shadow active:scale-[0.98]">
+-                                {/* Header */}
+-                                <div className="flex justify-between items-start gap-3">
+-                                    <div className="flex-1 min-w-0">
+-                                        <h3 className="text-[15px] font-bold text-slate-800 truncate">{title}</h3>
+-                                        <p className="text-xs font-medium text-slate-400 mt-0.5 truncate">{subtitle}</p>
+-                                    </div>
+-                                    <div className="text-right shrink-0">
+-                                        <p className="text-sm font-bold text-slate-700">{dateStr}</p>
+-                                        <p className="text-xs font-medium text-slate-400 mt-0.5">{startTime} → {endTime}</p>
++                            const dateObj = new Date(log.refuel_date)
++                            const dateStr = `${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${dateObj.getFullYear()}`
++                            const startTime = log.refuel_time?.slice(0, 5) || '--:--'
++                            const endTime = parsedEndTime || calculateEndTime(startTime, parsedDurationMins) || '--:--'
++                            const price = log.unit_price || 0
++                            const locationParts = [log.station_name, log.location].filter(Boolean)
++                            const title = locationParts[0] || 'Trạm sạc'
++                            const subtitle = locationParts[1] || 'Không rõ địa điểm'
++
++                            return (
++                                <div key={log.id} onClick={() => setEditingLog(log as FuelLogRecord)} className="bg-white rounded-[20px] p-5 shadow-md border border-gray-300 flex flex-col gap-4 cursor-pointer hover:shadow-md transition-shadow active:scale-[0.98]">
++                                    {/* Header */}
++                                    <div className="flex justify-between items-start gap-3">
++                                        <div className="flex-1 min-w-0">
++                                            <h3 className="text-[15px] font-bold text-slate-800 truncate">{title}</h3>
++                                            <p className="text-xs font-medium text-slate-400 mt-0.5 truncate">{subtitle}</p>
++                                        </div>
++                                        <div className="text-right shrink-0">
++                                            <p className="text-sm font-bold text-slate-700">{dateStr}</p>
++                                            <p className="text-xs font-medium text-slate-400 mt-0.5">{startTime} → {endTime}</p>
++                                        </div>
+@@ -428 +497,0 @@ export default function VehicleChargingHistory() {
+-                                </div>
+@@ -430,6 +499,11 @@ export default function VehicleChargingHistory() {
+-                                {/* Bottom Stats */}
+-                                <div className="flex items-center justify-between">
+-                                    <div className="flex items-center gap-5">
+-                                        <div className="flex items-center gap-1.5">
+-                                            <Zap className="h-4 w-4 text-emerald-500" />
+-                                            <span className="text-[15px] font-black text-slate-800">{log.kwh?.toFixed(1) || 0} kWh</span>
++                                    {/* Bottom Stats */}
++                                    <div className="flex items-center justify-between">
++                                        <div className="flex items-center gap-5">
++                                            <div className="flex items-center gap-1.5">
++                                                <Zap className="h-4 w-4 text-emerald-500" />
++                                                <span className="text-[15px] font-black text-slate-800">{log.kwh?.toFixed(1) || 0} kWh</span>
++                                            </div>
++                                            <div className="flex items-center gap-1.5">
++                                                <Clock className="h-4 w-4 text-blue-500" />
++                                                <span className="text-[13px] font-semibold text-slate-600">{parsedDurationMins}m</span>
++                                            </div>
+@@ -437,3 +511,12 @@ export default function VehicleChargingHistory() {
+-                                        <div className="flex items-center gap-1.5">
+-                                            <Clock className="h-4 w-4 text-blue-500" />
+-                                            <span className="text-[13px] font-semibold text-slate-600">{parsedDurationMins}m</span>
++                                        <div className="text-right">
++                                            {/* Show crossed original price and Free badge if cost is 0 */}
++                                            {log.total_cost === 0 ? (
++                                                <>
++                                                    <span className="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md mr-1.5 uppercase">Free</span>
++                                                    <span className="text-xs font-medium text-slate-400 line-through">{formatCurrency((log.kwh || 0) * (price || 3858)).replace('₫', 'đ').trim()}</span>
++                                                </>
++                                            ) : (
++                                                <>
++                                                    <span className="text-[15px] font-black text-slate-800">{formatCurrency(log.total_cost || log.total_amount || 0).replace('₫', 'đ').trim()}</span>
++                                                </>
++                                            )}
+@@ -442,25 +525,12 @@ export default function VehicleChargingHistory() {
+-                                    <div className="text-right">
+-                                        {/* Show crossed original price and Free badge if cost is 0 */}
+-                                        {log.total_cost === 0 ? (
+-                                            <>
+-                                                <span className="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md mr-1.5 uppercase">Free</span>
+-                                                <span className="text-xs font-medium text-slate-400 line-through">{formatCurrency((log.kwh || 0) * (price || 3858)).replace('₫', 'đ').trim()}</span>
+-                                            </>
+-                                        ) : (
+-                                            <>
+-                                                <span className="text-[15px] font-black text-slate-800">{formatCurrency(log.total_cost || log.total_amount || 0).replace('₫', 'đ').trim()}</span>
+-                                            </>
+-                                        )}
+-                                    </div>
+-                                </div>
+-                                {/* Progress Bar */}
+-                                <div className="mt-1">
+-                                    <div className="flex justify-between text-[10px] text-slate-500 font-medium mb-1.5 px-0.5">
+-                                        <span>Tỉ lệ sạc</span>
+-                                        <span className="text-emerald-500 font-bold">{Math.round(Math.min(100, Math.max(0, ((log.kwh || 0) / 37.23) * 100)))}%</span>
+-                                    </div>
+-                                    <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+-                                        <div
+-                                            className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+-                                            style={{ width: `${Math.min(100, Math.max(0, ((log.kwh || 0) / 37.23) * 100))}%` }}
+-                                        ></div>
++                                    {/* Progress Bar */}
++                                    <div className="mt-1">
++                                        <div className="flex justify-between text-[10px] text-slate-500 font-medium mb-1.5 px-0.5">
++                                            <span>Tỉ lệ sạc</span>
++                                            <span className="text-emerald-500 font-bold">{Math.round(Math.min(100, Math.max(0, ((log.kwh || 0) / 37.23) * 100)))}%</span>
++                                        </div>
++                                        <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
++                                            <div
++                                                className="bg-emerald-500 h-full rounded-full transition-all duration-500"
++                                                style={{ width: `${Math.min(100, Math.max(0, ((log.kwh || 0) / 37.23) * 100))}%` }}
++                                            ></div>
++                                        </div>
+@@ -468 +537,0 @@ export default function VehicleChargingHistory() {
+-                                </div>
+@@ -470,9 +539,10 @@ export default function VehicleChargingHistory() {
+-                                {/* Clean Notes display if any exist */}
+-                                {cleanNotesStr && (
+-                                    <div className="pt-3 border-t border-slate-100 mt-0.5">
+-                                        <p className="text-[13px] text-slate-600 font-medium">Ghi chú: <span className="text-slate-500 font-normal">{cleanNotesStr}</span></p>
+-                                    </div>
+-                                )}
+-                            </div>
+-                        )
+-                    })}
++                                    {/* Clean Notes display if any exist */}
++                                    {cleanNotesStr && (
++                                        <div className="pt-3 border-t border-slate-100 mt-0.5">
++                                            <p className="text-[13px] text-slate-600 font-medium">Ghi chú: <span className="text-slate-500 font-normal">{cleanNotesStr}</span></p>
++                                        </div>
++                                    )}
++                                </div>
++                            )
++                        })
++                    )}
+@@ -483 +553 @@ export default function VehicleChargingHistory() {
+-            {/* Edit Modal */}
++            {/* Details & Edit Modal */}
+@@ -485,3 +555,3 @@ export default function VehicleChargingHistory() {
+-                <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-[3px]">
+-                    <div className="w-full rounded-t-3xl bg-white shadow-2xl flex flex-col max-h-[90vh]">
+-                        <div className="bg-blue-600 rounded-t-3xl px-5 pt-5 pb-4 text-white">
++                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-[3px] p-4" onClick={() => setEditingLog(null)}>
++                    <div className="mx-auto w-full max-w-md rounded-3xl bg-white shadow-2xl flex flex-col max-h-[90vh] overflow-hidden" onClick={e => e.stopPropagation()}>
++                        <div className="bg-blue-600 px-5 pt-5 pb-5 text-white shrink-0">
+@@ -489 +559 @@ export default function VehicleChargingHistory() {
+-                                <h3 className="text-base font-bold flex items-center gap-2">
++                                <h3 className="text-lg font-bold flex items-center gap-2">
+@@ -491 +561 @@ export default function VehicleChargingHistory() {
+-                                    Chỉnh sửa chi phí sạc
++                                    Chi tiết phiên sạc
+@@ -497 +567,3 @@ export default function VehicleChargingHistory() {
+-                            <p className="text-xs opacity-80 mt-1 ml-7">{editingLog.station_name} · {new Date(editingLog.refuel_date).toLocaleDateString('vi-VN')}</p>
++                            <p className="text-sm opacity-90 mt-1 ml-7">
++                                {editingLog.station_name} · {`${String(new Date(editingLog.refuel_date).getDate()).padStart(2, '0')}/${String(new Date(editingLog.refuel_date).getMonth() + 1).padStart(2, '0')}/${new Date(editingLog.refuel_date).getFullYear()}`} {editingLog.refuel_time?.slice(0, 5) || ''}
++                            </p>
+@@ -499,21 +571,25 @@ export default function VehicleChargingHistory() {
+-                        <div className="flex-1 overflow-y-auto px-5 py-5">
+-                            <form onSubmit={async (e) => {
+-                                e.preventDefault()
+-                                const form = e.target as HTMLFormElement
+-                                const price = Number(form.price.value) || 0
+-                                const cost = Number(form.cost.value) || 0
+-                                const notes = form.notes.value.trim()
+-
+-                                const toastId = toast.loading('Đang cập nhật...')
+-                                try {
+-                                    await updateFuelLog(editingLog.id, {
+-                                        unit_price: price,
+-                                        total_cost: cost,
+-                                        total_amount: cost,
+-                                        notes: notes || undefined
+-                                    })
+-                                    toast.success('Đã cập nhật thành công', { id: toastId })
+-                                    setEditingLog(null)
+-                                    queryClient.invalidateQueries({ queryKey: vehicleKeys.fuel(selectedVehicle?.id as string) })
+-                                } catch (error) {
+-                                    toast.error('Lỗi khi cập nhật', { id: toastId })
++                        <div className="flex-1 overflow-y-auto px-5 py-5 scrollbar-hide">
++                            {(() => {
++                                let parsedEndTimeModal = ''
++                                let parsedDurationMinsModal = editingLog.charge_duration_minutes || 0
++                                let parsedKhuyenMai = ''
++                                let cleanNotesModal = ''
++
++                                if (editingLog.notes) {
++                                    const lines = editingLog.notes.split('\n')
++                                    for (const line of lines) {
++                                        if (line.includes('Kết thúc:')) {
++                                            const match = line.match(/Kết thúc:\s*([0-9:]+)/)
++                                            if (match) parsedEndTimeModal = match[1].trim()
++                                        }
++                                        if (line.includes('Thời gian sạc:')) {
++                                            const match = line.match(/Thời gian sạc:\s*(\d+)/)
++                                            if (match) parsedDurationMinsModal = parseInt(match[1], 10)
++                                        }
++                                        if (line.includes('Khuyến mãi:')) {
++                                            const match = line.match(/Khuyến mãi:\s*([^\n]+)/)
++                                            if (match) parsedKhuyenMai = match[1].trim()
++                                        }
++                                    }
++                                    const cleanLines = lines.filter(l => !l.includes('📍') && !l.includes('🔗') && !l.includes('GPS:') && !l.includes('https://www.google.com/maps') && !l.includes('Kết thúc:') && !l.includes('Thời gian sạc:') && !l.includes('Khuyến mãi:'))
++                                    cleanNotesModal = cleanLines.map(l => l.replace(/[⏱⏳]/g, '').trim()).filter(Boolean).join(' ')
+@@ -521,10 +597,123 @@ export default function VehicleChargingHistory() {
+-                            }} className="space-y-4">
+-                                <div className="grid grid-cols-2 gap-4">
+-                                    <div>
+-                                        <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Đơn giá (đ/kWh)</label>
+-                                        <input type="number" name="price" defaultValue={editingLog.unit_price || ''} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm focus:border-blue-400 focus:bg-white outline-none" placeholder="VD: 3858" />
+-                                    </div>
+-                                    <div>
+-                                        <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Thành tiền (VNĐ)</label>
+-                                        <input type="number" name="cost" required defaultValue={editingLog.total_cost ?? editingLog.total_amount ?? ''} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm focus:border-blue-400 focus:bg-white outline-none" />
+-                                    </div>
++
++                                const startTimeModal = editingLog.refuel_time?.slice(0, 5) || '--:--'
++                                const endTimeModal = parsedEndTimeModal || calculateEndTime(startTimeModal, parsedDurationMinsModal) || '--:--'
++                                const durationModal = parsedDurationMinsModal > 0 ? `${parsedDurationMinsModal} phút` : '-- phút'
++                                const percentModal = Math.round(Math.min(100, Math.max(0, ((editingLog.kwh || 0) / 37.23) * 100)))
++                                const actualCostModal = editingLog.total_cost !== undefined && editingLog.total_cost !== null ? editingLog.total_cost : (editingLog.total_amount || 0)
++                                const originalCostModal = (editingLog.kwh || 0) * (editingLog.unit_price || 3858)
++
++                                return (
++                                    <>
++                                        {/* Read-only details */}
++                                        <div className="grid grid-cols-2 gap-y-4 gap-x-4 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-100">
++                                            <div>
++                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Thời gian</p>
++                                                <p className="text-sm font-bold text-slate-800">{startTimeModal} → {endTimeModal}</p>
++                                            </div>
++                                            <div>
++                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Thời lượng sạc</p>
++                                                <p className="text-sm font-bold text-slate-800">{durationModal}</p>
++                                            </div>
++
++                                            <div className="col-span-2">
++                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Vị trí địa chỉ</p>
++                                                <p className="text-sm font-bold text-slate-800 leading-snug">{editingLog.station_name}{editingLog.location ? ` - ${editingLog.location}` : ''}</p>
++                                            </div>
++
++                                            <div>
++                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Năng lượng</p>
++                                                <p className="text-sm font-bold text-slate-800">{editingLog.kwh ? `${editingLog.kwh.toFixed(2)} kWh` : '--'}</p>
++                                            </div>
++                                            <div>
++                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Tỉ lệ sạc</p>
++                                                <p className="text-sm font-bold text-emerald-600">~{percentModal}% pin</p>
++                                            </div>
++
++                                            <div className="col-span-2">
++                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Chi phí phiên sạc</p>
++                                                <div className="flex flex-wrap items-center gap-2">
++                                                    <span className="text-sm font-black text-blue-600">
++                                                        {actualCostModal === 0 ? 'Miễn phí' : formatCurrency(actualCostModal).replace('₫', 'đ').trim()}
++                                                    </span>
++                                                    {(actualCostModal < originalCostModal || parsedKhuyenMai) && (
++                                                        <span className="text-xs font-semibold text-slate-400 line-through">
++                                                            {formatCurrency(originalCostModal).replace('₫', 'đ').trim()}
++                                                        </span>
++                                                    )}
++                                                    {parsedKhuyenMai && (
++                                                        <span className="text-xs font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">
++                                                            KM: {parsedKhuyenMai}
++                                                        </span>
++                                                    )}
++                                                </div>
++                                            </div>
++
++                                            {cleanNotesModal && (
++                                                <div className="col-span-2">
++                                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Ghi chú</p>
++                                                    <p className="text-sm font-medium text-slate-700">{cleanNotesModal}</p>
++                                                </div>
++                                            )}
++                                        </div>
++
++                                        <form onSubmit={async (e) => {
++                                            e.preventDefault()
++                                            const form = e.target as HTMLFormElement
++                                            const notes = form.notes.value.trim()
++
++                                            const toastId = toast.loading('Đang cập nhật...')
++                                            try {
++                                                await updateFuelLog(editingLog.id, {
++                                                    notes: notes || undefined
++                                                })
++                                                toast.success('Đã cập nhật thành công', { id: toastId })
++                                                setEditingLog(null)
++                                                queryClient.invalidateQueries({ queryKey: vehicleKeys.fuel(selectedVehicle?.id as string) })
++                                            } catch (error) {
++                                                toast.error('Lỗi khi cập nhật', { id: toastId })
++                                            }
++                                        }} className="space-y-4 border-t border-slate-100 pt-5">
++                                            <h4 className="font-bold text-slate-800 text-sm mb-3">Chỉnh sửa ghi chú</h4>
++                                            <div>
++                                                <textarea name="notes" rows={4} defaultValue={editingLog.notes || ''} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm focus:border-blue-400 focus:bg-white outline-none transition-colors" placeholder="Dữ liệu import thường lưu trữ tại đây..."></textarea>
++                                            </div>
++                                            <button type="submit" className="w-full flex items-center justify-center gap-2 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white py-3.5 font-bold transition-all shadow-md shadow-blue-200">
++                                                <Save className="h-5 w-5" />
++                                                Lưu cập nhật
++                                            </button>
++                                        </form>
++                                    </>
++                                )
++                            })()}
++                        </div>
++                    </div>
++                </div>
++            )}
++
++            {/* Filter Modal */}
++            {isFilterModalOpen && (
++                <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-[3px]" onClick={() => setIsFilterModalOpen(false)}>
++                    <div className="w-full max-w-md rounded-t-3xl bg-white shadow-2xl flex flex-col" onClick={e => e.stopPropagation()}>
++                        <div className="flex justify-center pt-3 pb-1 shrink-0">
++                            <div className="h-1.5 w-12 rounded-full bg-slate-200" />
++                        </div>
++                        <div className="flex items-center justify-between p-4 border-b border-slate-100 shrink-0">
++                            <h3 className="font-bold text-lg text-slate-800">Tìm kiếm & Lọc</h3>
++                            <button onClick={() => setIsFilterModalOpen(false)} className="rounded-full bg-slate-100 p-2 text-slate-600 hover:bg-slate-200 transition-colors">
++                                <X className="h-4 w-4" />
++                            </button>
++                        </div>
++
++                        <div className="p-5 space-y-6">
++                            <div>
++                                <label className="mb-2 block text-sm font-semibold text-slate-700">Từ khóa tìm kiếm</label>
++                                <div className="relative">
++                                    <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
++                                    <input
++                                        type="text"
++                                        value={searchTerm}
++                                        onChange={(e) => setSearchTerm(e.target.value)}
++                                        placeholder="Tên trạm, địa chỉ, ghi chú..."
++                                        className="w-full rounded-xl border border-slate-300 pl-10 pr-3 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
++                                        autoFocus
++                                    />
+@@ -532,3 +721,22 @@ export default function VehicleChargingHistory() {
+-                                <div>
+-                                    <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Ghi chú & Khuyến mãi</label>
+-                                    <textarea name="notes" rows={4} defaultValue={editingLog.notes || ''} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm focus:border-blue-400 focus:bg-white outline-none" placeholder="Nhập ghi chú hoặc thông tin khuyến mãi..."></textarea>
++                            </div>
++
++                            <div>
++                                <label className="mb-2 block text-sm font-semibold text-slate-700">Tìm kiếm thông minh</label>
++                                <div className="flex flex-wrap gap-2">
++                                    {[
++                                        'Chi phí cao nhất',
++                                        'Chi phí thấp nhất',
++                                        'Nhiều điện nhất',
++                                        'Sạc lâu nhất'
++                                    ].map(suggest => (
++                                        <button
++                                            key={suggest}
++                                            onClick={() => setSearchTerm(suggest)}
++                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${searchTerm === suggest
++                                                ? 'bg-blue-100 text-blue-700 border-blue-200 shadow-sm'
++                                                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
++                                                }`}
++                                        >
++                                            {suggest}
++                                        </button>
++                                    ))}
+@@ -536,3 +744,18 @@ export default function VehicleChargingHistory() {
+-                                <button type="submit" className="w-full flex items-center justify-center gap-2 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white py-3.5 font-bold transition-all mt-2">
+-                                    <Save className="h-5 w-5" />
+-                                    Lưu thay đổi
++                            </div>
++
++                            <div className="pt-2">
++                                <button
++                                    onClick={() => setIsFilterModalOpen(false)}
++                                    className="w-full rounded-2xl bg-blue-600 text-white font-bold py-3.5 hover:bg-blue-700 active:scale-[0.98] transition-all"
++                                >
++                                    Xem kết quả ({filteredLogs.length})
++                                </button>
++                                <button
++                                    onClick={() => {
++                                        setSearchTerm('')
++                                        setFilterYear('all')
++                                        setIsFilterModalOpen(false)
++                                    }}
++                                    className="w-full mt-2 rounded-2xl bg-slate-100 text-slate-600 font-bold py-3.5 hover:bg-slate-200 active:scale-[0.98] transition-all"
++                                >
++                                    Xóa bộ lọc
+@@ -540 +763 @@ export default function VehicleChargingHistory() {
+-                            </form>
++                            </div>
+diff --git a/src/pages/vehicles/VehicleExpenses.tsx b/src/pages/vehicles/VehicleExpenses.tsx
+index dc26deb..c8cf5c8 100644
+--- a/src/pages/vehicles/VehicleExpenses.tsx
++++ b/src/pages/vehicles/VehicleExpenses.tsx
+@@ -52 +52 @@ function getPeriodRange(period: FilterPeriod, offset: number): { start: Date; en
+-                : d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
++                : d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })
+@@ -62 +62 @@ function getPeriodRange(period: FilterPeriod, offset: number): { start: Date; en
+-                : `${s.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })} – ${e.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })}`
++                : `${s.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })} – ${e.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}`
+@@ -69 +69 @@ function getPeriodRange(period: FilterPeriod, offset: number): { start: Date; en
+-            : s.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })
++            : s.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+@@ -175 +175 @@ export default function VehicleExpenses() {
+-            <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4 pt-4">
++            <main className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-md mx-auto px-4 pb-4 pt-4">
+@@ -381 +381 @@ export default function VehicleExpenses() {
+-                                    : d.toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric', month: 'numeric' })
++                                    : d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'numeric' })
+@@ -553 +553 @@ function AddExpenseModal({ vehicle, onClose, onSuccess }: {
+-            <div className="w-full max-h-[92vh] overflow-y-auto rounded-t-3xl bg-white shadow-2xl">
++            <div className="mx-auto w-full max-w-md max-h-[92vh] overflow-y-auto rounded-t-3xl bg-white shadow-2xl">
+@@ -555 +555,3 @@ function AddExpenseModal({ vehicle, onClose, onSuccess }: {
+-                <div className="sticky top-0 z-10 rounded-t-3xl bg-orange-500 px-5 pt-5 pb-4 text-white">
++                <div className="sticky top-0 z-10 rounded-t-3xl bg-orange-500 px-5 pt-3 pb-4 text-white">
++                    {/* Handle */}
++                    <div className="mx-auto mb-4 h-1.5 w-12 shrink-0 rounded-full bg-white/30" />
+diff --git a/src/pages/vehicles/VehicleFuel.tsx b/src/pages/vehicles/VehicleFuel.tsx
+index a10bab4..6f4ac5f 100644
+--- a/src/pages/vehicles/VehicleFuel.tsx
++++ b/src/pages/vehicles/VehicleFuel.tsx
+@@ -1 +1 @@
+-﻿import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
++import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+@@ -24,0 +25 @@ import { useVehicleStore } from '../../store/useVehicleStore'
++import { DateTimePickerModal } from '../../components/ui/DateTimePickerModal'
+@@ -33,6 +33,0 @@ const FUEL_TYPES = {
+-// Charging location presets for quick input
+-const CHARGE_LOCATION_PRESETS = [
+-    { label: 'Trạm sạc Vinfast' },
+-    { label: 'Trạm sạc khác' },
+-]
+-
+@@ -204,5 +199,14 @@ function ChargeLogCard({
+-    const durationMins = (() => {
+-        let mins = log.charge_duration_minutes || 0
+-        if (log.notes) {
+-            const match = log.notes.match(/Thời gian sạc:\s*(\d+)/)
+-            if (match) mins = parseInt(match[1], 10)
++    let parsedEndTime = ''
++    let parsedDurationMins = log.charge_duration_minutes || 0
++
++    if (log.notes) {
++        const lines = log.notes.split('\n')
++        for (const line of lines) {
++            if (line.includes('Kết thúc:')) {
++                const match = line.match(/Kết thúc:\s*([0-9:]+)/)
++                if (match) parsedEndTime = match[1].trim()
++            }
++            if (line.includes('Thời gian sạc:')) {
++                const match = line.match(/Thời gian sạc:\s*(\d+)/)
++                if (match) parsedDurationMins = parseInt(match[1], 10)
++            }
+@@ -210,2 +214,19 @@ function ChargeLogCard({
+-        return mins
+-    })()
++    }
++
++    const durationMins = parsedDurationMins;
++
++    const calculateEndTime = (startTimeStr: string, durMins: number) => {
++        if (!startTimeStr || !durMins) return ''
++        const parts = startTimeStr.split(':')
++        if (parts.length < 2) return ''
++        const hours = parseInt(parts[0], 10)
++        const minutes = parseInt(parts[1], 10)
++        if (isNaN(hours) || isNaN(minutes)) return ''
++        const d = new Date()
++        d.setHours(hours, minutes, 0)
++        d.setMinutes(d.getMinutes() + durMins)
++        return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })
++    }
++
++    const startTime = log.refuel_time?.slice(0, 5) || '--:--'
++    const endTime = parsedEndTime || calculateEndTime(startTime, durationMins) || '--:--'
+@@ -297,7 +318,14 @@ function ChargeLogCard({
+-                {/* Station name quick view */}
+-                {log.station_name && (
+-                    <div className="mt-2.5 flex items-center gap-1.5 text-xs text-slate-500">
+-                        <MapPin className="h-3 w-3 shrink-0 text-green-500" />
+-                        <span className="truncate">{log.station_name}</span>
+-                    </div>
+-                )}
++                {/* Station name quick view & Time */}
++                <div className="mt-2.5 flex flex-col gap-1">
++                    {log.station_name && (
++                        <div className="flex items-center gap-1.5 text-xs text-slate-500">
++                            <MapPin className="h-3 w-3 shrink-0 text-green-500" />
++                            <span className="truncate">{log.station_name}</span>
++                        </div>
++                    )}
++                    {startTime !== '--:--' && endTime !== '--:--' && (
++                        <div className="flex items-center gap-1.5 text-xs font-medium text-blue-400 pl-[18px]">
++                            {startTime} <span className="mx-0.5 text-slate-300">→</span> {endTime}
++                        </div>
++                    )}
++                </div>
+@@ -637 +665 @@ export default function VehicleFuel() {
+-            <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4 pt-4">
++            <main className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-md mx-auto px-4 pb-4 pt-4">
+@@ -901,0 +930 @@ function AddChargeModal({
++    const [isDateTimePickerOpen, setIsDateTimePickerOpen] = useState(false)
+@@ -1019,5 +1047,0 @@ function AddChargeModal({
+-    // Quick location preset
+-    const applyLocationPreset = useCallback((label: string) => {
+-        setFormData(prev => ({ ...prev, station_name: label }))
+-    }, [])
+-
+@@ -1227,5 +1251,8 @@ function AddChargeModal({
+-                        <input type="date" required
+-                            value={formData.refuel_date}
+-                            onChange={(e) => setFormData({ ...formData, refuel_date: e.target.value })}
+-                            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-100"
+-                        />
++                        <button type="button" onClick={() => setIsDateTimePickerOpen(true)}
++                            className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-100"
++                        >
++                            <span className={formData.refuel_date ? 'text-slate-900' : 'text-slate-400'}>
++                                {formData.refuel_date ? new Date(formData.refuel_date).toLocaleDateString('vi-VN') : 'Chọn ngày sạc'}
++                            </span>
++                            <Calendar className="h-4 w-4 text-slate-400" />
++                        </button>
+@@ -1239,14 +1265,0 @@ function AddChargeModal({
+-                        {isElectric && (
+-                            <div className="mb-2 flex gap-1.5 overflow-x-auto scrollbar-hide">
+-                                {CHARGE_LOCATION_PRESETS.map(p => (
+-                                    <button key={p.label} type="button" onClick={() => applyLocationPreset(p.label)}
+-                                        className={`flex shrink-0 items-center gap-1 rounded-xl border px-3 py-1.5 text-xs font-medium transition-all ${formData.station_name === p.label
+-                                            ? 'border-green-500 bg-green-50 text-green-700'
+-                                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+-                                            }`}>
+-                                        <Zap className="h-3 w-3 text-green-600" />{p.label}
+-                                        {formData.station_name === p.label && <Check className="h-3 w-3 text-green-600" />}
+-                                    </button>
+-                                ))}
+-                            </div>
+-                        )}
+@@ -1255 +1268 @@ function AddChargeModal({
+-                            placeholder={isElectric ? 'Hoặc nhập địa chỉ / lấy vị trí GPS' : 'Petrolimex, Shell...'}
++                            placeholder={isElectric ? 'Nhập địa chỉ trạm sạc' : 'Petrolimex, Shell...'}
+@@ -1519,0 +1533,12 @@ function AddChargeModal({
++
++            {/* DateTimePicker Modal */}
++            <DateTimePickerModal
++                isOpen={isDateTimePickerOpen}
++                onClose={() => setIsDateTimePickerOpen(false)}
++                onConfirm={(date) => {
++                    setFormData(prev => ({ ...prev, refuel_date: date }))
++                    setIsDateTimePickerOpen(false)
++                }}
++                initialDate={formData.refuel_date}
++                showTime={false}
++            />
+@@ -1603 +1628,3 @@ function BulkDiscountModal({
+-                <div className="bg-red-500 rounded-t-3xl px-5 pt-5 pb-4 text-white">
++                <div className="bg-red-500 rounded-t-3xl px-5 pt-3 pb-4 text-white">
++                    {/* Handle */}
++                    <div className="mx-auto mb-4 h-1.5 w-12 shrink-0 rounded-full bg-white/30" />
+diff --git a/src/pages/vehicles/VehicleMaintenance.tsx b/src/pages/vehicles/VehicleMaintenance.tsx
+index f74b279..439bfb8 100644
+--- a/src/pages/vehicles/VehicleMaintenance.tsx
++++ b/src/pages/vehicles/VehicleMaintenance.tsx
+@@ -55 +55 @@ function getPeriodRange(period: FilterPeriod, offset: number): { start: Date; en
+-                : d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
++                : d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })
+@@ -65 +65 @@ function getPeriodRange(period: FilterPeriod, offset: number): { start: Date; en
+-                : `${s.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })} – ${e.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })}`
++                : `${s.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })} – ${e.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}`
+@@ -72 +72 @@ function getPeriodRange(period: FilterPeriod, offset: number): { start: Date; en
+-            : s.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })
++            : s.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+@@ -178 +178 @@ export default function VehicleMaintenance() {
+-            <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4 pt-4">
++            <main className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-md mx-auto px-4 pb-4 pt-4">
+@@ -352 +352 @@ export default function VehicleMaintenance() {
+-                                    : d.toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric', month: 'numeric' })
++                                    : d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'numeric' })
+@@ -605 +605 @@ function AddMaintenanceModal({ vehicle, onClose, onSuccess }: {
+-            <div className="w-full max-h-[92vh] overflow-y-auto rounded-t-3xl bg-white shadow-2xl">
++            <div className="mx-auto w-full max-w-md max-h-[92vh] overflow-y-auto rounded-t-3xl bg-white shadow-2xl">
+@@ -607 +607,3 @@ function AddMaintenanceModal({ vehicle, onClose, onSuccess }: {
+-                <div className="sticky top-0 z-10 rounded-t-3xl bg-gray-500 px-5 pt-5 pb-4 text-white">
++                <div className="sticky top-0 z-10 rounded-t-3xl bg-gray-500 px-5 pt-3 pb-4 text-white">
++                    {/* Handle */}
++                    <div className="mx-auto mb-4 h-1.5 w-12 shrink-0 rounded-full bg-white/30" />
+@@ -800 +802 @@ function MaintenanceSettingsModal({ vehicle, onClose, onSuccess }: {
+-            <div className="w-full max-h-[90vh] overflow-y-auto rounded-t-3xl bg-white shadow-2xl">
++            <div className="mx-auto w-full max-w-md max-h-[90vh] overflow-y-auto rounded-t-3xl bg-white shadow-2xl">
+@@ -802,10 +804,14 @@ function MaintenanceSettingsModal({ vehicle, onClose, onSuccess }: {
+-                <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-5 py-4">
+-                    <div className="flex items-center gap-3">
+-                        <div className="rounded-xl bg-gray-100 p-2 text-gray-600">
+-                            <Settings className="h-5 w-5" />
+-                        </div>
+-                        <div>
+-                            <h3 className="text-base font-bold text-slate-800">Cài đặt chu kỳ xe</h3>
+-                            <p className="text-xs font-medium text-slate-500">
+-                                {vehicle.license_plate} · {vehicle.vehicle_type === 'motorcycle' ? 'Xe máy' : 'Ô tô'}
+-                            </p>
++                <div className="sticky top-0 z-10 border-b border-slate-100 bg-white px-5 pt-3 pb-4">
++                    {/* Handle */}
++                    <div className="mx-auto mb-4 h-1.5 w-12 shrink-0 rounded-full bg-slate-200" />
++                    <div className="flex items-center justify-between">
++                        <div className="flex items-center gap-3">
++                            <div className="rounded-xl bg-gray-100 p-2 text-gray-600">
++                                <Settings className="h-5 w-5" />
++                            </div>
++                            <div>
++                                <h3 className="text-base font-bold text-slate-800">Cài đặt chu kỳ xe</h3>
++                                <p className="text-xs font-medium text-slate-500">
++                                    {vehicle.license_plate} · {vehicle.vehicle_type === 'motorcycle' ? 'Xe máy' : 'Ô tô'}
++                                </p>
++                            </div>
+@@ -812,0 +819,3 @@ function MaintenanceSettingsModal({ vehicle, onClose, onSuccess }: {
++                        <button onClick={onClose} className="rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200">
++                            <X className="h-5 w-5" />
++                        </button>
+@@ -814,3 +822,0 @@ function MaintenanceSettingsModal({ vehicle, onClose, onSuccess }: {
+-                    <button onClick={onClose} className="rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200">
+-                        <X className="h-5 w-5" />
+-                    </button>
+diff --git a/src/pages/vehicles/VehicleReports.tsx b/src/pages/vehicles/VehicleReports.tsx
+index 078d545..29d73a1 100644
+--- a/src/pages/vehicles/VehicleReports.tsx
++++ b/src/pages/vehicles/VehicleReports.tsx
+@@ -203 +203 @@ export default function VehicleReports() {
+-            <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4 pt-4 space-y-5">
++            <main className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-md mx-auto px-4 pb-4 pt-4 space-y-5">
+@@ -343 +343 @@ export default function VehicleReports() {
+-                                            {new Date(trip.trip_date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: '2-digit' })}
++                                            {new Date(trip.trip_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}
+@@ -368 +368 @@ export default function VehicleReports() {
+-                                            <p className="text-sm font-bold text-slate-800">{new Date(recordFuelCost.refuel_date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
++                                            <p className="text-sm font-bold text-slate-800">{new Date(recordFuelCost.refuel_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
+@@ -385 +385 @@ export default function VehicleReports() {
+-                                            <p className="text-sm font-bold text-slate-800">{new Date(recordFuelVolume.refuel_date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
++                                            <p className="text-sm font-bold text-slate-800">{new Date(recordFuelVolume.refuel_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
+diff --git a/src/pages/vehicles/VehicleTrips.tsx b/src/pages/vehicles/VehicleTrips.tsx
+index 5a76746..a420ef3 100644
+--- a/src/pages/vehicles/VehicleTrips.tsx
++++ b/src/pages/vehicles/VehicleTrips.tsx
+@@ -336 +336 @@ function TripCard({
+-                            {new Date(trip.trip_date).toLocaleDateString('vi-VN', { weekday: 'short', day: '2-digit', month: '2-digit' })}
++                            {new Date(trip.trip_date).toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: '2-digit' })}
+@@ -489 +489 @@ export default function VehicleTrips() {
+-        : periodStart.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })
++        : periodStart.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+@@ -508 +508 @@ export default function VehicleTrips() {
+-            const date = new Date(t.trip_date).toLocaleDateString('vi-VN', { weekday: 'short', day: '2-digit', month: '2-digit' })
++            const date = new Date(t.trip_date).toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: '2-digit' })
+@@ -520 +520 @@ export default function VehicleTrips() {
+-        return new Date(key).toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'numeric' })
++        return new Date(key).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'numeric' })
+@@ -542 +542 @@ export default function VehicleTrips() {
+-            <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4 pt-4">
++            <main className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-md mx-auto px-4 pb-4 pt-4">
+@@ -958 +958 @@ function TripModal({
+-            <div className="w-full rounded-t-3xl bg-white shadow-2xl max-h-[92vh] flex flex-col">
++            <div className="mx-auto w-full max-w-md rounded-t-3xl bg-white shadow-2xl max-h-[92vh] flex flex-col">
+@@ -960 +960,3 @@ function TripModal({
+-                <div className={`${accentBg} rounded-t-3xl px-5 pt-5 pb-4 text-white`}>
++                <div className={`${accentBg} rounded-t-3xl px-5 pt-3 pb-4 text-white`}>
++                    {/* Handle */}
++                    <div className="mx-auto mb-4 h-1.5 w-12 shrink-0 rounded-full bg-white/30" />
+@@ -1276,2 +1278,4 @@ function CheckpointTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
+-            <div className="w-full rounded-t-3xl bg-white shadow-2xl max-h-[88vh] flex flex-col">
+-                <div className="bg-cyan-500 rounded-t-3xl px-5 pt-5 pb-4 text-white">
++            <div className="mx-auto w-full max-w-md rounded-t-3xl bg-white shadow-2xl max-h-[88vh] flex flex-col">
++                <div className="bg-cyan-500 rounded-t-3xl px-5 pt-3 pb-4 text-white">
++                    {/* Handle */}
++                    <div className="mx-auto mb-4 h-1.5 w-12 shrink-0 rounded-full bg-white/30" />
+@@ -1419,2 +1423,4 @@ function CompleteTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
+-            <div className="w-full rounded-t-3xl bg-white shadow-2xl max-h-[88vh] flex flex-col">
+-                <div className="bg-emerald-500 rounded-t-3xl px-5 pt-5 pb-4 text-white">
++            <div className="mx-auto w-full max-w-md rounded-t-3xl bg-white shadow-2xl max-h-[88vh] flex flex-col">
++                <div className="bg-emerald-500 rounded-t-3xl px-5 pt-3 pb-4 text-white">
++                    {/* Handle */}
++                    <div className="mx-auto mb-4 h-1.5 w-12 shrink-0 rounded-full bg-white/30" />
+diff --git a/src/pages/vehicles/index.tsx b/src/pages/vehicles/index.tsx
+index 488046d..0039755 100644
+--- a/src/pages/vehicles/index.tsx
++++ b/src/pages/vehicles/index.tsx
+@@ -1 +1 @@
+-﻿import { useState, useEffect } from 'react'
++import { useState, useEffect } from 'react'
+@@ -211 +211 @@ export default function VehicleManagement() {
+-                <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4 pt-4">
++                <main className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-md mx-auto px-4 pb-4 pt-4">
+@@ -241 +241 @@ export default function VehicleManagement() {
+-            <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4 pt-4">
++            <main className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-md mx-auto px-4 pb-4 pt-4">

@@ -1,0 +1,788 @@
+import React, { useEffect, useState, useRef } from 'react'
+import { FaTimes, FaPlus, FaEdit, FaTrash, FaImage, FaSearch } from 'react-icons/fa'
+import {
+  fetchIcons,
+  createIcon,
+  updateIcon,
+  deleteIcon,
+  type IconRecord,
+  type IconType,
+  type IconInsert,
+} from '../../lib/iconService'
+import { useNotification } from '../../contexts/notificationContext.helpers'
+import { useDialog } from '../../contexts/dialogContext.helpers'
+import { searchReactIcons, getCachedIconLibrary } from '../../utils/iconLoader'
+import { ModalFooterButtons } from '../ui/ModalFooterButtons'
+import { LoadingRing } from '../ui/LoadingRing'
+
+type IconManagementModalProps = {
+  isOpen: boolean
+  onClose: () => void
+}
+
+const ICON_GROUPS = [
+  { id: 'life', label: 'Sinh hoạt' },
+  { id: 'finance', label: 'Tài chính' },
+  { id: 'lifestyle', label: 'Giải trí' },
+  { id: 'others', label: 'Khác' },
+]
+
+// Icon library metadata
+const ICON_LIBRARY_INFO: Record<string, { name: string; label: string }> = {
+  fa: { name: 'Font Awesome 5', label: 'Font Awesome 5 (Fa)' },
+  bs: { name: 'Bootstrap Icons', label: 'Bootstrap Icons (Bs)' },
+  lu: { name: 'Lucide Icons', label: 'Lucide Icons (Lu)' },
+  hi2: { name: 'Heroicons 2', label: 'Heroicons 2 (Hi2)' },
+  md: { name: 'Material Design', label: 'Material Design (Md)' },
+}
+
+export const IconManagementModal = ({ isOpen, onClose }: IconManagementModalProps) => {
+  const { success, error: showError } = useNotification()
+  const { showConfirm } = useDialog()
+  const [icons, setIcons] = useState<IconRecord[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [editingIcon, setEditingIcon] = useState<IconRecord | null>(null)
+  const [selectedGroup, setSelectedGroup] = useState<string>('all')
+  const [searchTerm, setSearchTerm] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Form state
+  const [formData, setFormData] = useState({
+    name: '',
+    label: '',
+    icon_type: 'react-icon' as IconType,
+    react_icon_name: '',
+    react_icon_library: 'fa',
+    group_id: 'life',
+    group_label: 'Sinh hoạt',
+    display_order: 0,
+  })
+  const [selectedImage, setSelectedImage] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [svgUrl, setSvgUrl] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [reactIconSearch, setReactIconSearch] = useState('')
+  const [reactIconResults, setReactIconResults] = useState<string[]>([])
+  const [iconLibraryCache, setIconLibraryCache] = useState<Record<string, Record<string, any>>>({})
+
+  useEffect(() => {
+    if (isOpen) {
+      loadIcons()
+      // Preload all icon libraries
+      const preloadLibraries = async () => {
+        const libraries = ['fa', 'bs', 'lu', 'hi2', 'md']
+        const loaded = await Promise.all(
+          libraries.map(async (lib) => {
+            const library = await getCachedIconLibrary(lib)
+            return { lib, library }
+          })
+        )
+        const cache: Record<string, Record<string, any>> = {}
+        loaded.forEach(({ lib, library }) => {
+          if (library) {
+            cache[lib] = library
+          }
+        })
+        setIconLibraryCache(cache)
+      }
+      preloadLibraries()
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    const searchIcons = async () => {
+      if (reactIconSearch && formData.react_icon_library) {
+        try {
+          const results = await searchReactIcons(formData.react_icon_library, reactIconSearch)
+          setReactIconResults(results)
+        } catch {
+          setReactIconResults([])
+        }
+      } else {
+        setReactIconResults([])
+      }
+    }
+    searchIcons()
+  }, [reactIconSearch, formData.react_icon_library])
+
+  const loadIcons = async () => {
+    setIsLoading(true)
+    try {
+      const data = await fetchIcons({ is_active: true })
+      setIcons(data)
+    } catch {
+      showError('Không thể tải danh sách icons.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleCreate = () => {
+    setEditingIcon(null)
+    setFormData({
+      name: '',
+      label: '',
+      icon_type: 'react-icon',
+      react_icon_name: '',
+      react_icon_library: 'fa',
+      group_id: 'life',
+      group_label: 'Sinh hoạt',
+      display_order: 0,
+    })
+    setSelectedImage(null)
+    setImagePreview(null)
+    setSvgUrl('')
+    setReactIconSearch('')
+    setIsFormOpen(true)
+  }
+
+  const handleEdit = (icon: IconRecord) => {
+    setEditingIcon(icon)
+    setFormData({
+      name: icon.name,
+      label: icon.label,
+      icon_type: icon.icon_type,
+      react_icon_name: icon.react_icon_name || '',
+      react_icon_library: icon.react_icon_library || 'fa',
+      group_id: icon.group_id,
+      group_label: icon.group_label,
+      display_order: icon.display_order,
+    })
+    setSelectedImage(null)
+    setImagePreview(icon.image_url || null)
+    setReactIconSearch('')
+    setIsFormOpen(true)
+  }
+
+  const handleDelete = async (icon: IconRecord) => {
+    const confirmed = await showConfirm(
+      `Bạn có chắc muốn xóa icon "${icon.label}"?`
+    )
+
+    if (!confirmed) return
+
+    try {
+      await deleteIcon(icon.id)
+      success('Đã xóa icon thành công!')
+      loadIcons()
+    } catch {
+      showError('Không thể xóa icon.')
+    }
+  }
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setSelectedImage(file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleGroupChange = (groupId: string) => {
+    const group = ICON_GROUPS.find((g) => g.id === groupId)
+    setFormData((prev) => ({
+      ...prev,
+      group_id: groupId,
+      group_label: group?.label || '',
+    }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+
+    try {
+      let imageFile: File | undefined = undefined
+      let imageUrl: string | null = null
+
+      if (formData.icon_type === 'svg-url') {
+        imageUrl = svgUrl
+      } else if (selectedImage) {
+        imageFile = selectedImage
+      }
+
+      const iconData: IconInsert = {
+        ...formData,
+        image_url: imageUrl || undefined,
+      }
+
+      if (editingIcon) {
+        await updateIcon(editingIcon.id, iconData, imageFile)
+        success('Đã cập nhật icon thành công!')
+      } else {
+        await createIcon(iconData, imageFile)
+        success('Đã tạo icon thành công!')
+      }
+
+      setIsFormOpen(false)
+      setEditingIcon(null)
+      loadIcons()
+    } catch (error) {
+      showError(error instanceof Error ? error.message : 'Không thể lưu icon.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const getIconPreview = (icon: IconRecord): React.ReactNode => {
+    // SVG URL
+    if (icon.icon_type === 'svg-url' && icon.image_url) {
+      return <img src={icon.image_url} alt={icon.label} className="h-6 w-6 object-contain" />
+    }
+
+    // SVG file hoặc Image
+    if ((icon.icon_type === 'svg' || icon.icon_type === 'image') && icon.image_url) {
+      return <img src={icon.image_url} alt={icon.label} className="h-6 w-6 object-contain" />
+    }
+
+    // React Icon
+    if (icon.icon_type === 'react-icon' && icon.react_icon_name && icon.react_icon_library) {
+      const library = iconLibraryCache[icon.react_icon_library]
+      if (library && library[icon.react_icon_name]) {
+        const IconComponent = library[icon.react_icon_name]
+        return React.createElement(IconComponent, { className: 'h-6 w-6' })
+      }
+    }
+
+    return <span className="text-2xl">💰</span>
+  }
+
+  const filteredIcons = icons.filter((icon) => {
+    if (selectedGroup !== 'all' && icon.group_id !== selectedGroup) return false
+    if (searchTerm && !icon.label.toLowerCase().includes(searchTerm.toLowerCase())) return false
+    return true
+  })
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = ''
+      }
+    }
+  }, [isOpen])
+
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end backdrop-blur-sm bg-slate-950/50 animate-in fade-in duration-200">
+      <div className="flex w-full max-w-md mx-auto max-h-[90vh] flex-col rounded-t-3xl bg-white shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300 sm:slide-in-from-bottom-0">
+        {/* Header */}
+        <div className="flex flex-col border-b border-slate-200 bg-gradient-to-r from-white to-slate-50 px-4 pt-3 pb-4 sm:px-6 sm:pt-4 sm:pb-5">
+          <div className="mx-auto mb-4 h-1.5 w-12 shrink-0 rounded-full bg-slate-200" />
+          <div className="flex shrink-0 items-center justify-between">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900">Quản lý Icons</h2>
+              <p className="mt-1 text-xs sm:text-sm text-slate-500">Quản lý icons cho hạng mục</p>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              <button
+                onClick={handleCreate}
+                className="flex items-center gap-1.5 sm:gap-2 rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 px-3 sm:px-4 py-2 text-white text-sm sm:text-base font-semibold shadow-lg hover:from-sky-600 hover:to-blue-700 transition-all"
+              >
+                <FaPlus className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="hidden sm:inline">Thêm icon</span>
+                <span className="sm:hidden">Thêm</span>
+              </button>
+              <button
+                onClick={onClose}
+                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all hover:bg-slate-200"
+              >
+                <FaTimes className="h-4 w-4 sm:h-5 sm:w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6">
+          {isFormOpen ? (
+            /* Form */
+            <form id="icon-form" onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    Tên icon (ID) <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                    placeholder="food, transport, etc."
+                    className="w-full rounded-xl border-2 border-slate-200 bg-white p-3 text-sm focus:border-sky-500 focus:outline-none"
+                    required
+                    disabled={!!editingIcon}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    Tên hiển thị <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.label}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, label: e.target.value }))}
+                    placeholder="Ăn uống, Đi lại, etc."
+                    className="w-full rounded-xl border-2 border-slate-200 bg-white p-3 text-sm focus:border-sky-500 focus:outline-none"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-700">
+                  Loại icon <span className="text-red-500">*</span>
+                </label>
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormData((prev) => ({ ...prev, icon_type: 'react-icon' }))}
+                    className={`rounded-xl border-2 p-3 text-sm font-medium transition-all ${formData.icon_type === 'react-icon'
+                      ? 'border-sky-500 bg-sky-50 text-sky-700'
+                      : 'border-slate-200 bg-white text-slate-700'
+                      }`}
+                  >
+                    React Icon
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData((prev) => ({ ...prev, icon_type: 'image' }))}
+                    className={`rounded-xl border-2 p-3 text-sm font-medium transition-all ${formData.icon_type === 'image'
+                      ? 'border-sky-500 bg-sky-50 text-sky-700'
+                      : 'border-slate-200 bg-white text-slate-700'
+                      }`}
+                  >
+                    Upload PNG/JPG
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData((prev) => ({ ...prev, icon_type: 'svg' }))}
+                    className={`rounded-xl border-2 p-3 text-sm font-medium transition-all ${formData.icon_type === 'svg'
+                      ? 'border-sky-500 bg-sky-50 text-sky-700'
+                      : 'border-slate-200 bg-white text-slate-700'
+                      }`}
+                  >
+                    Upload SVG
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData((prev) => ({ ...prev, icon_type: 'svg-url' }))}
+                    className={`rounded-xl border-2 p-3 text-sm font-medium transition-all ${formData.icon_type === 'svg-url'
+                      ? 'border-sky-500 bg-sky-50 text-sky-700'
+                      : 'border-slate-200 bg-white text-slate-700'
+                      }`}
+                  >
+                    SVG URL
+                  </button>
+                </div>
+              </div>
+
+              {formData.icon_type === 'react-icon' ? (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="mb-2 block text-sm font-semibold text-slate-700">
+                        Thư viện icon
+                      </label>
+                      <select
+                        value={formData.react_icon_library}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            react_icon_library: e.target.value,
+                            react_icon_name: '',
+                          }))
+                        }
+                        className="w-full rounded-xl border-2 border-slate-200 bg-white p-3 text-sm focus:border-sky-500 focus:outline-none"
+                      >
+                        {Object.entries(ICON_LIBRARY_INFO).map(([value, info]) => (
+                          <option key={value} value={value}>
+                            {info.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-semibold text-slate-700">
+                        Tìm kiếm icon
+                      </label>
+                      <div className="relative">
+                        <FaSearch className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                        <input
+                          type="text"
+                          value={reactIconSearch}
+                          onChange={(e) => setReactIconSearch(e.target.value)}
+                          placeholder="Tìm kiếm icon..."
+                          className="w-full rounded-xl border-2 border-slate-200 bg-white pl-10 pr-3 py-3 text-sm focus:border-sky-500 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {reactIconResults.length > 0 && (
+                    <div>
+                      <label className="mb-2 block text-sm font-semibold text-slate-700">
+                        Chọn icon
+                      </label>
+                      <div className="max-h-60 overflow-y-auto rounded-xl border-2 border-slate-200 p-3">
+                        <div className="grid grid-cols-6 sm:grid-cols-8 gap-2">
+                          {reactIconResults.map((iconName) => {
+                            const library = iconLibraryCache[formData.react_icon_library]
+                            const IconComponent = library?.[iconName]
+                            return (
+                              <button
+                                key={iconName}
+                                type="button"
+                                onClick={() =>
+                                  setFormData((prev) => ({ ...prev, react_icon_name: iconName }))
+                                }
+                                className={`flex h-12 w-12 items-center justify-center rounded-lg border-2 transition-all ${formData.react_icon_name === iconName
+                                  ? 'border-sky-500 bg-sky-50'
+                                  : 'border-slate-200 hover:border-slate-300'
+                                  }`}
+                              >
+                                {IconComponent ? (
+                                  React.createElement(IconComponent, { className: 'h-6 w-6 text-slate-700' })
+                                ) : (
+                                  <span className="text-xs">?</span>
+                                )}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {formData.react_icon_name && (
+                    <div className="rounded-xl border-2 border-slate-200 bg-slate-50 p-4">
+                      <p className="text-sm font-medium text-slate-700 mb-2">Icon đã chọn:</p>
+                      <div className="flex items-center gap-3">
+                        {(() => {
+                          const library = iconLibraryCache[formData.react_icon_library]
+                          const IconComponent = library?.[formData.react_icon_name]
+                          return IconComponent ? (
+                            React.createElement(IconComponent, { className: 'h-8 w-8 text-slate-700' })
+                          ) : null
+                        })()}
+                        <div>
+                          <p className="font-semibold text-slate-900">{formData.react_icon_name}</p>
+                          <p className="text-xs text-slate-500">
+                            {ICON_LIBRARY_INFO[formData.react_icon_library]?.name}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : formData.icon_type === 'image' || formData.icon_type === 'svg' ? (
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    {formData.icon_type === 'svg' ? 'Upload file SVG' : 'Upload ảnh'}
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept={formData.icon_type === 'svg' ? '.svg' : 'image/*'}
+                      onChange={handleImageSelect}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        try {
+                          fileInputRef.current?.click()
+                        } catch (error) {
+                          console.error('Error opening file picker:', error)
+                        }
+                      }}
+                      className="flex items-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:border-slate-300 transition-all"
+                    >
+                      <FaImage className="h-5 w-5" />
+                      Chọn file
+                    </button>
+                    {imagePreview && (
+                      <div className="flex items-center gap-3">
+                        {formData.icon_type === 'svg' ? (
+                          <div
+                            className="h-16 w-16 rounded-lg border-2 border-slate-200 flex items-center justify-center bg-slate-50"
+                            dangerouslySetInnerHTML={{ __html: imagePreview }}
+                          />
+                        ) : (
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="h-16 w-16 rounded-lg object-cover border-2 border-slate-200"
+                          />
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedImage(null)
+                            setImagePreview(null)
+                            if (fileInputRef.current) fileInputRef.current.value = ''
+                          }}
+                          className="text-sm text-red-600 hover:text-red-700"
+                        >
+                          Xóa
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : formData.icon_type === 'svg-url' ? (
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    URL SVG <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="url"
+                    value={svgUrl}
+                    onChange={(e) => setSvgUrl(e.target.value)}
+                    placeholder="https://example.com/icon.svg"
+                    className="w-full rounded-xl border-2 border-slate-200 bg-white p-3 text-sm focus:border-sky-500 focus:outline-none"
+                    required={formData.icon_type === 'svg-url'}
+                  />
+                  {svgUrl && (
+                    <div className="mt-3 flex items-center gap-3">
+                      <div
+                        className="h-16 w-16 rounded-lg border-2 border-slate-200 flex items-center justify-center bg-slate-50"
+                        dangerouslySetInnerHTML={{
+                          __html: `<img src="${svgUrl}" alt="SVG Preview" class="h-12 w-12" />`,
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              ) : null}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    Nhóm <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={formData.group_id}
+                    onChange={(e) => handleGroupChange(e.target.value)}
+                    className="w-full rounded-xl border-2 border-slate-200 bg-white p-3 text-sm focus:border-sky-500 focus:outline-none"
+                    required
+                  >
+                    {ICON_GROUPS.map((group) => (
+                      <option key={group.id} value={group.id}>
+                        {group.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    Thứ tự hiển thị
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.display_order}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, display_order: parseInt(e.target.value) || 0 }))
+                    }
+                    className="w-full rounded-xl border-2 border-slate-200 bg-white p-3 text-sm focus:border-sky-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <ModalFooterButtons
+                onCancel={() => {
+                  setIsFormOpen(false)
+                  setEditingIcon(null)
+                }}
+                onConfirm={() => { }}
+                confirmText={isSubmitting ? 'Đang lưu...' : editingIcon ? 'Cập nhật' : 'Tạo icon'}
+                isSubmitting={isSubmitting}
+                disabled={isSubmitting}
+                confirmButtonType="submit"
+                formId="icon-form"
+              />
+            </form>
+          ) : (
+            /* Table */
+            <>
+              {/* Filters */}
+              <div className="mb-4 sm:mb-6 space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:items-center sm:gap-4">
+                <div className="flex-1 w-full sm:min-w-[200px]">
+                  <div className="relative">
+                    <FaSearch className="absolute left-3 top-1/2 h-4 w-4 sm:h-5 sm:w-5 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Tìm kiếm icon..."
+                      className="w-full rounded-xl border-2 border-slate-200 bg-white pl-9 sm:pl-10 pr-3 py-2.5 text-sm focus:border-sky-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+                <select
+                  value={selectedGroup}
+                  onChange={(e) => setSelectedGroup(e.target.value)}
+                  className="w-full sm:w-auto rounded-xl border-2 border-slate-200 bg-white px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none"
+                >
+                  <option value="all">Tất cả nhóm</option>
+                  {ICON_GROUPS.map((group) => (
+                    <option key={group.id} value={group.id}>
+                      {group.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Icons List */}
+              {isLoading ? (
+                <div className="text-center py-12 flex items-center justify-center">
+                  <LoadingRing size="md" />
+                </div>
+              ) : filteredIcons.length === 0 ? (
+                <div className="text-center py-12 text-slate-500">Không có icon nào</div>
+              ) : (
+                <>
+                  {/* Mobile: Card Layout */}
+                  <div className="block md:hidden space-y-3">
+                    {filteredIcons.map((icon) => (
+                      <div
+                        key={icon.id}
+                        className="rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition-all"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-50">
+                            {getIconPreview(icon)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0 flex-1">
+                                <p className="font-semibold text-slate-900 truncate">{icon.label}</p>
+                                <p className="text-xs text-slate-500 mt-0.5 truncate">{icon.name}</p>
+                                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                                    {icon.icon_type === 'react-icon' ? 'React Icon' :
+                                      icon.icon_type === 'image' ? 'PNG/JPG' :
+                                        icon.icon_type === 'svg' ? 'SVG' :
+                                          icon.icon_type === 'svg-url' ? 'SVG URL' : 'Ảnh'}
+                                  </span>
+                                  <span className="text-xs text-slate-500">•</span>
+                                  <span className="text-xs text-slate-600">{icon.group_label}</span>
+                                  <span className="text-xs text-slate-500">•</span>
+                                  <span className="text-xs text-slate-600">Thứ tự: {icon.display_order}</span>
+                                </div>
+                              </div>
+                              <div className="flex gap-1 shrink-0">
+                                <button
+                                  onClick={() => handleEdit(icon)}
+                                  className="p-2 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+                                  aria-label="Sửa"
+                                >
+                                  <FaEdit className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDelete(icon)}
+                                  className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                  aria-label="Xóa"
+                                >
+                                  <FaTrash className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Desktop: Table Layout */}
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-slate-200">
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
+                            Icon
+                          </th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
+                            Tên
+                          </th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
+                            Loại
+                          </th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
+                            Nhóm
+                          </th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
+                            Thứ tự
+                          </th>
+                          <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">
+                            Thao tác
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredIcons.map((icon) => (
+                          <tr key={icon.id} className="border-b border-slate-100 hover:bg-slate-50">
+                            <td className="px-4 py-3">
+                              <div className="flex h-8 w-8 items-center justify-center">
+                                {getIconPreview(icon)}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <div>
+                                <p className="font-medium text-slate-900">{icon.label}</p>
+                                <p className="text-xs text-slate-500">{icon.name}</p>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
+                                {icon.icon_type === 'react-icon' ? 'React Icon' :
+                                  icon.icon_type === 'image' ? 'PNG/JPG' :
+                                    icon.icon_type === 'svg' ? 'SVG' :
+                                      icon.icon_type === 'svg-url' ? 'SVG URL' : 'Ảnh'}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-slate-600">{icon.group_label}</td>
+                            <td className="px-4 py-3 text-sm text-slate-600">{icon.display_order}</td>
+                            <td className="px-4 py-3">
+                              <div className="flex justify-end gap-2">
+                                <button
+                                  onClick={() => handleEdit(icon)}
+                                  className="p-2 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+                                  aria-label="Sửa"
+                                >
+                                  <FaEdit className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDelete(icon)}
+                                  className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                  aria-label="Xóa"
+                                >
+                                  <FaTrash className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+

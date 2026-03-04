@@ -474,7 +474,7 @@ export default function VehicleChargingHistory() {
                             }
 
                             const dateObj = new Date(log.refuel_date)
-                            const dateStr = dateObj.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                            const dateStr = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })
                             const startTime = log.refuel_time?.slice(0, 5) || '--:--'
                             const endTime = parsedEndTime || calculateEndTime(startTime, parsedDurationMins) || '--:--'
                             const price = log.unit_price || 0
@@ -553,20 +553,20 @@ export default function VehicleChargingHistory() {
             {/* Details & Edit Modal */}
             {editingLog && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-[3px] p-4" onClick={() => setEditingLog(null)}>
-                    <div className="mx-auto w-full max-w-md rounded-3xl bg-white shadow-2xl flex flex-col max-h-[90vh] overflow-hidden" onClick={e => e.stopPropagation()}>
-                        <div className="bg-blue-600 px-5 pt-5 pb-5 text-white shrink-0">
-                            <div className="flex items-center justify-between mb-1">
-                                <h3 className="text-lg font-bold flex items-center gap-2">
-                                    <Zap className="h-5 w-5 fill-white/20" />
+                    <div className="mx-auto w-full max-w-[380px] rounded-[24px] bg-white shadow-2xl flex flex-col max-h-[90vh] overflow-hidden" onClick={e => e.stopPropagation()}>
+                        <div className="bg-[#2563eb] px-6 pt-5 pb-5 text-white relative shrink-0">
+                            <div className="flex items-center gap-2 mb-1.5 pt-1">
+                                <Zap className="h-5 w-5 fill-white/20" />
+                                <h3 className="text-[17px] font-bold">
                                     Chi tiết phiên sạc
                                 </h3>
-                                <button onClick={() => setEditingLog(null)} className="rounded-full bg-white/20 p-1.5 hover:bg-white/30 transition-colors">
-                                    <X className="h-4 w-4" />
-                                </button>
                             </div>
-                            <p className="text-sm opacity-90 mt-1 ml-7">{editingLog.station_name} · {new Date(editingLog.refuel_date).toLocaleDateString('vi-VN')} {editingLog.refuel_time?.slice(0, 5) || ''}</p>
+                            <p className="text-[13px] text-blue-100/90 ml-7 tracking-wide">{editingLog.station_name} · {new Date(editingLog.refuel_date).toLocaleDateString('en-GB')} {editingLog.refuel_time?.slice(0, 5) || ''}</p>
+                            <button onClick={() => setEditingLog(null)} className="absolute top-4 right-4 rounded-full bg-white/10 p-2 hover:bg-white/20 transition-colors">
+                                <X className="h-4 w-4 text-white" />
+                            </button>
                         </div>
-                        <div className="flex-1 overflow-y-auto px-5 py-5 scrollbar-hide">
+                        <div className="flex-1 overflow-y-auto px-5 py-6 scrollbar-hide">
                             {(() => {
                                 let parsedEndTimeModal = ''
                                 let parsedDurationMinsModal = editingLog.charge_duration_minutes || 0
@@ -603,34 +603,38 @@ export default function VehicleChargingHistory() {
                                 return (
                                     <>
                                         {/* Read-only details */}
-                                        <div className="grid grid-cols-2 gap-y-4 gap-x-4 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                                            <div>
-                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Thời gian</p>
-                                                <p className="text-sm font-bold text-slate-800">{startTimeModal} → {endTimeModal}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Thời lượng sạc</p>
-                                                <p className="text-sm font-bold text-slate-800">{durationModal}</p>
+                                        <div className="bg-slate-50 border border-slate-100 p-5 rounded-[20px] mb-6 space-y-5">
+                                            <div className="flex justify-between items-start">
+                                                <div className="flex-1">
+                                                    <p className="text-[10px] items-center gap-1 font-bold text-slate-500 uppercase tracking-widest mb-1.5 flex">Thời gian</p>
+                                                    <p className="text-sm font-bold text-slate-800">{startTimeModal} → {endTimeModal}</p>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-[10px] items-center gap-1 font-bold text-slate-500 uppercase tracking-widest mb-1.5 flex">Thời gian sạc</p>
+                                                    <p className="text-sm font-bold text-slate-800">{durationModal}</p>
+                                                </div>
                                             </div>
 
-                                            <div className="col-span-2">
-                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Vị trí địa chỉ</p>
+                                            <div>
+                                                <p className="text-[10px] items-center gap-1 font-bold text-slate-500 uppercase tracking-widest mb-1.5 flex">Địa chỉ</p>
                                                 <p className="text-sm font-bold text-slate-800 leading-snug">{editingLog.station_name}{editingLog.location ? ` - ${editingLog.location}` : ''}</p>
                                             </div>
 
-                                            <div>
-                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Năng lượng</p>
-                                                <p className="text-sm font-bold text-slate-800">{editingLog.kwh ? `${editingLog.kwh.toFixed(2)} kWh` : '--'}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Tỉ lệ sạc</p>
-                                                <p className="text-sm font-bold text-emerald-600">~{percentModal}% pin</p>
+                                            <div className="flex justify-between items-start">
+                                                <div className="flex-1">
+                                                    <p className="text-[10px] items-center gap-1 font-bold text-slate-500 uppercase tracking-widest mb-1.5 flex">Năng lượng</p>
+                                                    <p className="text-sm font-bold text-slate-800">{editingLog.kwh ? `${editingLog.kwh.toFixed(2)} kWh` : '--'}</p>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-[10px] items-center gap-1 font-bold text-slate-500 uppercase tracking-widest mb-1.5 flex">Tỉ lệ sạc</p>
+                                                    <p className="text-sm font-bold text-emerald-600 tracking-wide">~{percentModal}% pin</p>
+                                                </div>
                                             </div>
 
-                                            <div className="col-span-2">
-                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Chi phí phiên sạc</p>
-                                                <div className="flex flex-wrap items-center gap-2">
-                                                    <span className="text-sm font-black text-blue-600">
+                                            <div>
+                                                <p className="text-[10px] items-center gap-1 font-bold text-slate-500 uppercase tracking-widest mb-1.5 flex">Chi phí phiên sạc</p>
+                                                <div className="flex items-center gap-2 mt-0.5">
+                                                    <span className="text-[15px] font-bold text-[#2563eb]">
                                                         {actualCostModal === 0 ? 'Miễn phí' : formatCurrency(actualCostModal).replace('₫', 'đ').trim()}
                                                     </span>
                                                     {(actualCostModal < originalCostModal || parsedKhuyenMai) && (
@@ -639,7 +643,7 @@ export default function VehicleChargingHistory() {
                                                         </span>
                                                     )}
                                                     {parsedKhuyenMai && (
-                                                        <span className="text-xs font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">
+                                                        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
                                                             KM: {parsedKhuyenMai}
                                                         </span>
                                                     )}
@@ -647,9 +651,9 @@ export default function VehicleChargingHistory() {
                                             </div>
 
                                             {cleanNotesModal && (
-                                                <div className="col-span-2">
-                                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Ghi chú</p>
-                                                    <p className="text-sm font-medium text-slate-700">{cleanNotesModal}</p>
+                                                <div className="pt-3 border-t border-slate-200/60 mt-2">
+                                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Ghi chú thêm</p>
+                                                    <p className="text-sm text-slate-800 whitespace-pre-wrap">{cleanNotesModal}</p>
                                                 </div>
                                             )}
                                         </div>
@@ -670,12 +674,12 @@ export default function VehicleChargingHistory() {
                                             } catch (error) {
                                                 toast.error('Lỗi khi cập nhật', { id: toastId })
                                             }
-                                        }} className="space-y-4 border-t border-slate-100 pt-5">
-                                            <h4 className="font-bold text-slate-800 text-sm mb-3">Chỉnh sửa ghi chú</h4>
+                                        }} className="space-y-4">
+                                            <h4 className="font-bold text-slate-800 text-[15px] mb-3 ml-1">Chỉnh sửa ghi chú</h4>
                                             <div>
-                                                <textarea name="notes" rows={4} defaultValue={editingLog.notes || ''} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm focus:border-blue-400 focus:bg-white outline-none transition-colors" placeholder="Dữ liệu import thường lưu trữ tại đây..."></textarea>
+                                                <textarea name="notes" rows={4} defaultValue={editingLog.notes || ''} className="w-full rounded-[18px] border border-slate-200 bg-white px-4 py-3 text-[14px] text-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 focus:bg-white outline-none transition-all shadow-sm leading-relaxed" placeholder="Dữ liệu import thường lưu trữ tại đây..."></textarea>
                                             </div>
-                                            <button type="submit" className="w-full flex items-center justify-center gap-2 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white py-3.5 font-bold transition-all shadow-md shadow-blue-200">
+                                            <button type="submit" className="w-full flex items-center justify-center gap-2 rounded-[18px] bg-[#2563eb] hover:bg-blue-700 active:scale-[0.98] text-white py-3.5 font-bold transition-all shadow-lg shadow-blue-200 mt-2">
                                                 <Save className="h-5 w-5" />
                                                 Lưu cập nhật
                                             </button>

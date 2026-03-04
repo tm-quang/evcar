@@ -1,0 +1,576 @@
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import {
+  FaTimes,
+  FaUpload,
+  FaTrash,
+  FaEdit,
+  FaCheck,
+  FaSpinner,
+} from 'react-icons/fa'
+
+import HeaderBar from '../components/layout/HeaderBar'
+import { useNotification } from '../contexts/notificationContext.helpers'
+import {
+  fetchSettings,
+  updateSetting,
+  deleteSetting,
+  updateSettingValue,
+  type SystemSettingRecord,
+  type SettingCategory,
+  type SettingType,
+} from '../lib/settingsService'
+import { uploadMultipleToCloudinary } from '../lib/cloudinaryService'
+import { getSupabaseClient } from '../lib/supabaseClient'
+import { getCachedAdminStatus } from '../lib/adminService'
+
+const CATEGORY_LABELS: Record<SettingCategory, string> = {
+  branding: 'Thương hiệu',
+  quick_actions: 'Tiện ích',
+  content: 'Nội dung',
+  menu: 'Menu',
+  logic: 'Logic',
+  notifications: 'Thông báo',
+  ui: 'Giao diện',
+  data: 'Dữ liệu',
+  other: 'Khác',
+}
+
+const TYPE_LABELS: Record<SettingType, string> = {
+  text: 'Văn bản',
+  image: 'Hình ảnh',
+  json: 'JSON',
+  boolean: 'Boolean',
+  number: 'Số',
+  url: 'URL',
+  color: 'Màu sắc',
+}
+
+export const AdminSettingsPage = () => {
+  const navigate = useNavigate()
+  const { success, error: showError } = useNotification()
+
+  const [settings, setSettings] = useState<SystemSettingRecord[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [selectedCategory, setSelectedCategory] = useState<SettingCategory | 'all'>('all')
+  const [editingKey, setEditingKey] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState<Partial<SystemSettingRecord>>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState<string | null>(null)
+  const [isUserAdmin, setIsUserAdmin] = useState(false)
+  const [isCheckingAdmin, setIsCheckingAdmin] = useState(true)
+
+  // Check admin status
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      setIsCheckingAdmin(true)
+      try {
+        const adminStatus = await getCachedAdminStatus()
+        setIsUserAdmin(adminStatus)
+        if (!adminStatus) {
+          showError('Bạn không có quyền truy cập trang này. Chỉ admin mới có thể quản lý cài đặt hệ thống.')
+          setTimeout(() => {
+            navigate('/settings')
+          }, 2000)
+        }
+      } catch (err) {
+        console.error('Error checking admin status:', err)
+        setIsUserAdmin(false)
+        showError('Không thể kiểm tra quyền truy cập. Vui lòng thử lại.')
+        setTimeout(() => {
+          navigate('/settings')
+        }, 2000)
+      } finally {
+        setIsCheckingAdmin(false)
+      }
+    }
+
+    checkAdminStatus()
+  }, [navigate, showError])
+
+  // Load settings
+  useEffect(() => {
+    if (!isUserAdmin && !isCheckingAdmin) return
+
+    const loadSettings = async () => {
+      setIsLoading(true)
+      try {
+        const data = await fetchSettings({ is_active: true })
+        setSettings(data)
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Không thể tải cài đặt'
+        showError(message)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadSettings()
+  }, [showError, isUserAdmin, isCheckingAdmin])
+
+  const filteredSettings = selectedCategory === 'all'
+    ? settings
+    : settings.filter(s => s.category === selectedCategory)
+
+  const handleEdit = (setting: SystemSettingRecord) => {
+    setEditingKey(setting.setting_key)
+    setEditForm({
+      setting_value: setting.setting_value,
+      label: setting.label,
+      description: setting.description,
+      is_active: setting.is_active,
+      is_public: setting.is_public,
+      metadata: setting.metadata,
+    })
+  }
+
+  const handleCancelEdit = () => {
+    setEditingKey(null)
+    setEditForm({})
+  }
+
+  const handleSave = async (key: string) => {
+    setIsSubmitting(true)
+    try {
+      await updateSetting(key, {
+        setting_value: editForm.setting_value || null,
+        label: editForm.label,
+        description: editForm.description || null,
+        is_active: editForm.is_active,
+        is_public: editForm.is_public,
+        metadata: editForm.metadata || null,
+      })
+
+      // Reload settings
+      const data = await fetchSettings({ is_active: true })
+      setSettings(data)
+
+      setEditingKey(null)
+      setEditForm({})
+      success('Đã cập nhật cài đặt thành công!')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Không thể cập nhật cài đặt'
+      showError(message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleImageUpload = async (key: string, file: File) => {
+    setUploadingImage(key)
+    try {
+      const supabase = getSupabaseClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) {
+        throw new Error('Bạn cần đăng nhập để upload ảnh.')
+      }
+
+      // Upload to Cloudinary
+      const uploadResults = await uploadMultipleToCloudinary([file], {
+        folder: `settings/${key}`,
+        transformation: {
+          quality: 'auto',
+          format: 'auto',
+        },
+      })
+
+      if (uploadResults.length === 0) {
+        throw new Error('Upload ảnh thất bại')
+      }
+
+      const imageUrl = uploadResults[0].secure_url
+
+      // Update setting with image URL
+      await updateSettingValue(key, imageUrl, {
+        fileSize: file.size,
+        fileName: file.name,
+        uploadedAt: new Date().toISOString(),
+      })
+
+      // Reload settings
+      const data = await fetchSettings({ is_active: true })
+      setSettings(data)
+
+      success('Đã upload ảnh thành công!')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Không thể upload ảnh'
+      showError(message)
+    } finally {
+      setUploadingImage(null)
+    }
+  }
+
+  const handleDelete = async (key: string) => {
+    if (!confirm(`Bạn có chắc chắn muốn xóa cài đặt "${key}"?`)) {
+      return
+    }
+
+    try {
+      await deleteSetting(key)
+
+      // Reload settings
+      const data = await fetchSettings({ is_active: true })
+      setSettings(data)
+
+      success('Đã xóa cài đặt thành công!')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Không thể xóa cài đặt'
+      showError(message)
+    }
+  }
+
+  // Show loading or redirect if not admin
+  if (isCheckingAdmin) {
+    return (
+      <div className="flex h-full flex-col overflow-hidden bg-[#F7F9FC] text-slate-900">
+        <HeaderBar variant="page" title="Cài đặt hệ thống" />
+        <main className="flex-1 overflow-y-auto overscroll-contain">
+          <div className="flex h-full items-center justify-center">
+            <div className="flex flex-col items-center gap-4">
+              <div className="h-12 w-12 animate-spin rounded-full border-4 border-sky-200 border-t-sky-600" />
+              <p className="text-sm text-slate-600">Đang kiểm tra quyền truy cập...</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  if (!isUserAdmin) {
+    return (
+      <div className="flex h-full flex-col overflow-hidden bg-[#F7F9FC] text-slate-900">
+        <HeaderBar variant="page" title="Cài đặt hệ thống" />
+        <main className="flex-1 overflow-y-auto overscroll-contain">
+          <div className="flex h-full items-center justify-center">
+            <div className="text-center">
+              <p className="text-sm text-slate-600">Bạn không có quyền truy cập trang này.</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex h-full flex-col overflow-hidden bg-[#F7F9FC] text-slate-900">
+      <HeaderBar variant="page" title="Cài đặt hệ thống" />
+
+      <main className="flex-1 overflow-y-auto overscroll-contain">
+        <div className="mx-auto flex w-full max-w-md flex-col gap-6 px-4 pt-2 pb-6 sm:px-6 sm:pt-2 sm:pb-6 lg:px-8">
+          {/* Category Filter */}
+          <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-white p-4 shadow-sm border border-slate-200">
+            <button
+              type="button"
+              onClick={() => setSelectedCategory('all')}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${selectedCategory === 'all'
+                  ? 'bg-sky-500 text-white shadow-md'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+            >
+              Tất cả
+            </button>
+            {(Object.keys(CATEGORY_LABELS) as SettingCategory[]).map((category) => (
+              <button
+                key={category}
+                type="button"
+                onClick={() => setSelectedCategory(category)}
+                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${selectedCategory === category
+                    ? 'bg-sky-500 text-white shadow-md'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+              >
+                {CATEGORY_LABELS[category]}
+              </button>
+            ))}
+          </div>
+
+          {/* Settings Grid - Desktop Layout */}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <FaSpinner className="h-8 w-8 animate-spin text-sky-500" />
+            </div>
+          ) : filteredSettings.length === 0 ? (
+            <div className="rounded-2xl bg-white p-12 text-center shadow-sm border border-slate-200">
+              <p className="text-slate-500">Không có cài đặt nào</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {filteredSettings.map((setting) => {
+                const isEditing = editingKey === setting.setting_key
+
+                return (
+                  <div
+                    key={setting.id}
+                    className="rounded-2xl bg-white p-5 shadow-sm border border-slate-200 hover:shadow-md transition-all"
+                  >
+                    {/* Header */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="px-2 py-0.5 rounded-lg bg-sky-100 text-sky-700 text-xs font-semibold">
+                            {CATEGORY_LABELS[setting.category]}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600 text-xs font-medium">
+                            {TYPE_LABELS[setting.setting_type]}
+                          </span>
+                        </div>
+                        <h3 className="text-base font-bold text-slate-900">{setting.label}</h3>
+                        {setting.description && (
+                          <p className="text-xs text-slate-500 mt-1">{setting.description}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {!isEditing && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleEdit(setting)}
+                              className="p-2 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-all"
+                              title="Sửa"
+                            >
+                              <FaEdit className="h-4 w-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(setting.setting_key)}
+                              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                              title="Xóa"
+                            >
+                              <FaTrash className="h-4 w-4" />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    {isEditing ? (
+                      <div className="space-y-4">
+                        {/* Text/URL/Color Input */}
+                        {setting.setting_type !== 'image' && (
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                              Giá trị
+                            </label>
+                            {setting.setting_type === 'boolean' ? (
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={editForm.setting_value === 'true'}
+                                  onChange={(e) =>
+                                    setEditForm((prev) => ({
+                                      ...prev,
+                                      setting_value: e.target.checked ? 'true' : 'false',
+                                    }))
+                                  }
+                                  className="w-4 h-4 rounded border-slate-300 text-sky-500 focus:ring-sky-500"
+                                />
+                                <span className="text-sm text-slate-700">
+                                  {editForm.setting_value === 'true' ? 'Bật' : 'Tắt'}
+                                </span>
+                              </label>
+                            ) : (
+                              <input
+                                type={setting.setting_type === 'number' ? 'number' : 'text'}
+                                value={editForm.setting_value || ''}
+                                onChange={(e) =>
+                                  setEditForm((prev) => ({
+                                    ...prev,
+                                    setting_value: e.target.value,
+                                  }))
+                                }
+                                className="w-full rounded-lg border-2 border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+                                placeholder="Nhập giá trị..."
+                              />
+                            )}
+                          </div>
+                        )}
+
+                        {/* Image Upload */}
+                        {setting.setting_type === 'image' && (
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                              Hình ảnh
+                            </label>
+                            <div className="space-y-2">
+                              {editForm.setting_value && (
+                                <div className="relative rounded-lg border-2 border-slate-200 overflow-hidden">
+                                  <img
+                                    src={editForm.setting_value}
+                                    alt={setting.label}
+                                    className="w-full h-32 object-contain bg-slate-50"
+                                  />
+                                </div>
+                              )}
+                              <label className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-3 cursor-pointer hover:border-sky-400 hover:bg-sky-50 transition-all">
+                                <FaUpload className="h-4 w-4 text-slate-400" />
+                                <span className="text-sm font-medium text-slate-600">
+                                  {uploadingImage === setting.setting_key ? 'Đang upload...' : 'Tải ảnh lên'}
+                                </span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0]
+                                    if (file) {
+                                      handleImageUpload(setting.setting_key, file)
+                                    }
+                                  }}
+                                  disabled={uploadingImage === setting.setting_key}
+                                />
+                              </label>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Label */}
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                            Nhãn
+                          </label>
+                          <input
+                            type="text"
+                            value={editForm.label || ''}
+                            onChange={(e) =>
+                              setEditForm((prev) => ({ ...prev, label: e.target.value }))
+                            }
+                            className="w-full rounded-lg border-2 border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+                          />
+                        </div>
+
+                        {/* Description */}
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                            Mô tả
+                          </label>
+                          <textarea
+                            value={editForm.description || ''}
+                            onChange={(e) =>
+                              setEditForm((prev) => ({ ...prev, description: e.target.value }))
+                            }
+                            rows={2}
+                            className="w-full rounded-lg border-2 border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 resize-none"
+                          />
+                        </div>
+
+                        {/* Toggles */}
+                        <div className="flex items-center justify-between">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={editForm.is_active ?? true}
+                              onChange={(e) =>
+                                setEditForm((prev) => ({ ...prev, is_active: e.target.checked }))
+                              }
+                              className="w-4 h-4 rounded border-slate-300 text-sky-500 focus:ring-sky-500"
+                            />
+                            <span className="text-sm text-slate-700">Kích hoạt</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={editForm.is_public ?? false}
+                              onChange={(e) =>
+                                setEditForm((prev) => ({ ...prev, is_public: e.target.checked }))
+                              }
+                              className="w-4 h-4 rounded border-slate-300 text-sky-500 focus:ring-sky-500"
+                            />
+                            <span className="text-sm text-slate-700">Công khai</span>
+                          </label>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-2 pt-2">
+                          <button
+                            type="button"
+                            onClick={() => handleSave(setting.setting_key)}
+                            disabled={isSubmitting}
+                            className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-600 transition-all disabled:opacity-50"
+                          >
+                            {isSubmitting ? (
+                              <FaSpinner className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <FaCheck className="h-4 w-4" />
+                            )}
+                            Lưu
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleCancelEdit}
+                            disabled={isSubmitting}
+                            className="flex items-center justify-center gap-2 rounded-lg border-2 border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all disabled:opacity-50"
+                          >
+                            <FaTimes className="h-4 w-4" />
+                            Hủy
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {/* Display Value */}
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+                            Giá trị hiện tại
+                          </label>
+                          {setting.setting_type === 'image' ? (
+                            setting.setting_value ? (
+                              <div className="relative rounded-lg border-2 border-slate-200 overflow-hidden bg-slate-50">
+                                <img
+                                  src={setting.setting_value}
+                                  alt={setting.label}
+                                  className="w-full h-32 object-contain"
+                                />
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-center h-32 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50">
+                                <span className="text-sm text-slate-400">Chưa có ảnh</span>
+                              </div>
+                            )
+                          ) : setting.setting_type === 'boolean' ? (
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`px-3 py-1.5 rounded-lg text-sm font-semibold ${setting.setting_value === 'true'
+                                    ? 'bg-emerald-100 text-emerald-700'
+                                    : 'bg-slate-100 text-slate-600'
+                                  }`}
+                              >
+                                {setting.setting_value === 'true' ? 'Bật' : 'Tắt'}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="rounded-lg border-2 border-slate-200 bg-slate-50 px-3 py-2">
+                              <p className="text-sm text-slate-900 break-all">
+                                {setting.setting_value || <span className="text-slate-400">(Trống)</span>}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Key */}
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+                            Key
+                          </label>
+                          <div className="rounded-lg border-2 border-slate-200 bg-slate-50 px-3 py-2">
+                            <code className="text-xs text-slate-600 font-mono">{setting.setting_key}</code>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  )
+}
+
+export default AdminSettingsPage
+
