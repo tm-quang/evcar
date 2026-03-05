@@ -122,7 +122,7 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
   return (
     <div className="w-full max-w-lg rounded-3xl shadow-lg bg-white p-6 sm:p-8">
       {error && (
-        <div className="mb-5 rounded-3xl border border-rose-200 bg-rose-50 px-4 py-10 text-sm text-rose-700">
+        <div className="mb-5 rounded-3xl border border-red-200 bg-red-50 px-4 py-10 text-sm text-red-700">
           {error}
         </div>
       )}
@@ -204,4 +204,5 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
     </div>
   )
 }
+
 

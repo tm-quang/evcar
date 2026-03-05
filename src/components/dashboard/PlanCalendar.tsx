@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { FaChevronLeft, FaChevronRight, FaCalendarAlt, FaCalendarWeek, FaCog } from 'react-icons/fa'
 import type { TaskRecord } from '../../lib/taskService'
 import type { ReminderRecord } from '../../lib/reminderService'
-import { createDateUTC7, formatDateUTC7, getDateComponentsUTC7, getNowUTC7 } from '../../utils/dateUtils'
+import { createDateUTC7, formatDateUTC7, getDateComponentsUTC7, getNowUTC7, getDayOfWeekUTC7 } from '../../utils/dateUtils'
 import { getLunarDate } from '../../utils/lunarCalendar'
 
 type PlanCalendarProps = {
@@ -154,8 +154,8 @@ export const PlanCalendar = ({
             // Use reminder's custom color
             const colorMap: Record<string, string> = {
               amber: '#f59e0b',
-              emerald: '#10b981',
-              rose: '#f43f5e',
+              green: '#10b981',
+              red: '#f43f5e',
               sky: '#0ea5e9',
               blue: '#3b82f6',
               purple: '#a855f7',
@@ -170,9 +170,9 @@ export const PlanCalendar = ({
             if (isNote) {
               map[date].primaryColor = '#f59e0b' // amber-500
             } else if (isIncome) {
-              map[date].primaryColor = '#10b981' // emerald-500
+              map[date].primaryColor = '#10b981' // green-500
             } else {
-              map[date].primaryColor = '#f43f5e' // rose-500
+              map[date].primaryColor = '#f43f5e' // red-500
             }
           }
         }
@@ -183,7 +183,7 @@ export const PlanCalendar = ({
   }, [tasks, reminders])
 
   const goToPrevious = () => {
-    const newDate = new Date(currentDate)
+    const newDate = new Date(currentDate.getTime())
     if (viewMode === 'month') {
       newDate.setMonth(newDate.getMonth() - 1)
     } else {
@@ -193,7 +193,7 @@ export const PlanCalendar = ({
   }
 
   const goToNext = () => {
-    const newDate = new Date(currentDate)
+    const newDate = new Date(currentDate.getTime())
     if (viewMode === 'month') {
       newDate.setMonth(newDate.getMonth() + 1)
     } else {
@@ -216,13 +216,19 @@ export const PlanCalendar = ({
     const days: (Date | null)[] = []
 
     if (viewMode === 'month') {
-      const firstDayOfMonth = new Date(year, month, 1)
-      const lastDayOfMonth = new Date(year, month + 1, 0)
+      // Use fixed UTC+7 components
+      const components = getDateComponentsUTC7(currentDate)
+      const yr = components.year
+      const mn = components.month
+
+      const firstDayOfMonth = createDateUTC7(yr, mn, 1)
+      const lastDayOfMonth = new Date(yr, mn, 0) // This is fine for getting days count as it depends on month length only
       const daysInMonth = lastDayOfMonth.getDate()
-      const startingDayOfWeek = firstDayOfMonth.getDay() // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+
+      const vnDayOfWeek = getDayOfWeekUTC7(firstDayOfMonth)
 
       // Convert to Monday-first week (0=Sunday becomes 6, 1=Monday becomes 0, etc.)
-      const mondayFirstDayOfWeek = startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1
+      const mondayFirstDayOfWeek = vnDayOfWeek === 0 ? 6 : vnDayOfWeek - 1
 
       // Empty slots before first day of month (starting from Monday)
       for (let i = 0; i < mondayFirstDayOfWeek; i++) days.push(null)
@@ -232,16 +238,17 @@ export const PlanCalendar = ({
       }
     } else {
       // Week view - start from Monday
-      const currentDay = currentDate.getDay() // 0-6 (0 = Sunday)
+      // Week view - start from Monday
+      const currentDay = getDayOfWeekUTC7(currentDate) // 0-6 (0 = Sunday)
       // Convert to Monday-first: if Sunday (0), go back 6 days; otherwise go back (day - 1) days
       const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1
-      const diff = currentDate.getDate() - daysFromMonday
-      const startOfWeek = new Date(currentDate)
-      startOfWeek.setDate(diff)
+
+      const components = getDateComponentsUTC7(currentDate)
+      const startOfWeek = createDateUTC7(components.year, components.month, components.day - daysFromMonday)
 
       for (let i = 0; i < 7; i++) {
-        const day = new Date(startOfWeek)
-        day.setDate(startOfWeek.getDate() + i)
+        const components = getDateComponentsUTC7(startOfWeek)
+        const day = createDateUTC7(components.year, components.month, components.day + i)
         days.push(day)
       }
     }
@@ -530,8 +537,8 @@ export const PlanCalendar = ({
                       setIsSettingsOpen(false)
                     }}
                     className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${viewMode === 'month'
-                        ? 'border-blue-500 bg-blue-50 shadow-md'
-                        : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'
+                      ? 'border-blue-500 bg-blue-50 shadow-md'
+                      : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'
                       }`}
                   >
                     <div className="flex items-center gap-3">
@@ -558,8 +565,8 @@ export const PlanCalendar = ({
                       setIsSettingsOpen(false)
                     }}
                     className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${viewMode === 'week'
-                        ? 'border-blue-500 bg-blue-50 shadow-md'
-                        : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'
+                      ? 'border-blue-500 bg-blue-50 shadow-md'
+                      : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'
                       }`}
                   >
                     <div className="flex items-center gap-3">
@@ -587,4 +594,5 @@ export const PlanCalendar = ({
     </div>
   )
 }
+
 

@@ -187,7 +187,7 @@ export const WalletCardItem = ({
                 )}
               </div>
               <p className={`mt-1 text-sm font-medium ${colors.text} opacity-70`}>{wallet.type}</p>
-              <p className={`mt-2 text-2xl font-bold ${isNegative ? 'text-rose-300' : colors.text}`}>
+              <p className={`mt-2 text-2xl font-bold ${isNegative ? 'text-red-300' : colors.text}`}>
                 {formatCurrency(wallet.balance)}
               </p>
             </div>
@@ -200,7 +200,7 @@ export const WalletCardItem = ({
               </button>
               <button
                 onClick={() => onDelete(wallet.id)}
-                className="rounded-full p-2 text-white/70 transition hover:bg-white/20 hover:text-rose-300"
+                className="rounded-full p-2 text-white/70 transition hover:bg-white/20 hover:text-red-300"
               >
                 <FaTrash className="h-5 w-5" />
               </button>
@@ -269,7 +269,7 @@ export const WalletCardItem = ({
           <div className="absolute inset-0 z-20 flex items-center justify-center rounded-3xl bg-black/20 backdrop-blur-sm">
             <button
               onClick={handleTransferClick}
-              className="rounded-full px-8 py-4 text-base font-bold bg-emerald-500 text-white hover:bg-emerald-600 backdrop-blur-sm transition-all shadow-2xl flex items-center gap-3 transform hover:scale-105 active:scale-95"
+              className="rounded-full px-8 py-4 text-base font-bold bg-green-500 text-white hover:bg-green-600 backdrop-blur-sm transition-all shadow-2xl flex items-center gap-3 transform hover:scale-105 active:scale-95"
               title="Chuyển đổi số dư"
             >
               <FaExchangeAlt className="h-5 w-5" />
@@ -281,4 +281,5 @@ export const WalletCardItem = ({
     </div>
   )
 }
+
 

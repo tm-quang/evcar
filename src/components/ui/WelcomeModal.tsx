@@ -26,8 +26,8 @@ const APP_FEATURES = [
     icon: FaExchangeAlt,
     title: 'Quản lý Thu/Chi',
     description: 'Ghi chép và phân loại các khoản thu chi',
-    color: 'text-emerald-600',
-    bgColor: 'bg-emerald-50',
+    color: 'text-green-600',
+    bgColor: 'bg-green-50',
   },
   {
     icon: FaChartBar,
@@ -233,4 +233,5 @@ export const WelcomeModal = ({ isOpen, onClose }: WelcomeModalProps) => {
     </div>
   )
 }
+
 

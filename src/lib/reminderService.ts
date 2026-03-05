@@ -510,3 +510,4 @@ export const getUpcomingReminders = async (days: number = 7): Promise<ReminderRe
     is_active: true,
   })
 }
+

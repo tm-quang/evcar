@@ -94,7 +94,7 @@ export const WalletTransferModal = ({
         bg: 'from-slate-900 via-slate-800 to-slate-950',
         border: 'border-slate-400/50',
         text: 'text-white',
-        badge: 'bg-emerald-500',
+        badge: 'bg-green-500',
       },
       'Ngân hàng': {
         bg: 'from-blue-700 via-blue-800 to-indigo-900',
@@ -103,10 +103,10 @@ export const WalletTransferModal = ({
         badge: 'bg-blue-500',
       },
       'Tiết kiệm': {
-        bg: 'from-emerald-700 via-teal-800 to-cyan-900',
-        border: 'border-emerald-400/50',
+        bg: 'from-green-700 via-teal-800 to-cyan-900',
+        border: 'border-green-400/50',
         text: 'text-white',
-        badge: 'bg-emerald-500',
+        badge: 'bg-green-500',
       },
       'Tín dụng': {
         bg: 'from-purple-700 via-violet-800 to-fuchsia-900',
@@ -115,7 +115,7 @@ export const WalletTransferModal = ({
         badge: 'bg-purple-500',
       },
       'Đầu tư': {
-        bg: 'from-amber-700 via-orange-800 to-rose-900',
+        bg: 'from-amber-700 via-orange-800 to-red-900',
         border: 'border-amber-400/50',
         text: 'text-white',
         badge: 'bg-amber-500',
@@ -283,7 +283,7 @@ export const WalletTransferModal = ({
             {/* Target Wallet Selection */}
             <div>
               <label className="mb-2 block text-xs font-semibold text-slate-700 sm:text-sm">
-                Đến ví <span className="text-rose-500">*</span>
+                Đến ví <span className="text-red-500">*</span>
               </label>
               {availableWallets.length === 0 ? (
                 <div className="rounded-3xl bg-amber-50 p-4 text-center">
@@ -418,7 +418,7 @@ export const WalletTransferModal = ({
             {/* Amount Input */}
             <div>
               <label className="mb-2.5 block text-xs font-semibold text-slate-700 sm:text-sm">
-                Số tiền chuyển đổi <span className="text-rose-500">*</span>
+                Số tiền chuyển đổi <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -467,10 +467,10 @@ export const WalletTransferModal = ({
                   </div>
                   <div className="flex justify-between items-center p-3 rounded-2xl bg-white/60 backdrop-blur-sm">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <div className="h-2 w-2 rounded-full bg-emerald-500 shrink-0"></div>
+                      <div className="h-2 w-2 rounded-full bg-green-500 shrink-0"></div>
                       <span className="text-sm font-medium text-slate-700 truncate">{targetWallet.name}:</span>
                     </div>
-                    <span className="text-base font-bold text-emerald-600 ml-2">
+                    <span className="text-base font-bold text-green-600 ml-2">
                       {new Intl.NumberFormat('vi-VN', {
                         style: 'currency',
                         currency: 'VND',
@@ -484,12 +484,12 @@ export const WalletTransferModal = ({
 
             {/* Error Message */}
             {error && (
-              <div className="rounded-3xl bg-gradient-to-br from-rose-50 to-red-50 border-2 border-rose-300/50 p-4 shadow-md">
+              <div className="rounded-3xl bg-gradient-to-br from-red-50 to-red-50 border-2 border-red-300/50 p-4 shadow-md">
                 <div className="flex items-start gap-3">
-                  <div className="h-5 w-5 rounded-full bg-rose-500 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="h-5 w-5 rounded-full bg-red-500 flex items-center justify-center shrink-0 mt-0.5">
                     <span className="text-white text-xs font-bold">!</span>
                   </div>
-                  <p className="text-sm font-medium text-rose-800 leading-relaxed flex-1">{error}</p>
+                  <p className="text-sm font-medium text-red-800 leading-relaxed flex-1">{error}</p>
                 </div>
               </div>
             )}
@@ -520,4 +520,5 @@ export const WalletTransferModal = ({
     </div>
   )
 }
+
 

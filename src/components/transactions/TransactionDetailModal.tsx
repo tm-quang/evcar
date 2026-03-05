@@ -229,7 +229,7 @@ export const TransactionDetailModal = ({
             <div className="space-y-4">
               {/* Amount - Large Display */}
               <div className="text-center py-4">
-                <div className={`text-3xl font-bold ${isIncome ? 'text-emerald-600' : 'text-rose-600'}`}>
+                <div className={`text-3xl font-bold ${isIncome ? 'text-green-600' : 'text-red-600'}`}>
                   {isIncome ? '+' : '-'}
                   {formatCurrency(localTransaction.amount)}
                 </div>
@@ -373,7 +373,7 @@ export const TransactionDetailModal = ({
                                   setActiveImageIndex(null)
                                 }}
                                 disabled={isDeletingImage === index}
-                                className="flex items-center justify-center rounded-full bg-rose-500 p-3 text-white transition-all hover:bg-rose-600 hover:scale-110 active:scale-95 disabled:opacity-50"
+                                className="flex items-center justify-center rounded-full bg-red-500 p-3 text-white transition-all hover:bg-red-600 hover:scale-110 active:scale-95 disabled:opacity-50"
                                 title="Xóa ảnh"
                               >
                                 {isDeletingImage === index ? (
@@ -439,7 +439,7 @@ export const TransactionDetailModal = ({
 
                                   window.open(mapsUrl, '_blank', 'noopener,noreferrer')
                                 }}
-                                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border-2 border-emerald-200 bg-emerald-50 text-emerald-600 transition-all hover:border-emerald-300 hover:bg-emerald-100"
+                                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border-2 border-green-200 bg-green-50 text-green-600 transition-all hover:border-green-300 hover:bg-green-100"
                                 title="Mở bản đồ"
                               >
                                 <FaExternalLinkAlt className="h-5 w-5" />
@@ -560,4 +560,5 @@ export const TransactionDetailModal = ({
     </>
   )
 }
+
 

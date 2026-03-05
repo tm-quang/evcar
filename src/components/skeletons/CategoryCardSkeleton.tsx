@@ -23,3 +23,4 @@ export const CategoryCardSkeleton = ({ count = 6 }: CategoryCardSkeletonProps) =
   )
 }
 
+

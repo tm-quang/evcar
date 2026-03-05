@@ -303,7 +303,7 @@ const AccountInfoPage = () => {
           </div>
 
           {error && (
-            <div className="rounded-lg bg-rose-50 border border-rose-200 p-3 text-sm text-rose-600">
+            <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-600">
               {error}
             </div>
           )}
@@ -364,7 +364,7 @@ const AccountInfoPage = () => {
                     type="button"
                     onClick={handleRemoveAvatar}
                     disabled={isSubmitting || isAvatarProcessing || isAvatarUploading}
-                    className="text-xs font-medium text-rose-600 hover:text-rose-700 disabled:opacity-50"
+                    className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-50"
                   >
                     Xóa ảnh đại diện
                   </button>
@@ -548,4 +548,5 @@ const AccountInfoPage = () => {
 }
 
 export default AccountInfoPage
+
 

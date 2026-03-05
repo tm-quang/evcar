@@ -284,11 +284,11 @@ function ChargeLogCard({
                 <div className="mt-3.5 px-0.5">
                     <div className="flex justify-between text-[10px] text-slate-500 font-medium mb-1.5">
                         <span>Tỉ lệ sạc</span>
-                        <span className="text-emerald-500 font-bold">{Math.round(Math.min(100, Math.max(0, (kwh / 37.23) * 100)))}%</span>
+                        <span className="text-green-500 font-bold">{Math.round(Math.min(100, Math.max(0, (kwh / 37.23) * 100)))}%</span>
                     </div>
                     <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                         <div
-                            className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                            className="bg-green-500 h-full rounded-full transition-all duration-500"
                             style={{ width: `${Math.min(100, Math.max(0, (kwh / 37.23) * 100))}%` }}
                         ></div>
                     </div>
@@ -1794,7 +1794,7 @@ function ChargeDetailModal({
                                                 {chargeAmount.toLocaleString('vi-VN')}đ
                                             </span>
                                         )}
-                                        <span className="text-xs font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-md">
+                                        <span className="text-xs font-bold text-green-500 bg-green-50 px-1.5 py-0.5 rounded-md">
                                             KM: -{discount.toLocaleString('vi-VN')}đ
                                         </span>
                                     </>
@@ -1826,3 +1826,4 @@ function ChargeDetailModal({
         </div>
     )
 }
+

@@ -9,3 +9,4 @@ export const useVehicleStore = create<VehicleState>((set) => ({
     selectedVehicleId: null,
     setSelectedVehicleId: (id) => set({ selectedVehicleId: id }),
 }))
+

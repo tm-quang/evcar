@@ -246,3 +246,4 @@ export class SpeechRecognitionManager {
 
 // Export singleton instance
 export const speechRecognitionManager = new SpeechRecognitionManager()
+

@@ -244,3 +244,4 @@ export class OpenAIWhisperProvider implements ISpeechProvider {
   }
 }
 
+

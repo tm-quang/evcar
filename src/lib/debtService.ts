@@ -337,3 +337,4 @@ export const markAsPaid = async (id: string): Promise<DebtRecord> => {
     if (error) throw error
     return data
 }
+

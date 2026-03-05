@@ -226,3 +226,4 @@ export const initializeDefaultFavorites = async (categoryType: FavoriteCategoryT
     }
   }
 }
+

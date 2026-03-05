@@ -158,9 +158,9 @@ const HeaderBar = (props: HeaderBarProps) => {
     isLoadingProfile = false,
   } = props
 
-  let ringColorClass = 'from-emerald-400 via-green-300 to-emerald-500' // Xanh (Connected)
+  let ringColorClass = 'from-green-400 via-green-300 to-green-500' // Xanh (Connected)
   if (!isOnline) {
-    ringColorClass = 'from-rose-500 via-red-400 to-rose-600' // Đỏ (Disconnected)
+    ringColorClass = 'from-red-500 via-red-400 to-red-600' // Đỏ (Disconnected)
   } else if (isReloading || isLoadingProfile) {
     ringColorClass = 'from-amber-400 via-yellow-300 to-amber-500' // Vàng (Connecting)
   }
@@ -275,3 +275,4 @@ const HeaderBar = (props: HeaderBarProps) => {
 }
 
 export default HeaderBar
+

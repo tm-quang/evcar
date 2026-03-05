@@ -78,7 +78,7 @@ function StatCard({ icon: Icon, label, value, sub, color, trend }: {
                     <Icon className="h-5 w-5" />
                 </div>
                 {trend && (
-                    <div className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${trend === 'up' ? 'bg-rose-50 text-rose-600' : trend === 'down' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-500'}`}>
+                    <div className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${trend === 'up' ? 'bg-red-50 text-red-600' : trend === 'down' ? 'bg-green-50 text-green-600' : 'bg-slate-50 text-slate-500'}`}>
                         {trend === 'up' ? <TrendingUp className="h-3 w-3" /> : trend === 'down' ? <TrendingDown className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
                         {trend === 'up' ? 'Tăng' : trend === 'down' ? 'Giảm' : 'Bình thường'}
                     </div>
@@ -205,7 +205,7 @@ export default function VehicleReports() {
 
 
                 {/* ── Hero Card ─────────────────────────────────────────── */}
-                <div className={`relative overflow-hidden rounded-2xl p-5 text-white shadow-lg ${isElectric ? 'bg-gradient-to-br from-emerald-500 to-green-700' : isMoto ? 'bg-gradient-to-br from-orange-500 to-red-700' : 'bg-gradient-to-br from-blue-600 to-indigo-800'}`}>
+                <div className={`relative overflow-hidden rounded-2xl p-5 text-white shadow-lg ${isElectric ? 'bg-gradient-to-br from-green-500 to-green-700' : isMoto ? 'bg-gradient-to-br from-orange-500 to-red-700' : 'bg-gradient-to-br from-blue-600 to-indigo-800'}`}>
                     <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
                     <div className="absolute right-0 bottom-0 h-20 opacity-10">
                         {isMoto ? <Bike className="h-full w-full" /> : <Car className="h-full w-full" />}
@@ -243,7 +243,7 @@ export default function VehicleReports() {
                     <StatCard icon={Wrench} label="Tổng bảo dưỡng"
                         value={fmt(totalMaint)} color="bg-purple-100 text-purple-600" />
                     <StatCard icon={Receipt} label="Chi phí khác"
-                        value={fmt(totalExp)} color="bg-rose-100 text-rose-600" />
+                        value={fmt(totalExp)} color="bg-red-100 text-red-600" />
                     <StatCard icon={Navigation} label={isElectric ? 'Tiêu thụ TB' : 'Tiêu hao TB'}
                         value={avgConsumption > 0 ? `${avgConsumption.toFixed(1)} ${isElectric ? 'kWh' : 'L'}/100km` : '—'}
                         color="bg-sky-100 text-sky-600"
@@ -360,7 +360,7 @@ export default function VehicleReports() {
                             {recordFuelCost && (
                                 <div className={`flex items-center justify-between p-4 ${recordFuelVolume ? 'border-b border-slate-50' : ''}`}>
                                     <div className="flex items-center gap-3">
-                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-500">
+                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500">
                                             <Receipt className="h-5 w-5" />
                                         </div>
                                         <div>
@@ -369,7 +369,7 @@ export default function VehicleReports() {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-base font-black text-rose-600">{fmt(recordFuelCost.total_amount || 0)}</p>
+                                        <p className="text-base font-black text-red-600">{fmt(recordFuelCost.total_amount || 0)}</p>
                                     </div>
                                 </div>
                             )}
@@ -407,10 +407,10 @@ export default function VehicleReports() {
                                     <div key={i} className={`px-4 py-3 ${i < expenseTypeData.length - 1 ? 'border-b border-slate-50' : ''}`}>
                                         <div className="flex items-center justify-between mb-1.5">
                                             <span className="text-xs font-semibold text-slate-700">{item.name}</span>
-                                            <span className="text-xs font-bold text-rose-600">{fmt(item.value)}</span>
+                                            <span className="text-xs font-bold text-red-600">{fmt(item.value)}</span>
                                         </div>
                                         <div className="h-1.5 w-full rounded-full bg-slate-100">
-                                            <div className="h-full rounded-full bg-rose-400 transition-all" style={{ width: `${pct}%` }} />
+                                            <div className="h-full rounded-full bg-red-400 transition-all" style={{ width: `${pct}%` }} />
                                         </div>
                                     </div>
                                 )
@@ -436,7 +436,7 @@ export default function VehicleReports() {
                                         <p className="text-xs text-slate-500 mb-1">{label}</p>
                                         <p className="text-base font-black text-slate-800">{f(cur)}</p>
                                         {prev > 0 && (
-                                            <p className={`text-[10px] font-semibold mt-1 flex items-center gap-0.5 ${up ? 'text-rose-500' : 'text-emerald-500'}`}>
+                                            <p className={`text-[10px] font-semibold mt-1 flex items-center gap-0.5 ${up ? 'text-red-500' : 'text-green-500'}`}>
                                                 {up ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                                                 {up ? '+' : ''}{diff}% so với {prevMonth.month}
                                             </p>
@@ -455,3 +455,4 @@ export default function VehicleReports() {
         </div>
     )
 }
+

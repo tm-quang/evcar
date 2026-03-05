@@ -334,7 +334,7 @@ export function SimpleLocationInput({
                                         {savedStations.map(station => (
                                             <div key={station.id} onClick={() => handleSelectSaved(station)} className="flex items-center justify-between p-3.5 bg-white border border-slate-200 rounded-2xl hover:border-blue-400 transition cursor-pointer shadow-sm group active:scale-[0.99]">
                                                 <div className="flex items-start gap-3 flex-1 min-w-0">
-                                                    <div className="bg-emerald-50 text-emerald-600 border border-emerald-100 p-2 rounded-xl shrink-0">
+                                                    <div className="bg-green-50 text-green-600 border border-green-100 p-2 rounded-xl shrink-0">
                                                         <MapPin className="h-5 w-5" />
                                                     </div>
                                                     <div className="min-w-0 flex-1">
@@ -360,3 +360,4 @@ export function SimpleLocationInput({
         </div>
     )
 }
+

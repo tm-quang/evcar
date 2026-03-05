@@ -393,3 +393,4 @@ export const getIconGroups = async (): Promise<Array<{ id: string; label: string
 
   return Array.from(groups.entries()).map(([id, label]) => ({ id, label }))
 }
+

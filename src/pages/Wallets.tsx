@@ -65,7 +65,7 @@ const getWalletTypeColors = (type: WalletType) => {
       bg: 'from-slate-900 via-slate-800 to-slate-950', // Gradient 3 màu đậm hơn nữa
       border: 'border-slate-400/50',
       text: 'text-white',
-      badge: 'bg-emerald-500',
+      badge: 'bg-green-500',
       shadow: 'shadow-xl shadow-black/20',
     },
     'Ngân hàng': {
@@ -76,10 +76,10 @@ const getWalletTypeColors = (type: WalletType) => {
       shadow: 'shadow-xl shadow-black/20',
     },
     'Tiết kiệm': {
-      bg: 'from-emerald-700 via-teal-800 to-cyan-900', // Gradient xanh lá đậm hơn nữa
-      border: 'border-emerald-400/50',
+      bg: 'from-green-700 via-teal-800 to-cyan-900', // Gradient xanh lá đậm hơn nữa
+      border: 'border-green-400/50',
       text: 'text-white',
-      badge: 'bg-emerald-500',
+      badge: 'bg-green-500',
       shadow: 'shadow-xl shadow-black/20',
     },
     'Tín dụng': {
@@ -90,7 +90,7 @@ const getWalletTypeColors = (type: WalletType) => {
       shadow: 'shadow-xl shadow-black/20',
     },
     'Đầu tư': {
-      bg: 'from-amber-700 via-orange-800 to-rose-900', // Gradient vàng cam đậm hơn nữa
+      bg: 'from-amber-700 via-orange-800 to-red-900', // Gradient vàng cam đậm hơn nữa
       border: 'border-amber-400/50',
       text: 'text-white',
       badge: 'bg-amber-500',
@@ -713,7 +713,7 @@ export const WalletsPage = () => {
                                         </span>
                                       </div>
                                       <p className={`mt-1 text-sm font-medium ${colors.text} opacity-70`}>{wallet.type}</p>
-                                      <p className={`mt-2 text-2xl font-bold ${isNegative ? 'text-rose-300' : colors.text}`}>
+                                      <p className={`mt-2 text-2xl font-bold ${isNegative ? 'text-red-300' : colors.text}`}>
                                         {formatCurrency(wallet.balance)}
                                       </p>
                                     </div>
@@ -726,7 +726,7 @@ export const WalletsPage = () => {
                                       </button>
                                       <button
                                         onClick={() => handleDelete(wallet.id)}
-                                        className="rounded-full p-2 text-white/70 transition hover:bg-white/20 hover:text-rose-300"
+                                        className="rounded-full p-2 text-white/70 transition hover:bg-white/20 hover:text-red-300"
                                       >
                                         <FaTrash className="h-5 w-5" />
                                       </button>
@@ -756,7 +756,7 @@ export const WalletsPage = () => {
                                         e.stopPropagation()
                                         handleToggleActive(wallet)
                                       }}
-                                      className="rounded-full bg-emerald-500/90 px-4 py-2 text-xs font-semibold text-white transition hover:bg-emerald-500 shadow-sm"
+                                      className="rounded-full bg-green-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-green-600 shadow-sm"
                                     >
                                       Khôi phục
                                     </button>
@@ -796,7 +796,7 @@ export const WalletsPage = () => {
                 {/* Tên ví */}
                 <div>
                   <label className="mb-2 block text-xs font-semibold text-slate-700 sm:text-sm">
-                    Tên ví <span className="text-rose-500">*</span>
+                    Tên ví <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -812,7 +812,7 @@ export const WalletsPage = () => {
                 {!editingWallet && (
                   <div>
                     <label className="mb-2 block text-xs font-semibold text-slate-700 sm:text-sm">
-                      Loại ví <span className="text-rose-500">*</span>
+                      Loại ví <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <button
@@ -933,7 +933,7 @@ export const WalletsPage = () => {
                 <div>
                   <div className="mb-2 flex items-center justify-between">
                     <label className="block text-xs font-semibold text-slate-700 sm:text-sm">
-                      {editingWallet ? 'Số dư hiện tại' : 'Số dư ban đầu'} <span className="text-rose-500">*</span>
+                      {editingWallet ? 'Số dư hiện tại' : 'Số dư ban đầu'} <span className="text-red-500">*</span>
                     </label>
                     {editingWallet && (
                       <div className="flex items-center gap-2">
@@ -1001,7 +1001,7 @@ export const WalletsPage = () => {
                       className={`w-full rounded-3xl border-2 p-3.5 pr-12 text-sm placeholder:text-slate-400 transition-all focus:outline-none focus:ring-2 cursor-pointer sm:p-4 sm:text-base ${(() => {
                         const balanceValue = parseVNDInput(formData.balance)
                         return balanceValue < 0
-                          ? 'border-rose-500 bg-rose-50 text-rose-700 focus:border-rose-500 focus:ring-rose-500/20'
+                          ? 'border-red-500 bg-red-50 text-red-700 focus:border-red-500 focus:ring-red-500/20'
                           : 'border-slate-200 bg-white text-slate-900 focus:border-sky-500 focus:ring-sky-500/20'
                       })()
                         }`}
@@ -1011,7 +1011,7 @@ export const WalletsPage = () => {
                     />
                     <span className={`absolute right-4 top-1/2 -translate-y-1/2 font-semibold text-sm sm:text-base ${(() => {
                       const balanceValue = parseVNDInput(formData.balance)
-                      return balanceValue < 0 ? 'text-rose-600' : 'text-slate-500'
+                      return balanceValue < 0 ? 'text-red-600' : 'text-slate-500'
                     })()
                       }`}>
                       ₫
@@ -1021,7 +1021,7 @@ export const WalletsPage = () => {
                     const balanceValue = parseVNDInput(formData.balance)
                     const isNegative = balanceValue < 0
                     return (
-                      <p className={`mt-1.5 text-xs ${isNegative ? 'text-rose-600 font-semibold' : 'text-slate-500'}`}>
+                      <p className={`mt-1.5 text-xs ${isNegative ? 'text-red-600 font-semibold' : 'text-slate-500'}`}>
                         {isNegative ? (
                           <>
                             <span className="font-bold">⚠️ Cảnh báo: </span>
@@ -1040,7 +1040,7 @@ export const WalletsPage = () => {
                 {/* Mô tả */}
                 <div>
                   <label className="mb-2 block text-xs font-semibold text-slate-700 sm:text-sm">
-                    Mô tả <span className="text-rose-500">*</span>
+                    Mô tả <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     value={formData.description}
@@ -1167,6 +1167,7 @@ export const WalletsPage = () => {
 }
 
 export default WalletsPage
+
 
 
 

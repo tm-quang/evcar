@@ -20,3 +20,4 @@ export const applyArchiveFilter = (query: any, dateColumn: string) => {
     return query.gte(dateColumn, ARCHIVE_CUTOFF_DATE);
   }
 };
+

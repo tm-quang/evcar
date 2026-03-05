@@ -120,7 +120,7 @@ export function TripGPSDisplay({ trip }: { trip: any }) {
 
                     const Icon = node.type === 'start' ? Navigation : node.type === 'end' ? Flag : MapPin
                     const colorAttr = node.type === 'start' ? 'text-blue-500 bg-blue-100 border-blue-200' :
-                        node.type === 'end' ? 'text-emerald-500 bg-emerald-100 border-emerald-200' :
+                        node.type === 'end' ? 'text-green-500 bg-green-100 border-green-200' :
                             'text-cyan-500 bg-cyan-100 border-cyan-200'
 
                     const timeStr = node.time ? node.time.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '---'
@@ -219,3 +219,4 @@ export function getTripCleanNotes(notes: string): string {
     })
     return cleanLines.join('\n').trim()
 }
+

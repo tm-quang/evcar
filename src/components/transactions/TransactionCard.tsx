@@ -88,22 +88,22 @@ export const TransactionCard = ({
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onMouseLeave={onLongPressCancel}
-      className={`group relative flex items-center gap-3 rounded-3xl p-3 shadow-lg border transition-all select-none cursor-default hover:shadow-xl ${isIncome
-          ? 'bg-emerald-50/30 border-emerald-200/60 hover:border-emerald-300/80'
-          : 'bg-rose-50/40 border-rose-200/60 hover:border-rose-300/80'
+      className={`group relative flex items-center gap-3 rounded-3xl p-3 shadow-md border transition-all select-none cursor-default active:scale-[0.98] ${isIncome
+        ? 'bg-green-200/50 border-green-500/50'
+        : 'bg-red-200/50 border-red-500/50'
         }`}
     >
       {/* Icon Container */}
       <div
-        className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full overflow-hidden"
+        className={`relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full overflow-hidden shadow-sm ${isIncome ? 'bg-teal-400' : 'bg-blue-600'
+          }`}
       >
         {categoryIcon ? (
-          <div className="h-full w-full flex items-center justify-center">
+          <div className="h-full w-full flex items-center justify-center transition-transform group-hover:scale-110">
             {categoryIcon}
           </div>
         ) : (
-          <FaPlus className={`h-6 w-6 ${isIncome ? 'text-emerald-600' : 'text-rose-600'
-            }`} />
+          <FaPlus className="h-6 w-6 text-white" />
         )}
       </div>
 
@@ -111,58 +111,48 @@ export const TransactionCard = ({
       <div className="flex-1 min-w-0 flex items-center justify-between gap-3">
         {/* Left side: Description, Date, Category, Tags */}
         <div className="flex-1 min-w-0 flex flex-col justify-center">
-          {/* Description - Nếu null thì hiển thị tên hạng mục */}
-          <p className="truncate text-sm font-semibold mb-1 text-slate-900">
-            {transaction.description || categoryInfo.name}
+          {/* Title - Ưu tiên tên hạng mục cho giống ảnh */}
+          <p className="truncate text-base font-bold text-slate-800">
+            {categoryInfo.name}
           </p>
 
           {/* Date */}
-          <div className="flex items-center gap-1 mb-1 text-xs text-slate-600">
+          <div className="flex items-center gap-1.5 mt-0.5 text-xs text-slate-500">
             <FaCalendar className="h-3 w-3 text-slate-400" />
-            <span className="whitespace-nowrap font-medium">
-              {formatDate(transactionDate)}
-            </span>
+            <span className="font-semibold">{formatDate(transactionDate)}</span>
           </div>
 
-          {/* Category - Hiển thị dưới ngày */}
-          <div className="mb-1 text-xs text-slate-600">
-            <span className="font-medium truncate">
-              {categoryInfo.name}
-            </span>
-          </div>
+          {/* Description - Hiển thị tên giao dịch nếu có */}
+          {transaction.description && transaction.description !== categoryInfo.name && (
+            <p className="truncate text-xs text-slate-500 mt-0.5">
+              {transaction.description}
+            </p>
+          )}
 
           {/* Tags */}
           {transaction.tags && transaction.tags.length > 0 && (
-            <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+            <div className="flex items-center gap-1.5 flex-wrap mt-1">
               {transaction.tags.slice(0, 2).map((tag, index) => (
                 <span
                   key={index}
-                  className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600"
+                  className="inline-flex items-center rounded-md bg-slate-200/50 px-1.5 py-0.5 text-[10px] font-bold text-slate-600"
                 >
                   {tag}
                 </span>
               ))}
-              {transaction.tags.length > 2 && (
-                <span className="text-xs text-slate-400 font-medium">
-                  +{transaction.tags.length - 2}
-                </span>
-              )}
             </div>
           )}
         </div>
 
         {/* Right side: Amount and Wallet */}
-        <div className="flex flex-col items-end justify-center gap-1.5 shrink-0">
-          {/* Amount */}
-          <span className={`text-base font-bold whitespace-nowrap ${isIncome ? 'text-emerald-600' : 'text-rose-600'
-            }`}>
-            {isIncome ? '+' : '-'}
-            {formatCurrency(transaction.amount)}
+        <div className="flex flex-col items-end justify-center gap-2 shrink-0">
+          <span className={`text-lg font-black whitespace-nowrap tracking-tight ${isIncome ? 'text-green-500' : 'text-red-500'}`}>
+            {isIncome ? '+' : '-'}{formatCurrency(transaction.amount)}
           </span>
           {/* Wallet */}
-          <div className={`flex items-center gap-1.5 rounded-full ${walletInfo.color.bg} px-2.5 py-1`}>
-            <FaWallet className={`h-3 w-3 ${walletInfo.color.icon}`} />
-            <span className={`text-xs font-semibold ${walletInfo.color.text} whitespace-nowrap`}>
+          <div className="flex items-center gap-1.5 rounded-xl bg-blue-500 px-2.5 py-1 transition-colors group-hover:bg-blue-500">
+            <FaWallet className="h-3 w-3 text-white" />
+            <span className="text-[11px] font-bold text-white whitespace-nowrap">
               {walletInfo.name}
             </span>
           </div>
@@ -171,4 +161,5 @@ export const TransactionCard = ({
     </div>
   )
 }
+
 

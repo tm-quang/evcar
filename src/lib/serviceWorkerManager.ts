@@ -233,3 +233,4 @@ export const getServiceWorkerRegistration = (): ServiceWorkerRegistration | null
   return serviceWorkerRegistration
 }
 
+

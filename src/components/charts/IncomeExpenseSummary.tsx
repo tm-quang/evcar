@@ -38,13 +38,13 @@ export const IncomeExpenseSummary = ({ income, expense, isLoading = false }: Inc
       {/* Income */}
       <div className="flex items-center justify-between gap-2">
         <p className="text-base text-slate-600">Khoản thu</p>
-        <p className="text-base font-bold text-emerald-600 whitespace-nowrap">{formatCurrency(income)}</p>
+        <p className="text-base font-bold text-green-500 whitespace-nowrap">{formatCurrency(income)}</p>
       </div>
 
       {/* Expense */}
       <div className="flex items-center justify-between gap-2">
         <p className="text-base text-slate-600">Khoản chi</p>
-        <p className="text-base font-bold text-rose-600 whitespace-nowrap">{formatCurrency(expense)}</p>
+        <p className="text-base font-bold text-red-500 whitespace-nowrap">{formatCurrency(expense)}</p>
       </div>
 
       {/* Difference */}
@@ -57,4 +57,5 @@ export const IncomeExpenseSummary = ({ income, expense, isLoading = false }: Inc
     </div>
   )
 }
+
 

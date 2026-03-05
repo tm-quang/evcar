@@ -316,3 +316,4 @@ export const syncAllWalletBalances = async (): Promise<void> => {
   await Promise.all(wallets.map((wallet) => syncWalletBalanceFromTransactions(wallet.id)))
 
 }
+

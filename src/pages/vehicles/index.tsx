@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
     Car,
@@ -75,7 +75,7 @@ export default function VehicleManagement() {
     const isElectric = selectedVehicle?.fuel_type === 'electric'
     const isMoto = selectedVehicle?.vehicle_type === 'motorcycle'
 
-    // ── Maintenance progress data ─────────────────────────────────────────
+    // -- Maintenance progress data -----------------------------------------
     const maintProgress = (() => {
         if (!selectedVehicle?.next_maintenance_km) return null
         const odo = selectedVehicle.current_odometer
@@ -83,7 +83,7 @@ export default function VehicleManagement() {
         const kmLeft = target - odo
 
         let interval = selectedVehicle.maintenance_interval_km || (isMoto ? 3000 : 5000)
-        // Nếu số km còn lại lớn hơn cả chu kỳ (có thể do set lần đầu), dùng luôn ODO gốc làm mốc
+        // Nếu số km còn lại lớn hơn chu kỳ (có thể do set lần đầu), dùng luôn ODO gốc làm mốc
         if (kmLeft > interval) {
             interval = target
         }
@@ -105,7 +105,7 @@ export default function VehicleManagement() {
 
         // Nếu số ngày còn lại vượt quá chu kỳ, nới chu kỳ ra bằng mốc ban đầu (ví dụ 1 năm)
         if (days > intervalDays) {
-            intervalDays = Math.max(intervalDays, days + 30) // Tạm lấy khoảng dôi ra để progress bar không bị 0% hoàn toàn
+            intervalDays = Math.max(intervalDays, days + 30) // Tạm lấy khoảng dài ra để progress bar không bị 0% hoàn toàn
         }
 
         const traveledDays = Math.max(0, intervalDays - Math.max(0, days))
@@ -134,19 +134,19 @@ export default function VehicleManagement() {
         }
     }
 
-    // Module definitions — subtitle added for Settings-style cards
+    // Module definitions  subtitle added for Settings-style cards
     const modules = [
         {
             id: 'trips',
-            name: 'Lộ Trình',
+            name: 'Lịch sử hành trình',
             subtitle: 'Hành trình',
             icon: Route,
-            color: 'text-emerald-600',
-            bgColor: 'bg-emerald-50',
+            color: 'text-green-600',
+            bgColor: 'bg-green-50',
         },
         {
             id: 'fuel',
-            name: isElectric ? 'Sạc Điện' : 'Nhiên Liệu',
+            name: isElectric ? 'Sạc điện' : 'Nhiên Liệu',
             subtitle: isElectric ? 'Pin & sạc' : 'Xăng/Dầu',
             icon: isElectric ? BatteryCharging : Fuel,
             color: isElectric ? 'text-green-600' : 'text-orange-600',
@@ -166,8 +166,8 @@ export default function VehicleManagement() {
             name: 'Chi Phí Khác',
             subtitle: 'Phí & vé',
             icon: Receipt,
-            color: 'text-rose-600',
-            bgColor: 'bg-rose-50',
+            color: 'text-red-600',
+            bgColor: 'bg-red-50',
         },
         {
             id: 'reports',
@@ -207,7 +207,7 @@ export default function VehicleManagement() {
     if (loading) {
         return (
             <div className="flex h-screen flex-col overflow-hidden bg-[#F7F9FC]">
-                <HeaderBar variant="page" title="Quản Lý Phương Tiện" />
+                <HeaderBar variant="page" title="Quản lý phương tiện" />
                 <main className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-md mx-auto px-4 pb-4 pt-4">
                     <div className="animate-pulse space-y-4">
                         <div className="h-48 bg-gray-200 rounded-3xl" />
@@ -226,7 +226,7 @@ export default function VehicleManagement() {
         <div className="flex h-screen flex-col overflow-hidden bg-[#F7F9FC]">
             <HeaderBar
                 variant="page"
-                title="Quản Lý Phương Tiện"
+                title="Quản lý phương tiện"
                 customContent={
                     <button
                         onClick={() => navigate('/vehicles/add')}
@@ -240,7 +240,7 @@ export default function VehicleManagement() {
 
             <main className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-md mx-auto px-4 pb-4 pt-4">
 
-                {/* ── Xe của bạn ──────────────────────────────────────────── */}
+                {/* -- Xe của bạn -------------------------------------------- */}
                 <div className="mb-5">
                     <div className="mb-3 flex items-center justify-between px-1">
                         <h3 className="text-base font-bold text-slate-800">Xe của bạn</h3>
@@ -255,7 +255,7 @@ export default function VehicleManagement() {
                                 const gradientColor = vehicle.vehicle_type === 'motorcycle'
                                     ? 'from-orange-600 via-orange-700 to-red-800'
                                     : 'from-blue-700 via-blue-800 to-indigo-900'
-                                const badgeColor = vehicle.vehicle_type === 'motorcycle' ? 'text-amber-300' : 'text-emerald-300'
+                                const badgeColor = vehicle.vehicle_type === 'motorcycle' ? 'text-amber-300' : 'text-green-300'
 
                                 return (
                                     <div
@@ -371,12 +371,12 @@ export default function VehicleManagement() {
                     </div>
                 </div>
 
-                {/* ── Thống kê nhanh theo loại xe ─────────────────────────── */}
+                {/* -- Th?ng k� nhanh theo lo?i xe --------------------------- */}
                 {selectedVehicle && (
                     <div className="mb-5">
                         {/* Header row */}
                         <div className="mb-3 flex items-center gap-2 px-1">
-                            <div className={`rounded-lg p-1.5 ${isMoto ? 'bg-orange-100' : isElectric ? 'bg-green-100' : 'bg-blue-100'}`}>
+                            <div className={`rounded-3xl p-1.5 ${isMoto ? 'bg-orange-100' : isElectric ? 'bg-green-100' : 'bg-blue-100'}`}>
                                 {isMoto
                                     ? <Bike className="h-4 w-4 text-orange-600" />
                                     : isElectric
@@ -397,27 +397,27 @@ export default function VehicleManagement() {
                         ) : stats ? (
                             <div className="grid grid-cols-3 gap-2 mb-3">
                                 <div className="flex flex-col items-center justify-center rounded-2xl bg-white border border-slate-100 shadow-md py-3 px-2 text-center">
-                                    <div className={`mb-1.5 rounded-xl p-2 ${isMoto ? 'bg-orange-50' : 'bg-blue-50'}`}>
+                                    <div className={`mb-1.5 rounded-3xl p-2 ${isMoto ? 'bg-orange-100' : 'bg-blue-100'}`}>
                                         <Navigation className={`h-4 w-4 ${isMoto ? 'text-orange-500' : 'text-blue-500'}`} />
                                     </div>
                                     <p className="text-base font-black text-slate-800">{stats.totalDistance.toLocaleString()}</p>
                                     <p className="text-[10px] text-slate-400 leading-tight mt-0.5">km đã đi</p>
                                 </div>
                                 <div className="flex flex-col items-center justify-center rounded-2xl bg-white border border-slate-100 shadow-md py-3 px-2 text-center">
-                                    <div className="mb-1.5 rounded-xl bg-indigo-50 p-2">
+                                    <div className="mb-1.5 rounded-3xl bg-indigo-100 p-2">
                                         <Route className="h-4 w-4 text-indigo-500" />
                                     </div>
                                     <p className="text-base font-black text-slate-800">{stats.totalTrips}</p>
                                     <p className="text-[10px] text-slate-400 leading-tight mt-0.5">chuyến đi</p>
                                 </div>
                                 <div className="flex flex-col items-center justify-center rounded-2xl bg-white border border-slate-100 shadow-md py-3 px-2 text-center">
-                                    <div className="mb-1.5 rounded-xl bg-emerald-50 p-2">
-                                        <TrendingUp className="h-4 w-4 text-emerald-500" />
+                                    <div className="mb-1.5 rounded-3xl bg-green-100 p-2">
+                                        <TrendingUp className="h-4 w-4 text-green-500" />
                                     </div>
                                     <p className="text-base font-black text-slate-800">
-                                        {stats.costPerKm > 0 ? Math.round(stats.costPerKm).toLocaleString() : '—'}
+                                        {stats.costPerKm > 0 ? Math.round(stats.costPerKm).toLocaleString() : ''}
                                     </p>
-                                    <p className="text-[10px] text-slate-400 leading-tight mt-0.5">đ/km</p>
+                                    <p className="text-[10px] text-slate-400 leading-tight mt-0.5">d/km</p>
                                 </div>
                             </div>
                         ) : null}
@@ -438,7 +438,7 @@ export default function VehicleManagement() {
                                     {/* Fuel / Electric row */}
                                     <div className="flex items-center justify-between px-4 py-3">
                                         <div className="flex items-center gap-3">
-                                            <div className={`rounded-lg p-1.5 ${isElectric ? 'bg-green-50' : 'bg-orange-50'}`}>
+                                            <div className={`rounded-3xl p-1.5 ${isElectric ? 'bg-green-100' : 'bg-orange-100'}`}>
                                                 {isElectric
                                                     ? <Zap className="h-4 w-4 text-green-600" />
                                                     : <Fuel className="h-4 w-4 text-orange-600" />
@@ -456,7 +456,7 @@ export default function VehicleManagement() {
                                     {/* Maintenance row */}
                                     <div className="flex items-center justify-between px-4 py-3">
                                         <div className="flex items-center gap-3">
-                                            <div className="rounded-lg bg-gray-50 p-1.5">
+                                            <div className="rounded-3xl bg-gray-100 p-1.5">
                                                 <Wrench className="h-4 w-4 text-gray-600" />
                                             </div>
                                             <span className="text-sm font-medium text-slate-700">Bảo dưỡng</span>
@@ -467,12 +467,12 @@ export default function VehicleManagement() {
                                     {/* Other expenses row */}
                                     <div className="flex items-center justify-between px-4 py-3">
                                         <div className="flex items-center gap-3">
-                                            <div className="rounded-lg bg-rose-50 p-1.5">
-                                                <Receipt className="h-4 w-4 text-rose-600" />
+                                            <div className="rounded-3xl bg-red-100 p-1.5">
+                                                <Receipt className="h-4 w-4 text-red-600" />
                                             </div>
                                             <span className="text-sm font-medium text-slate-700">Phí khác</span>
                                         </div>
-                                        <span className="text-sm font-bold text-rose-600">{formatCurrency(stats.totalOtherExpenses)}</span>
+                                        <span className="text-sm font-bold text-red-600">{formatCurrency(stats.totalOtherExpenses)}</span>
                                     </div>
 
                                     {/* Total row */}
@@ -490,7 +490,7 @@ export default function VehicleManagement() {
                     </div>
                 )}
 
-                {/* ── Bảo dưỡng & Hạn giấy tờ ──────────────────────────── */}
+                {/* -- Bảo dưỡng & Hết hạn giấy tờ ---------------------------- */}
                 {selectedVehicle && (maintProgress || maintDateProgress || selectedVehicle.insurance_expiry_date || selectedVehicle.inspection_expiry_date) && (
                     <div className="mb-5">
                         <div className="mb-3 px-1">
@@ -503,12 +503,12 @@ export default function VehicleManagement() {
                                 <div className="px-4 py-4">
                                     <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center gap-2">
-                                            <div className={`rounded-lg p-1.5 ${maintProgress.isOverdue ? 'bg-red-100' : maintProgress.pct >= 80 ? 'bg-amber-100' : 'bg-gray-100'}`}>
+                                            <div className={`rounded-3xl p-1.5 ${maintProgress.isOverdue ? 'bg-red-100' : maintProgress.pct >= 80 ? 'bg-amber-100' : 'bg-gray-100'}`}>
                                                 <Wrench className={`h-4 w-4 ${maintProgress.isOverdue ? 'text-red-600' : maintProgress.pct >= 80 ? 'text-amber-600' : 'text-gray-600'}`} />
                                             </div>
                                             <div>
                                                 <p className="text-sm font-bold text-slate-700">Bảo dưỡng theo km</p>
-                                                <p className="text-xs text-slate-400">Kỳ tiếp: {maintProgress.target.toLocaleString()} km</p>
+                                                <p className="text-xs text-slate-400">Kế tiếp: {maintProgress.target.toLocaleString()} km</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
@@ -517,7 +517,7 @@ export default function VehicleManagement() {
                                                     Quá {Math.abs(maintProgress.kmLeft).toLocaleString()} km
                                                 </span>
                                             ) : (
-                                                <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${maintProgress.pct >= 80 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                                                <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${maintProgress.pct >= 80 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>
                                                     Còn {maintProgress.kmLeft.toLocaleString()} km
                                                 </span>
                                             )}
@@ -534,7 +534,7 @@ export default function VehicleManagement() {
                                         <span className="text-[10px] text-slate-400">{maintProgress.pct}% chu kỳ</span>
                                         <button onClick={() => navigate('/vehicles/maintenance')}
                                             className="text-[10px] font-semibold text-gray-600 hover:text-gray-800">
-                                            Xem bảo dưỡng →
+                                            Xem bảo dưỡng
                                         </button>
                                     </div>
                                 </div>
@@ -549,8 +549,8 @@ export default function VehicleManagement() {
                                                 <Calendar className={`h-4 w-4 ${maintDateProgress.isOverdue ? 'text-red-600' : maintDateProgress.pct >= 80 ? 'text-amber-600' : 'text-gray-600'}`} />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-bold text-slate-700">Bảo dưỡng theo thẻ</p>
-                                                <p className="text-xs text-slate-400">Kỳ tiếp: {maintDateProgress.target.toLocaleDateString('vi-VN')}</p>
+                                                <p className="text-sm font-bold text-slate-700">Bảo dưỡng theo tháng</p>
+                                                <p className="text-xs text-slate-400">Kế tiếp: {maintDateProgress.target.toLocaleDateString('vi-VN')}</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
@@ -559,7 +559,7 @@ export default function VehicleManagement() {
                                                     Quá {Math.abs(maintDateProgress.daysLeft)} ngày
                                                 </span>
                                             ) : (
-                                                <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${maintDateProgress.pct >= 80 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                                                <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${maintDateProgress.pct >= 80 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>
                                                     Còn {maintDateProgress.daysLeft} ngày
                                                 </span>
                                             )}
@@ -568,7 +568,7 @@ export default function VehicleManagement() {
                                     {/* Progress bar */}
                                     <div className="h-2.5 w-full rounded-full bg-slate-100 overflow-hidden">
                                         <div
-                                            className={`h-full rounded-full transition-all duration-700 ${maintDateProgress.isOverdue ? 'bg-red-500' : maintDateProgress.pct >= 80 ? 'bg-amber-400' : 'bg-emerald-400'}`}
+                                            className={`h-full rounded-full transition-all duration-700 ${maintDateProgress.isOverdue ? 'bg-red-500' : maintDateProgress.pct >= 80 ? 'bg-amber-400' : 'bg-green-400'}`}
                                             style={{ width: `${Math.min(100, Math.max(1, maintDateProgress.pct))}%` }}
                                         />
                                     </div>
@@ -576,7 +576,7 @@ export default function VehicleManagement() {
                                         <span className="text-[10px] text-slate-400">{maintDateProgress.pct}% chu kỳ</span>
                                         <button onClick={() => navigate('/vehicles/maintenance')}
                                             className="text-[10px] font-semibold text-gray-600 hover:text-gray-800">
-                                            Xem bảo dưỡng →
+                                            Xem bảo dưỡng
                                         </button>
                                     </div>
                                 </div>
@@ -593,12 +593,12 @@ export default function VehicleManagement() {
                                     <div className="px-4 py-4">
                                         <div className="flex items-center justify-between mb-2">
                                             <div className="flex items-center gap-3">
-                                                <div className={`rounded-lg p-1.5 ${isOver ? 'bg-red-100' : isWarn ? 'bg-amber-100' : 'bg-blue-100'}`}>
+                                                <div className={`rounded-3xl p-1.5 ${isOver ? 'bg-red-100' : isWarn ? 'bg-amber-100' : 'bg-blue-100'}`}>
                                                     <Shield className={`h-4 w-4 ${isOver ? 'text-red-600' : isWarn ? 'text-amber-600' : 'text-blue-600'}`} />
                                                 </div>
                                                 <div>
                                                     <p className="text-sm font-bold text-slate-700">Bảo hiểm</p>
-                                                    <p className="text-xs text-slate-400">Hạn: {d.toLocaleDateString('vi-VN')}</p>
+                                                    <p className="text-xs text-slate-400">Hết hạn: {d.toLocaleDateString('vi-VN')}</p>
                                                 </div>
                                             </div>
                                             <div className="text-right">
@@ -631,12 +631,12 @@ export default function VehicleManagement() {
                                     <div className="px-4 py-4">
                                         <div className="flex items-center justify-between mb-2">
                                             <div className="flex items-center gap-3">
-                                                <div className={`rounded-lg p-1.5 ${isOver ? 'bg-red-100' : isWarn ? 'bg-amber-100' : 'bg-teal-100'}`}>
+                                                <div className={`rounded-3xl p-1.5 ${isOver ? 'bg-red-100' : isWarn ? 'bg-amber-100' : 'bg-teal-100'}`}>
                                                     <ClipboardCheck className={`h-4 w-4 ${isOver ? 'text-red-600' : isWarn ? 'text-amber-600' : 'text-teal-600'}`} />
                                                 </div>
                                                 <div>
                                                     <p className="text-sm font-bold text-slate-700">Đăng kiểm</p>
-                                                    <p className="text-xs text-slate-400">Hạn: {d.toLocaleDateString('vi-VN')}</p>
+                                                    <p className="text-xs text-slate-400">Hết hạn: {d.toLocaleDateString('vi-VN')}</p>
                                                 </div>
                                             </div>
                                             <div className="text-right">
@@ -661,7 +661,7 @@ export default function VehicleManagement() {
                     </div>
                 )}
 
-                {/* ── Alerts ──────────────────────────────────────────────── */}
+                {/* -- Alerts ------------------------------------------------ */}
                 {alerts.length > 0 && (
                     <div className="mb-5 space-y-2">
                         {alerts.map((alert, index) => {
@@ -684,13 +684,13 @@ export default function VehicleManagement() {
                     </div>
                 )}
 
-                {/* ── Chức năng — Settings-style 2-col grid ───────────────── */}
+                {/* -- Chức năng  Settings-style 2-col grid ----------------- */}
                 {selectedVehicle && (
                     <div className="mb-6">
                         <div className="mb-3 px-1">
                             <h3 className="text-base font-bold text-slate-800">Chức năng quản lý</h3>
                             <p className="text-xs text-slate-400 mt-0.5">
-                                {isMoto ? 'Xe máy' : isElectric ? 'Xe điện' : 'Ô tô'} · {selectedVehicle.license_plate}
+                                {isMoto ? 'Xe máy' : isElectric ? 'Xe điện' : 'Ô tô'}  {selectedVehicle.license_plate}
                             </p>
                         </div>
 
@@ -728,12 +728,12 @@ export default function VehicleManagement() {
                 <div className="h-[150px] w-full flex-shrink-0"></div>
             </main>
 
-            {/* ── ODO Quick Update Modal ─────────────────────────────── */}
+            {/* -- ODO Quick Update Modal ------------------------------- */}
             {showOdoModal && selectedVehicle && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
                     <div className="w-full max-w-[340px] overflow-hidden rounded-[28px] bg-white shadow-2xl animate-in zoom-in-95 duration-200">
                         {/* Header */}
-                        <div className={`px-5 py-5 text-white flex items-center justify-between ${isMoto ? 'bg-orange-500' : isElectric ? 'bg-emerald-500' : 'bg-blue-600'
+                        <div className={`px-5 py-5 text-white flex items-center justify-between ${isMoto ? 'bg-orange-500' : isElectric ? 'bg-green-500' : 'bg-blue-600'
                             }`}>
                             <div className="flex items-center gap-3">
                                 <div className="rounded-2xl bg-white/20 p-2 shadow-inner">
@@ -772,7 +772,7 @@ export default function VehicleManagement() {
                                 />
                             </div>
                             {newOdo && Number(newOdo) > 0 && (
-                                <p className={`mt-3 text-center text-xs font-bold ${Number(newOdo) > selectedVehicle.current_odometer ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                <p className={`mt-3 text-center text-xs font-bold ${Number(newOdo) > selectedVehicle.current_odometer ? 'text-green-500' : 'text-red-500'}`}>
                                     {Number(newOdo) > selectedVehicle.current_odometer
                                         ? `Tăng thêm ${(Number(newOdo) - selectedVehicle.current_odometer).toLocaleString()} km`
                                         : 'ODO mới phải lớn hơn ODO hiện tại'}
@@ -788,7 +788,7 @@ export default function VehicleManagement() {
                             </button>
                             <button onClick={handleSaveOdo} disabled={savingOdo || !newOdo || Number(newOdo) <= selectedVehicle.current_odometer}
                                 className={`flex-[2] flex items-center justify-center gap-1.5 rounded-2xl py-3.5 text-sm font-bold text-white shadow-lg transition-all disabled:opacity-50 active:scale-95 ${isMoto ? 'bg-orange-500 hover:bg-orange-600 shadow-orange-500/25' :
-                                    isElectric ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/25' :
+                                    isElectric ? 'bg-green-500 hover:bg-green-600 shadow-green-500/25' :
                                         'bg-blue-600 hover:bg-blue-700 shadow-blue-500/25'
                                     }`}>
                                 {savingOdo ? 'Đang lưu...' : <><Check className="h-4 w-4" /> Cập nhật</>}
@@ -798,7 +798,7 @@ export default function VehicleManagement() {
                 </div>
             )}
 
-            {/* ── Maintenance Progress Widget (after stats) ─────────── */}
+            {/* -- Maintenance Progress Widget (after stats) ----------- */}
 
             <VehicleFooterNav
                 onAddClick={() => navigate('/vehicles/fuel')}
@@ -809,3 +809,4 @@ export default function VehicleManagement() {
         </div>
     )
 }
+

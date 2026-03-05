@@ -43,28 +43,28 @@ const getAlertLevelInfo = (level: 'level0' | 'level25' | 'level50' | 'level75' |
   
   // Màu sắc card giống Dashboard
   const cardStyles = isCritical
-    ? 'bg-gradient-to-br from-red-50 to-rose-50 border-2 border-red-400 shadow-lg shadow-red-200/50 hover:shadow-xl hover:shadow-red-300/50'
+    ? 'bg-gradient-to-br from-red-50 to-red-50 border-2 border-red-400 shadow-lg shadow-red-200/50 hover:shadow-xl hover:shadow-red-300/50'
     : isHigh
     ? 'bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-400 shadow-lg shadow-orange-200/50 hover:shadow-xl hover:shadow-orange-300/50'
     : isLow
     ? 'bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-400 shadow-md shadow-amber-200/50 hover:shadow-lg hover:shadow-amber-300/50'
-    : 'bg-gradient-to-br from-emerald-50 via-white to-emerald-50/30 border-2 border-emerald-300 shadow-lg shadow-emerald-200/50'
+    : 'bg-gradient-to-br from-green-50 via-white to-green-50/30 border-2 border-green-300 shadow-lg shadow-green-200/50'
 
   const badgeStyles = isCritical
-    ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white border-red-700 shadow-lg shadow-red-300/50 animate-pulse'
+    ? 'bg-gradient-to-r from-red-600 to-red-600 text-white border-red-700 shadow-lg shadow-red-300/50 animate-pulse'
     : isHigh
     ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white border-orange-600 shadow-md'
     : isLow
     ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white border-amber-600'
-    : 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-emerald-600'
+    : 'bg-gradient-to-r from-green-500 to-green-600 text-white border-green-600'
 
   const progressStyles = isCritical
-    ? 'bg-gradient-to-r from-red-600 via-rose-600 to-red-500 shadow-lg shadow-red-400/50'
+    ? 'bg-gradient-to-r from-red-600 via-red-600 to-red-500 shadow-lg shadow-red-400/50'
     : isHigh
     ? 'bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 shadow-md shadow-orange-400/50'
     : isLow
     ? 'bg-gradient-to-r from-amber-400 to-yellow-500'
-    : 'bg-gradient-to-r from-emerald-400 to-emerald-500'
+    : 'bg-gradient-to-r from-green-400 to-green-500'
 
   const textColor = isCritical
     ? 'text-red-700'
@@ -72,7 +72,7 @@ const getAlertLevelInfo = (level: 'level0' | 'level25' | 'level50' | 'level75' |
     ? 'text-orange-700'
     : isLow
     ? 'text-amber-700'
-    : 'text-emerald-700'
+    : 'text-green-700'
 
   const titleColor = isCritical
     ? 'text-red-900'
@@ -114,7 +114,7 @@ export const BudgetCard = ({
     <div className={`group relative rounded-3xl ${alertInfo.cardStyles} transition-all transform hover:scale-[1.02] active:scale-100 overflow-hidden p-4 sm:p-5`}>
       {/* Animated background effect */}
       {alertInfo.isCritical && (
-        <div className="absolute inset-0 bg-gradient-to-r from-red-400/10 via-transparent to-rose-400/10 animate-pulse" />
+        <div className="absolute inset-0 bg-gradient-to-r from-red-400/10 via-transparent to-red-400/10 animate-pulse" />
       )}
       
       <div className="relative z-10">
@@ -123,7 +123,7 @@ export const BudgetCard = ({
         <div className="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
           <div className="relative shrink-0">
             <div className={`h-12 w-12 sm:h-14 sm:w-14 rounded-2xl flex items-center justify-center overflow-hidden ${
-              alertInfo.isCritical ? 'bg-red-100 ring-2 ring-red-400' : alertInfo.isHigh ? 'bg-orange-100 ring-2 ring-orange-400' : alertInfo.isLow ? 'bg-amber-100 ring-2 ring-amber-400' : 'bg-emerald-100 ring-2 ring-emerald-400'
+              alertInfo.isCritical ? 'bg-red-100 ring-2 ring-red-400' : alertInfo.isHigh ? 'bg-orange-100 ring-2 ring-orange-400' : alertInfo.isLow ? 'bg-amber-100 ring-2 ring-amber-400' : 'bg-green-100 ring-2 ring-green-400'
             } shadow-md`}>
               {categoryIcon}
             </div>
@@ -134,7 +134,7 @@ export const BudgetCard = ({
             )}
             {budget.limit_type && !alertInfo.isCritical && (
               <div className={`absolute -top-1 -right-1 h-4 w-4 sm:h-5 sm:w-5 rounded-full flex items-center justify-center ${budget.limit_type === 'hard'
-                  ? 'bg-rose-500 text-white'
+                  ? 'bg-red-500 text-white'
                   : 'bg-amber-500 text-white'
                 } shadow-lg`}>
                 {budget.limit_type === 'hard' ? (
@@ -226,7 +226,7 @@ export const BudgetCard = ({
           <span className="text-[10px] sm:text-xs text-slate-500 font-medium mb-0.5">Số tiền còn lại</span>
           <span className={`text-sm sm:text-lg font-bold break-words leading-tight ${budget.remaining_amount >= 0 ? 'text-slate-900' : alertInfo.textColor}`}>
             {budget.remaining_amount >= 0 ? (
-              <span className="text-emerald-600">{formatCurrency(budget.remaining_amount)}</span>
+              <span className="text-green-600">{formatCurrency(budget.remaining_amount)}</span>
             ) : (
               <span className={alertInfo.textColor}>{formatCurrency(Math.abs(budget.remaining_amount))}</span>
             )}
@@ -257,4 +257,5 @@ export const BudgetCard = ({
     </div>
   )
 }
+
 

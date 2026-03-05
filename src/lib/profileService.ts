@@ -202,3 +202,4 @@ export const deleteAvatar = async (): Promise<void> => {
   // Cập nhật profile để xóa avatar_url
   await updateProfile({ avatar_url: null })
 }
+

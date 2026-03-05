@@ -81,7 +81,7 @@ export const ReportFilterModal = ({
                             {selectedCategoryIds.length > 0 && (
                                 <button
                                     onClick={onClearCategories}
-                                    className="text-xs font-medium text-rose-500 hover:text-rose-600"
+                                    className="text-xs font-medium text-red-500 hover:text-red-600"
                                 >
                                     Bỏ chọn tất cả
                                 </button>
@@ -117,3 +117,4 @@ export const ReportFilterModal = ({
         </div>
     )
 }
+

@@ -354,3 +354,4 @@ export const removeShoppingItem = async (listId: string, itemId: string): Promis
   return updateShoppingList(listId, { items: updatedItems })
 }
 
+

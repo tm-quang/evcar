@@ -390,19 +390,19 @@ const NotesPlansPage = () => {
   const getReminderColor = (reminder: ReminderRecord) => {
     if (reminder.color) return reminder.color
     const isNote = !reminder.amount && !reminder.category_id && !reminder.wallet_id
-    return isNote ? 'amber' : reminder.type === 'Thu' ? 'emerald' : 'rose'
+    return isNote ? 'amber' : reminder.type === 'Thu' ? 'green' : 'red'
   }
 
   const getColorClasses = (color: string) => {
     const colorMap: Record<string, { bg: string; border: string; icon: string; dot: string; shadow: string }> = {
       amber: { bg: 'bg-gradient-to-br from-amber-50 to-yellow-50', border: 'border-amber-200/60', icon: 'bg-gradient-to-br from-amber-400 to-amber-500', dot: 'bg-amber-500', shadow: 'shadow-amber-100/50' },
-      emerald: { bg: 'bg-gradient-to-br from-emerald-50 to-green-50', border: 'border-emerald-200/60', icon: 'bg-gradient-to-br from-emerald-400 to-emerald-500', dot: 'bg-emerald-500', shadow: 'shadow-emerald-100/50' },
-      rose: { bg: 'bg-gradient-to-br from-rose-50 to-pink-50', border: 'border-rose-200/60', icon: 'bg-gradient-to-br from-rose-400 to-rose-500', dot: 'bg-rose-500', shadow: 'shadow-rose-100/50' },
+      green: { bg: 'bg-gradient-to-br from-green-50 to-green-50', border: 'border-green-200/60', icon: 'bg-gradient-to-br from-green-400 to-green-500', dot: 'bg-green-500', shadow: 'shadow-green-100/50' },
+      red: { bg: 'bg-gradient-to-br from-red-50 to-pink-50', border: 'border-red-200/60', icon: 'bg-gradient-to-br from-red-400 to-red-500', dot: 'bg-red-500', shadow: 'shadow-red-100/50' },
       sky: { bg: 'bg-gradient-to-br from-sky-50 to-blue-50', border: 'border-sky-200/60', icon: 'bg-gradient-to-br from-sky-400 to-sky-500', dot: 'bg-sky-500', shadow: 'shadow-sky-100/50' },
       blue: { bg: 'bg-gradient-to-br from-blue-50 to-indigo-50', border: 'border-blue-200/60', icon: 'bg-gradient-to-br from-blue-400 to-blue-500', dot: 'bg-blue-500', shadow: 'shadow-blue-100/50' },
       purple: { bg: 'bg-gradient-to-br from-purple-50 to-violet-50', border: 'border-purple-200/60', icon: 'bg-gradient-to-br from-purple-400 to-purple-500', dot: 'bg-purple-500', shadow: 'shadow-purple-100/50' },
       indigo: { bg: 'bg-gradient-to-br from-indigo-50 to-blue-50', border: 'border-indigo-200/60', icon: 'bg-gradient-to-br from-indigo-400 to-indigo-500', dot: 'bg-indigo-500', shadow: 'shadow-indigo-100/50' },
-      pink: { bg: 'bg-gradient-to-br from-pink-50 to-rose-50', border: 'border-pink-200/60', icon: 'bg-gradient-to-br from-pink-400 to-pink-500', dot: 'bg-pink-500', shadow: 'shadow-pink-100/50' },
+      pink: { bg: 'bg-gradient-to-br from-pink-50 to-red-50', border: 'border-pink-200/60', icon: 'bg-gradient-to-br from-pink-400 to-pink-500', dot: 'bg-pink-500', shadow: 'shadow-pink-100/50' },
       orange: { bg: 'bg-gradient-to-br from-orange-50 to-amber-50', border: 'border-orange-200/60', icon: 'bg-gradient-to-br from-orange-400 to-orange-500', dot: 'bg-orange-500', shadow: 'shadow-orange-100/50' },
       teal: { bg: 'bg-gradient-to-br from-teal-50 to-cyan-50', border: 'border-teal-200/60', icon: 'bg-gradient-to-br from-teal-400 to-teal-500', dot: 'bg-teal-500', shadow: 'shadow-teal-100/50' },
     }
@@ -488,7 +488,7 @@ const NotesPlansPage = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex-1 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 p-3 shadow-lg shadow-emerald-500/30">
+                  <div className="flex-1 rounded-2xl bg-gradient-to-br from-green-500 to-teal-500 p-3 shadow-lg shadow-green-500/30">
                     <div className="flex items-center gap-2">
                       <div className="h-8 w-8 rounded-xl bg-white/20 flex items-center justify-center">
                         <FaBell className="h-4 w-4 text-white" />
@@ -552,7 +552,7 @@ const NotesPlansPage = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex-1 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 p-3 shadow-lg shadow-emerald-500/30">
+                <div className="flex-1 rounded-2xl bg-gradient-to-br from-green-500 to-teal-500 p-3 shadow-lg shadow-green-500/30">
                   <div className="flex items-center gap-2">
                     <div className="h-8 w-8 rounded-xl bg-white/20 flex items-center justify-center">
                       <FaBell className="h-4 w-4 text-white" />
@@ -601,7 +601,7 @@ const NotesPlansPage = () => {
             <button
               onClick={() => setActiveTab('reminders')}
               className={`flex-shrink-0 px-3 py-2.5 text-xs font-bold rounded-xl transition-all duration-300 ${activeTab === 'reminders'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30 scale-105 border border-emerald-300'
+                ? 'bg-gradient-to-r from-green-500 to-teal-500 text-white shadow-lg shadow-green-500/30 scale-105 border border-green-300'
                 : 'text-slate-600 hover:text-slate-800 hover:bg-white/50'
                 }`}
             >
@@ -646,9 +646,9 @@ const NotesPlansPage = () => {
                       const getTaskColorClasses = () => {
                         if (task.status === 'completed') {
                           return {
-                            bg: 'bg-gradient-to-br from-green-50 via-emerald-50 to-green-50',
+                            bg: 'bg-gradient-to-br from-green-50 via-green-50 to-green-50',
                             border: 'border-green-200/80',
-                            icon: 'bg-gradient-to-br from-green-400 to-emerald-500',
+                            icon: 'bg-gradient-to-br from-green-400 to-green-500',
                             shadow: 'shadow-green-100/50'
                           }
                         } else if (task.status === 'in_progress') {
@@ -660,9 +660,9 @@ const NotesPlansPage = () => {
                           }
                         } else if (task.priority === 'urgent') {
                           return {
-                            bg: 'bg-gradient-to-br from-red-50 via-rose-50 to-red-50',
+                            bg: 'bg-gradient-to-br from-red-50 via-red-50 to-red-50',
                             border: 'border-red-200/80',
-                            icon: 'bg-gradient-to-br from-red-400 to-rose-500',
+                            icon: 'bg-gradient-to-br from-red-400 to-red-500',
                             shadow: 'shadow-red-100/50'
                           }
                         } else {
@@ -706,7 +706,7 @@ const NotesPlansPage = () => {
                                     task.status === 'in_progress' ? '⏳ Đang làm' : '⏸ Chờ'}
                                 </span>
                                 {task.priority === 'urgent' && (
-                                  <span className="text-xs px-3 py-1 rounded-full bg-gradient-to-r from-red-500 to-rose-500 text-white font-semibold shadow-sm animate-pulse">
+                                  <span className="text-xs px-3 py-1 rounded-full bg-gradient-to-r from-red-500 to-red-500 text-white font-semibold shadow-sm animate-pulse">
                                     ⚠ Khẩn
                                   </span>
                                 )}
@@ -731,7 +731,7 @@ const NotesPlansPage = () => {
                             </button>
                             <button
                               onClick={() => handleDelete('task', task)}
-                              className="flex items-center justify-center rounded-2xl bg-gradient-to-r from-red-500 to-rose-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-red-600 hover:to-rose-600 hover:shadow-lg hover:scale-105 active:scale-95"
+                              className="flex items-center justify-center rounded-2xl bg-gradient-to-r from-red-500 to-red-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-red-600 hover:to-red-600 hover:shadow-lg hover:scale-105 active:scale-95"
                             >
                               <FaTrash className="h-4 w-4" />
                             </button>
@@ -810,8 +810,8 @@ const NotesPlansPage = () => {
                                 )}
                                 {!isNote && reminder.type && (
                                   <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white shadow-sm ${reminder.type === 'Thu'
-                                    ? 'bg-gradient-to-r from-emerald-400 to-green-500'
-                                    : 'bg-gradient-to-r from-rose-400 to-red-500'
+                                    ? 'bg-gradient-to-r from-green-400 to-green-500'
+                                    : 'bg-gradient-to-r from-red-400 to-red-500'
                                     }`}>
                                     {reminder.type === 'Thu' ? '💰 Thu' : '💸 Chi'}
                                   </span>
@@ -841,7 +841,7 @@ const NotesPlansPage = () => {
                             {isNote ? (
                               <button
                                 onClick={() => handleDelete('note', reminder)}
-                                className="flex items-center justify-center rounded-2xl bg-gradient-to-r from-red-500 to-rose-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-red-600 hover:to-rose-600 hover:shadow-lg hover:scale-105 active:scale-95"
+                                className="flex items-center justify-center rounded-2xl bg-gradient-to-r from-red-500 to-red-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-red-600 hover:to-red-600 hover:shadow-lg hover:scale-105 active:scale-95"
                               >
                                 <FaTrash className="h-4 w-4" />
                               </button>
@@ -849,7 +849,7 @@ const NotesPlansPage = () => {
                               <>
                                 <button
                                   onClick={() => handleCompleteReminder(reminder)}
-                                  className="flex items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 to-green-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-emerald-600 hover:to-green-600 hover:shadow-lg hover:scale-105 active:scale-95"
+                                  className="flex items-center justify-center rounded-2xl bg-gradient-to-r from-green-500 to-green-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-green-600 hover:to-green-600 hover:shadow-lg hover:scale-105 active:scale-95"
                                   title="Hoàn thành"
                                 >
                                   <FaCheck className="h-4 w-4" />
@@ -886,9 +886,9 @@ const NotesPlansPage = () => {
                       const getTaskColorClasses = () => {
                         if (task.status === 'completed') {
                           return {
-                            bg: 'bg-gradient-to-br from-green-50 via-emerald-50 to-green-50',
+                            bg: 'bg-gradient-to-br from-green-50 via-green-50 to-green-50',
                             border: 'border-green-200/80',
-                            icon: 'bg-gradient-to-br from-green-400 to-emerald-500',
+                            icon: 'bg-gradient-to-br from-green-400 to-green-500',
                             shadow: 'shadow-green-100/50'
                           }
                         } else if (task.status === 'in_progress') {
@@ -900,9 +900,9 @@ const NotesPlansPage = () => {
                           }
                         } else if (task.priority === 'urgent') {
                           return {
-                            bg: 'bg-gradient-to-br from-red-50 via-rose-50 to-red-50',
+                            bg: 'bg-gradient-to-br from-red-50 via-red-50 to-red-50',
                             border: 'border-red-200/80',
-                            icon: 'bg-gradient-to-br from-red-400 to-rose-500',
+                            icon: 'bg-gradient-to-br from-red-400 to-red-500',
                             shadow: 'shadow-red-100/50'
                           }
                         } else {
@@ -946,7 +946,7 @@ const NotesPlansPage = () => {
                                     task.status === 'in_progress' ? '⏳ Đang làm' : '⏸ Chờ'}
                                 </span>
                                 {task.priority === 'urgent' && (
-                                  <span className="text-xs px-3 py-1 rounded-full bg-gradient-to-r from-red-500 to-rose-500 text-white font-semibold shadow-sm animate-pulse">
+                                  <span className="text-xs px-3 py-1 rounded-full bg-gradient-to-r from-red-500 to-red-500 text-white font-semibold shadow-sm animate-pulse">
                                     ⚠ Khẩn
                                   </span>
                                 )}
@@ -971,7 +971,7 @@ const NotesPlansPage = () => {
                             </button>
                             <button
                               onClick={() => handleDelete('task', task)}
-                              className="flex items-center justify-center rounded-2xl bg-gradient-to-r from-red-500 to-rose-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-red-600 hover:to-rose-600 hover:shadow-lg hover:scale-105 active:scale-95"
+                              className="flex items-center justify-center rounded-2xl bg-gradient-to-r from-red-500 to-red-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-red-600 hover:to-red-600 hover:shadow-lg hover:scale-105 active:scale-95"
                             >
                               <FaTrash className="h-4 w-4" />
                             </button>
@@ -1050,8 +1050,8 @@ const NotesPlansPage = () => {
                                 )}
                                 {!isNote && reminder.type && (
                                   <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white shadow-sm ${reminder.type === 'Thu'
-                                    ? 'bg-gradient-to-r from-emerald-400 to-green-500'
-                                    : 'bg-gradient-to-r from-rose-400 to-red-500'
+                                    ? 'bg-gradient-to-r from-green-400 to-green-500'
+                                    : 'bg-gradient-to-r from-red-400 to-red-500'
                                     }`}>
                                     {reminder.type === 'Thu' ? '💰 Thu' : '💸 Chi'}
                                   </span>
@@ -1081,7 +1081,7 @@ const NotesPlansPage = () => {
                             {isNote ? (
                               <button
                                 onClick={() => handleDelete('note', reminder)}
-                                className="flex items-center justify-center rounded-2xl bg-gradient-to-r from-red-500 to-rose-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-red-600 hover:to-rose-600 hover:shadow-lg hover:scale-105 active:scale-95"
+                                className="flex items-center justify-center rounded-2xl bg-gradient-to-r from-red-500 to-red-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-red-600 hover:to-red-600 hover:shadow-lg hover:scale-105 active:scale-95"
                               >
                                 <FaTrash className="h-4 w-4" />
                               </button>
@@ -1089,7 +1089,7 @@ const NotesPlansPage = () => {
                               <>
                                 <button
                                   onClick={() => handleCompleteReminder(reminder)}
-                                  className="flex items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 to-green-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-emerald-600 hover:to-green-600 hover:shadow-lg hover:scale-105 active:scale-95"
+                                  className="flex items-center justify-center rounded-2xl bg-gradient-to-r from-green-500 to-green-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-green-600 hover:to-green-600 hover:shadow-lg hover:scale-105 active:scale-95"
                                   title="Hoàn thành"
                                 >
                                   <FaCheck className="h-4 w-4" />
@@ -1235,4 +1235,5 @@ const NotesPlansPage = () => {
 }
 
 export default NotesPlansPage
+
 

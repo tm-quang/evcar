@@ -81,3 +81,4 @@ export async function updateTripPricePerKm(
         console.warn('Error saving trip price to DB:', error)
     }
 }
+

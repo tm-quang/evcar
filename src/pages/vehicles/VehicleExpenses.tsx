@@ -676,3 +676,4 @@ function AddExpenseModal({ vehicle, onClose, onSuccess }: {
         </div>
     )
 }
+

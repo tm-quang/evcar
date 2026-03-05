@@ -736,3 +736,4 @@ export async function getMonthlyStats(vehicleId: string, months = 6): Promise<Mo
 
     return points
 }
+

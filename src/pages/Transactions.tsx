@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDataPreloader } from '../hooks/useDataPreloader'
+import { getNowUTC7, getDateComponentsUTC7, getDayOfWeekUTC7, createDateUTC7 } from '../utils/dateUtils'
 import {
   FaSearch,
 } from 'react-icons/fa'
@@ -29,36 +30,33 @@ const formatCurrency = (value: number) =>
 
 // Helper function to get date range based on period type
 const getDateRangeForPeriod = (periodType: 'day' | 'week' | 'month' | 'quarter') => {
-  const now = new Date()
+  const now = getNowUTC7()
+  const components = getDateComponentsUTC7(now)
   let startDate: Date
-  let endDate: Date = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59)
+  let endDate: Date = createDateUTC7(components.year, components.month, components.day, 23, 59, 59)
 
   switch (periodType) {
     case 'day':
-      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0)
+      startDate = createDateUTC7(components.year, components.month, components.day, 0, 0, 0)
       break
     case 'week': {
-      const dayOfWeek = now.getDay()
-      const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1) // Monday
-      startDate = new Date(now.getFullYear(), now.getMonth(), diff, 0, 0, 0)
+      const dayOfWeek = getDayOfWeekUTC7(now)
+      const diff = components.day - dayOfWeek + (dayOfWeek === 0 ? -6 : 1) // Monday
+      startDate = createDateUTC7(components.year, components.month, diff, 0, 0, 0)
       break
     }
     case 'month':
-      startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0)
-      endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59)
+      startDate = createDateUTC7(components.year, components.month, 1, 0, 0, 0)
+      endDate = createDateUTC7(components.year, components.month, components.day, 23, 59, 59)
       break
     case 'quarter': {
-      const quarter = Math.floor(now.getMonth() / 3)
-      startDate = new Date(now.getFullYear(), quarter * 3, 1, 0, 0, 0)
-      endDate = new Date(now.getFullYear(), quarter * 3 + 2, new Date(now.getFullYear(), quarter * 3 + 3, 0).getDate(), 23, 59, 59)
-      // Use current date if within quarter
-      if (now < endDate) {
-        endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59)
-      }
+      const quarter = Math.floor((components.month - 1) / 3)
+      startDate = createDateUTC7(components.year, quarter * 3 + 1, 1, 0, 0, 0)
+      endDate = createDateUTC7(components.year, components.month, components.day, 23, 59, 59)
       break
     }
     default:
-      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0)
+      startDate = createDateUTC7(components.year, components.month, components.day, 0, 0, 0)
   }
 
   return {
@@ -298,8 +296,8 @@ const TransactionsPage = () => {
     // Array of beautiful color combinations
     const colors = [
       { bg: 'bg-sky-100', icon: 'text-sky-600', text: 'text-sky-700' },
-      { bg: 'bg-emerald-100', icon: 'text-emerald-600', text: 'text-emerald-700' },
-      { bg: 'bg-rose-100', icon: 'text-rose-600', text: 'text-rose-700' },
+      { bg: 'bg-green-100', icon: 'text-green-600', text: 'text-green-700' },
+      { bg: 'bg-red-100', icon: 'text-red-600', text: 'text-red-700' },
       { bg: 'bg-amber-100', icon: 'text-amber-600', text: 'text-amber-700' },
       { bg: 'bg-purple-100', icon: 'text-purple-600', text: 'text-purple-700' },
       { bg: 'bg-indigo-100', icon: 'text-indigo-600', text: 'text-indigo-700' },
@@ -497,15 +495,15 @@ const TransactionsPage = () => {
 
           {/* Total Income and Expense */}
           <section className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-white px-4 py-3 shadow-lg border border-emerald-100">
-              <p className="text-xs font-semibold uppercase tracking-wider text-emerald-600">Tổng Thu</p>
-              <p className="mt-1 text-lg font-bold text-emerald-700">
+            <div className="rounded-xl bg-gradient-to-br from-green-50 to-white px-4 py-3 shadow-lg border border-green-100">
+              <p className="text-xs font-semibold uppercase tracking-wider text-green-500">Tổng Thu</p>
+              <p className="mt-1 text-lg font-bold text-green-500">
                 {isLoading ? '...' : formatCurrency(totals.income)}
               </p>
             </div>
-            <div className="rounded-xl bg-gradient-to-br from-rose-50 to-white px-4 py-3 shadow-lg border border-rose-100">
-              <p className="text-xs font-semibold uppercase tracking-wider text-rose-600">Tổng Chi</p>
-              <p className="mt-1 text-lg font-bold text-rose-700">
+            <div className="rounded-xl bg-gradient-to-br from-red-50 to-white px-4 py-3 shadow-lg border border-red-100">
+              <p className="text-xs font-semibold uppercase tracking-wider text-red-500">Tổng Chi</p>
+              <p className="mt-1 text-lg font-bold text-red-500">
                 {isLoading ? '...' : formatCurrency(totals.expense)}
               </p>
             </div>
@@ -574,7 +572,7 @@ const TransactionsPage = () => {
                           <div className="h-2 w-2 rounded-full bg-sky-400" />
                           <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">{dayLabel}</span>
                         </div>
-                        <span className={`text-[13px] font-black ${dayTotal >= 0 ? 'text-emerald-500' : 'text-slate-500'}`}>
+                        <span className={`text-[13px] font-black ${dayTotal >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                           {dayTotal >= 0 ? '+' : ''}{Math.round(dayTotal).toLocaleString('vi-VN')}đ
                         </span>
                       </div>
@@ -672,4 +670,5 @@ const TransactionsPage = () => {
 }
 
 export default TransactionsPage
+
 

@@ -25,8 +25,8 @@ export const HorizontalBarChart = ({ income, expense, height = 60 }: HorizontalB
     <div className="flex items-end gap-2 h-full">
       {/* Income Bar (Vertical - Left) - Green */}
       <div
-        className="rounded-sm bg-emerald-500 shrink-0"
-        style={{ 
+        className="rounded-sm bg-green-500 shrink-0"
+        style={{
           width: '45px',
           height: `${Math.max((incomeHeight / 100) * height, income > 0 ? 4 : 0)}px`,
           minHeight: income > 0 ? '4px' : '0px'
@@ -36,8 +36,8 @@ export const HorizontalBarChart = ({ income, expense, height = 60 }: HorizontalB
 
       {/* Expense Bar (Vertical - Right) - Red */}
       <div
-        className="rounded-sm bg-rose-500 shrink-0"
-        style={{ 
+        className="rounded-sm bg-red-500 shrink-0"
+        style={{
           width: '45px',
           height: `${Math.max((expenseHeight / 100) * height, expense > 0 ? 4 : 0)}px`,
           minHeight: expense > 0 ? '4px' : '0px'
@@ -47,4 +47,5 @@ export const HorizontalBarChart = ({ income, expense, height = 60 }: HorizontalB
     </div>
   )
 }
+
 

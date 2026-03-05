@@ -515,3 +515,4 @@ export const setTotalBalanceWalletIds = async (walletIds: string[]): Promise<voi
   // Invalidate cache
   await queryClient.invalidateQueries({ queryKey: ['getTotalBalanceWalletIds'] })
 }
+

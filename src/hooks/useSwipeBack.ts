@@ -115,3 +115,4 @@ export const useSwipeBack = (options: SwipeBackOptions = {}) => {
     }
   }, [enabled, threshold, edgeWidth, navigate])
 }
+

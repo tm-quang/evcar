@@ -527,7 +527,7 @@ export const DashboardPage = () => {
         // Sử dụng cache - nếu đã preload, sẽ lấy từ cache ngay lập tức
         // Chỉ fetch khi cache hết hạn hoặc chưa có
         const [transactionsData, categoriesData, walletsData] = await Promise.all([
-          fetchTransactions({ limit: 5 }),
+          fetchTransactions({ limit: 10 }),
           fetchCategories(),
           fetchWallets(false), // Chỉ lấy ví active, không lấy ví đã ẩn
         ])
@@ -602,7 +602,7 @@ export const DashboardPage = () => {
         // Đợi một chút để đảm bảo wallet balance đã được sync
         await new Promise(resolve => setTimeout(resolve, 500))
 
-        const transactionsData = await fetchTransactions({ limit: 5 })
+        const transactionsData = await fetchTransactions({ limit: 10 })
         // Sort by date: newest first (transaction_date desc, then created_at desc)
         const sortedTransactions = [...transactionsData].sort((a, b) => {
           const dateA = new Date(a.transaction_date).getTime()
@@ -638,7 +638,7 @@ export const DashboardPage = () => {
         try {
           setIsLoadingTransactions(true)
           const [transactionsData, categoriesData, walletsData, remindersData, tasksData, profileData] = await Promise.all([
-            fetchTransactions({ limit: 5 }),
+            fetchTransactions({ limit: 10 }),
             fetchCategories(),
             fetchWallets(false),
             fetchReminders({ is_active: true }),
@@ -1004,8 +1004,8 @@ export const DashboardPage = () => {
     // Array of beautiful color combinations
     const colors = [
       { bg: 'bg-sky-100', icon: 'text-sky-600', text: 'text-sky-700' },
-      { bg: 'bg-emerald-100', icon: 'text-emerald-600', text: 'text-emerald-700' },
-      { bg: 'bg-rose-100', icon: 'text-rose-600', text: 'text-rose-700' },
+      { bg: 'bg-green-100', icon: 'text-green-600', text: 'text-green-700' },
+      { bg: 'bg-red-100', icon: 'text-red-600', text: 'text-red-700' },
       { bg: 'bg-amber-100', icon: 'text-amber-600', text: 'text-amber-700' },
       { bg: 'bg-purple-100', icon: 'text-purple-600', text: 'text-purple-700' },
       { bg: 'bg-indigo-100', icon: 'text-indigo-600', text: 'text-indigo-700' },
@@ -1164,7 +1164,7 @@ export const DashboardPage = () => {
             </header>
             <div className="space-y-3">
               {isLoadingTransactions ? (
-                <TransactionListSkeleton count={5} />
+                <TransactionListSkeleton count={10} />
               ) : transactions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center rounded-3xl bg-white p-8 shadow-lg border border-slate-100">
                   <div className="mb-3 p-3 overflow-hidden">
@@ -1178,7 +1178,7 @@ export const DashboardPage = () => {
                 </div>
               ) : (
                 (() => {
-                  const recentTransactions = transactions.slice(0, 5);
+                  const recentTransactions = transactions.slice(0, 10);
                   // Group transactions by date
                   const grouped: Record<string, typeof transactions> = {};
                   recentTransactions.forEach((t) => {
@@ -1226,7 +1226,7 @@ export const DashboardPage = () => {
                             <div className="h-2 w-2 rounded-full bg-sky-400" />
                             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">{dayLabel}</span>
                           </div>
-                          <span className={`text-[13px] font-black ${dayTotal >= 0 ? 'text-emerald-500' : 'text-slate-500'}`}>
+                          <span className={`text-[13px] font-black ${dayTotal >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                             {dayTotal >= 0 ? '+' : ''}{Math.round(dayTotal).toLocaleString('vi-VN')}đ
                           </span>
                         </div>
@@ -1452,4 +1452,5 @@ export const DashboardPage = () => {
 }
 
 export default DashboardPage
+
 

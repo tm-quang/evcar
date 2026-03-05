@@ -85,13 +85,13 @@ const getNotificationColor = (type: NotificationType): string => {
     case 'reminder':
       return 'bg-amber-100 text-amber-600'
     case 'budget':
-      return 'bg-rose-100 text-rose-600'
+      return 'bg-red-100 text-red-600'
     case 'system':
       return 'bg-slate-100 text-slate-600'
     case 'admin':
       return 'bg-purple-100 text-purple-600'
     case 'promotion':
-      return 'bg-emerald-100 text-emerald-600'
+      return 'bg-green-100 text-green-600'
     case 'event':
       return 'bg-indigo-100 text-indigo-600'
     default:
@@ -365,7 +365,7 @@ export const NotificationsPage = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleDelete(notification.id)}
-                                  className="rounded-lg bg-rose-100 p-2 text-rose-600 transition hover:bg-rose-200"
+                                  className="rounded-lg bg-red-100 p-2 text-red-600 transition hover:bg-red-200"
                                   aria-label="Xóa"
                                 >
                                   <FaTrash className="h-4 w-4" />
@@ -388,4 +388,5 @@ export const NotificationsPage = () => {
 }
 
 export default NotificationsPage
+
 

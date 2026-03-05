@@ -30,10 +30,7 @@ const VoiceToTextPage = lazy(() => import('./pages/VoiceToText'))
 const AddBudgetPage = lazy(() => import('./pages/AddBudget'))
 const LoginPage = lazy(() => import('./pages/Login'))
 const RegisterPage = lazy(() => import('./pages/Register'))
-const AdminCategoriesIconPage = lazy(() => import('./pages/AdminCategoriesIcon'))
-const AdminIconImagesPage = lazy(() => import('./pages/AdminIconImages'))
 const AccountInfoPage = lazy(() => import('./pages/AccountInfo'))
-const AdminSettingsPage = lazy(() => import('./pages/AdminSettings'))
 const QRResultPage = lazy(() => import('./pages/QRResult'))
 const DebtManagerPage = lazy(() => import('./pages/DebtManager'))
 const VehicleManagementPage = lazy(() => import('./pages/vehicles'))
@@ -275,30 +272,6 @@ function AppContent() {
               }
             />
             <Route
-              path="/admin-categoriesicon"
-              element={
-                <ProtectedRoute>
-                  <AdminCategoriesIconPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin-icon-images"
-              element={
-                <ProtectedRoute>
-                  <AdminIconImagesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin-settings"
-              element={
-                <ProtectedRoute>
-                  <AdminSettingsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
               path="/qr-result"
               element={
                 <ProtectedRoute>
@@ -492,4 +465,5 @@ function App() {
 }
 
 export default App
+
 

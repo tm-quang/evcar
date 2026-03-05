@@ -13,6 +13,8 @@ import {
   getStartOfDayUTC7,
   getEndOfDayUTC7,
   getDateComponentsUTC7,
+  getDayOfWeekUTC7,
+  createDateUTC7,
 } from '../utils/dateUtils'
 
 export type PeriodType = 'weekly' | 'monthly' | 'yearly'
@@ -81,27 +83,16 @@ const throwIfError = (error: PostgrestError | null, fallbackMessage: string): vo
 
 // Get Monday of a given date in UTC+7 (week starts on Monday)
 const getMonday = (date: Date): Date => {
-  const d = new Date(date)
-  // Convert to UTC+7 first
-  const utc7Date = new Date(d.getTime() + (d.getTimezoneOffset() * 60000) + (7 * 3600000))
-  const day = utc7Date.getUTCDay()
-  const diff = utc7Date.getUTCDate() - day + (day === 0 ? -6 : 1) // Adjust when day is Sunday
-  const monday = new Date(utc7Date)
-  monday.setUTCDate(diff)
-  monday.setUTCHours(0, 0, 0, 0)
-  // Convert back to local time
-  return new Date(monday.getTime() - (7 * 3600000) - (monday.getTimezoneOffset() * 60000))
+  const vnDay = getDayOfWeekUTC7(date)
+  const components = getDateComponentsUTC7(date)
+  const diff = vnDay === 0 ? -6 : 1 - vnDay // Monday is 1
+  return createDateUTC7(components.year, components.month, components.day + diff, 0, 0, 0, 0)
 }
 
 // Get Sunday of a given week in UTC+7 (week ends on Sunday)
 const getSunday = (monday: Date): Date => {
-  const sunday = new Date(monday)
-  sunday.setTime(sunday.getTime() + (6 * 24 * 60 * 60 * 1000)) // Add 6 days
-  // Set to end of day in UTC+7
-  const utc7Date = new Date(sunday.getTime() + (sunday.getTimezoneOffset() * 60000) + (7 * 3600000))
-  utc7Date.setUTCHours(23, 59, 59, 999)
-  // Convert back to local time
-  return new Date(utc7Date.getTime() - (7 * 3600000) - (utc7Date.getTimezoneOffset() * 60000))
+  const components = getDateComponentsUTC7(monday)
+  return createDateUTC7(components.year, components.month, components.day + 6, 23, 59, 59, 999)
 }
 
 // Calculate period dates in UTC+7
@@ -235,13 +226,13 @@ export const getBudgetStatus = (percentage: number): BudgetStatus => {
 export const getBudgetColor = (status: BudgetStatus): string => {
   switch (status) {
     case 'safe':
-      return 'emerald'
+      return 'green'
     case 'warning':
       return 'amber'
     case 'danger':
       return 'red'
     case 'critical':
-      return 'rose'
+      return 'red'
   }
 }
 
@@ -740,3 +731,4 @@ export const checkBudgetLimit = async (
 
   return { allowed: true, budget: null, message: '' }
 }
+

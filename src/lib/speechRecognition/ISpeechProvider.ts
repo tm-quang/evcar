@@ -50,3 +50,4 @@ export interface ISpeechProvider {
   getSpeed(): number
 }
 
+

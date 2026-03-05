@@ -79,7 +79,7 @@ export const ShoppingListSelectionModal = ({
         <div className="flex items-center justify-between border-b border-slate-100 p-4 shrink-0">
           <div className="flex items-center gap-3">
             {preset.type === 'market' ? (
-              <FaStore className="h-5 w-5 text-emerald-600" />
+              <FaStore className="h-5 w-5 text-green-600" />
             ) : (
               <FaShoppingCart className="h-5 w-5 text-blue-600" />
             )}
@@ -242,4 +242,5 @@ export const ShoppingListSelectionModal = ({
     </div>
   )
 }
+
 

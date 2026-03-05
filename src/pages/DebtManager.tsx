@@ -315,7 +315,7 @@ export const DebtManagerPage = () => {
     const getStatusBadge = (debt: DebtRecord) => {
         if (debt.status === 'paid') {
             return (
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700">
                     <FaCheck className="h-3 w-3" />
                     Đã hoàn tất
                 </span>
@@ -323,7 +323,7 @@ export const DebtManagerPage = () => {
         }
         if (isOverdue(debt)) {
             return (
-                <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-700">
+                <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700">
                     <FaExclamationTriangle className="h-3 w-3" />
                     Quá hạn
                 </span>
@@ -403,31 +403,31 @@ export const DebtManagerPage = () => {
                         <DebtSummarySkeleton />
                     ) : summary && (summary.borrow_count > 0 || summary.lend_count > 0) ? (
                         <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                            <div className="rounded-2xl bg-gradient-to-br from-rose-50 to-white p-3 sm:p-4 border border-rose-100 shadow-lg overflow-hidden">
+                            <div className="rounded-2xl bg-gradient-to-br from-red-50 to-white p-3 sm:p-4 border border-red-100 shadow-lg overflow-hidden">
                                 <div className="flex items-center gap-1.5 sm:gap-2 mb-2">
-                                    <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-rose-100 flex items-center justify-center shrink-0">
-                                        <FaHandHoldingUsd className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-rose-600" />
+                                    <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
+                                        <FaHandHoldingUsd className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-500" />
                                     </div>
-                                    <span className="text-[10px] sm:text-xs font-semibold text-rose-600 truncate">Nợ cần trả</span>
+                                    <span className="text-[10px] sm:text-xs font-semibold text-red-500 truncate">Nợ cần trả</span>
                                 </div>
                                 <p className="text-sm sm:text-lg font-bold text-slate-900 break-words leading-tight">
                                     {formatCurrency(summary.total_borrow)}
                                 </p>
-                                <p className="text-[10px] sm:text-xs text-rose-600 font-medium mt-0.5">
+                                <p className="text-[10px] sm:text-xs text-red-500 font-medium mt-0.5">
                                     {summary.borrow_count} khoản
                                 </p>
                             </div>
-                            <div className="rounded-2xl bg-gradient-to-br from-emerald-50 to-white p-3 sm:p-4 border border-emerald-100 shadow-lg overflow-hidden">
+                            <div className="rounded-2xl bg-gradient-to-br from-green-50 to-white p-3 sm:p-4 border border-green-100 shadow-lg overflow-hidden">
                                 <div className="flex items-center gap-1.5 sm:gap-2 mb-2">
-                                    <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
-                                        <FaMoneyBillWave className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600" />
+                                    <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
+                                        <FaMoneyBillWave className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500" />
                                     </div>
-                                    <span className="text-[10px] sm:text-xs font-semibold text-emerald-600 truncate">Cho vay</span>
+                                    <span className="text-[10px] sm:text-xs font-semibold text-green-500 truncate">Cho vay</span>
                                 </div>
                                 <p className="text-sm sm:text-lg font-bold text-slate-900 break-words leading-tight">
                                     {formatCurrency(summary.total_lend)}
                                 </p>
-                                <p className="text-[10px] sm:text-xs text-emerald-600 font-medium mt-0.5">
+                                <p className="text-[10px] sm:text-xs text-green-500 font-medium mt-0.5">
                                     {summary.lend_count} khoản
                                 </p>
                             </div>
@@ -438,11 +438,11 @@ export const DebtManagerPage = () => {
                                     </div>
                                     <span className="text-[10px] sm:text-xs font-semibold text-blue-600 truncate">Số dư ròng</span>
                                 </div>
-                                <p className={`text-sm sm:text-lg font-bold break-words leading-tight ${summary.net_balance >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                <p className={`text-sm sm:text-lg font-bold break-words leading-tight ${summary.net_balance >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                                     {formatCurrency(Math.abs(summary.net_balance))}
                                 </p>
                                 {summary.overdue_count > 0 && (
-                                    <p className="text-[10px] sm:text-xs text-rose-600 font-medium mt-0.5">
+                                    <p className="text-[10px] sm:text-xs text-red-500 font-medium mt-0.5">
                                         {summary.overdue_count} quá hạn
                                     </p>
                                 )}
@@ -504,15 +504,15 @@ export const DebtManagerPage = () => {
                                 return (
                                     <div
                                         key={debt.id}
-                                        className={`rounded-3xl bg-white p-5 shadow-lg border transition-all ${isOverdue(debt) ? 'border-rose-200 bg-rose-50/30' : 'border-slate-100'
+                                        className={`rounded-3xl bg-white p-5 shadow-lg border transition-all ${isOverdue(debt) ? 'border-red-200 bg-red-50/30' : 'border-slate-100'
                                             }`}
                                     >
                                         {/* Header */}
                                         <div className="flex items-start justify-between mb-3">
                                             <div className="flex items-center gap-3">
                                                 <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${debt.type === 'borrow'
-                                                    ? 'bg-gradient-to-br from-rose-400 to-rose-600'
-                                                    : 'bg-gradient-to-br from-emerald-400 to-emerald-600'
+                                                    ? 'bg-gradient-to-br from-red-400 to-red-600'
+                                                    : 'bg-gradient-to-br from-green-400 to-green-600'
                                                     }`}>
                                                     {debt.type === 'borrow' ? (
                                                         <FaHandHoldingUsd className="h-6 w-6 text-white" />
@@ -532,7 +532,7 @@ export const DebtManagerPage = () => {
 
                                         {/* Amount */}
                                         <div className="mb-3">
-                                            <p className={`text-xl font-bold ${debt.type === 'borrow' ? 'text-rose-600' : 'text-emerald-600'}`}>
+                                            <p className={`text-xl font-bold ${debt.type === 'borrow' ? 'text-red-600' : 'text-green-600'}`}>
                                                 {formatCurrency(debt.remaining_amount)}
                                                 {debt.status !== 'paid' && debt.paid_amount > 0 && (
                                                     <span className="text-sm font-normal text-slate-500 ml-2">
@@ -550,7 +550,7 @@ export const DebtManagerPage = () => {
                                             <div className="mb-3">
                                                 <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
                                                     <div
-                                                        className={`h-full rounded-full transition-all ${debt.type === 'borrow' ? 'bg-rose-500' : 'bg-emerald-500'
+                                                        className={`h-full rounded-full transition-all ${debt.type === 'borrow' ? 'bg-red-500' : 'bg-green-500'
                                                             }`}
                                                         style={{ width: `${progressPercent}%` }}
                                                     />
@@ -565,7 +565,7 @@ export const DebtManagerPage = () => {
                                         <div className="flex items-center justify-between pt-3 border-t border-slate-100">
                                             <div className="text-xs text-slate-500">
                                                 {debt.due_date ? (
-                                                    <span className={isOverdue(debt) ? 'text-rose-600 font-semibold' : ''}>
+                                                    <span className={isOverdue(debt) ? 'text-red-600 font-semibold' : ''}>
                                                         Hạn: {formatDate(debt.due_date)}
                                                     </span>
                                                 ) : (
@@ -584,7 +584,7 @@ export const DebtManagerPage = () => {
                                                         </button>
                                                         <button
                                                             onClick={() => handleMarkAsPaid(debt)}
-                                                            className="p-2 rounded-full text-emerald-600 hover:bg-emerald-50 transition"
+                                                            className="p-2 rounded-full text-green-600 hover:bg-green-50 transition"
                                                             title="Đánh dấu hoàn tất"
                                                         >
                                                             <FaCheck className="h-4 w-4" />
@@ -600,7 +600,7 @@ export const DebtManagerPage = () => {
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(debt)}
-                                                    className="p-2 rounded-full text-rose-600 hover:bg-rose-50 transition"
+                                                    className="p-2 rounded-full text-red-600 hover:bg-red-50 transition"
                                                     title="Xóa"
                                                 >
                                                     <FaTrash className="h-4 w-4" />
@@ -633,14 +633,14 @@ export const DebtManagerPage = () => {
                                 {!editingDebt && (
                                     <div>
                                         <label className="mb-2 block text-sm font-semibold text-slate-700">
-                                            Loại <span className="text-rose-500">*</span>
+                                            Loại <span className="text-red-500">*</span>
                                         </label>
                                         <div className="grid grid-cols-2 gap-3">
                                             <button
                                                 type="button"
                                                 onClick={() => setFormData({ ...formData, type: 'borrow' })}
                                                 className={`flex items-center justify-center gap-2 rounded-3xl p-4 border-2 transition-all ${formData.type === 'borrow'
-                                                    ? 'border-rose-500 bg-rose-50 text-rose-700'
+                                                    ? 'border-red-500 bg-red-50 text-red-700'
                                                     : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
                                                     }`}
                                             >
@@ -651,7 +651,7 @@ export const DebtManagerPage = () => {
                                                 type="button"
                                                 onClick={() => setFormData({ ...formData, type: 'lend' })}
                                                 className={`flex items-center justify-center gap-2 rounded-3xl p-4 border-2 transition-all ${formData.type === 'lend'
-                                                    ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                                                    ? 'border-green-500 bg-green-50 text-green-700'
                                                     : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
                                                     }`}
                                             >
@@ -665,7 +665,7 @@ export const DebtManagerPage = () => {
                                 {/* Person name */}
                                 <div>
                                     <label className="mb-2 block text-sm font-semibold text-slate-700">
-                                        {formData.type === 'borrow' ? 'Nợ ai?' : 'Cho ai vay?'} <span className="text-rose-500">*</span>
+                                        {formData.type === 'borrow' ? 'Nợ ai?' : 'Cho ai vay?'} <span className="text-red-500">*</span>
                                     </label>
                                     <input
                                         type="text"
@@ -680,7 +680,7 @@ export const DebtManagerPage = () => {
                                 {/* Amount */}
                                 <div>
                                     <label className="mb-2 block text-sm font-semibold text-slate-700">
-                                        Số tiền <span className="text-rose-500">*</span>
+                                        Số tiền <span className="text-red-500">*</span>
                                     </label>
                                     <div className="relative">
                                         <input
@@ -838,3 +838,4 @@ export const DebtManagerPage = () => {
 }
 
 export default DebtManagerPage
+

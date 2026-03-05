@@ -177,3 +177,4 @@ export function parseVoiceInputToItems(text: string): Array<{ name: string; quan
 
 // Export singleton instance
 export const voiceRecognitionService = new VoiceRecognitionService()
+

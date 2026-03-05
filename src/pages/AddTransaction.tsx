@@ -615,12 +615,12 @@ export const AddTransactionPage = () => {
       showError('Không thể nhận diện hạng mục. Vui lòng chọn thủ công.')
       return false
     }
-    
+
     setIsSubmitting(true)
     try {
       const finalTransactionDate = transactionData.transaction_date || formatDateUTC7(getNowUTC7())
       const walletId = transactionData.wallet_id || defaultWalletId || ''
-      
+
       const result = await createTransaction({
         wallet_id: walletId,
         category_id: transactionData.category_id,
@@ -635,7 +635,7 @@ export const AddTransactionPage = () => {
       } else {
         success(`Đã thêm ${transactionData.type === 'Thu' ? 'khoản thu' : 'khoản chi'} thành công từ giọng nói!`)
       }
-      
+
       // Reload data
       try {
         const { queryClient } = await import('../lib/react-query')
@@ -643,7 +643,7 @@ export const AddTransactionPage = () => {
       } catch (err) {
         console.error('Error invalidating queries:', err)
       }
-      
+
       return true
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Không thể tạo giao dịch'
@@ -729,7 +729,7 @@ export const AddTransactionPage = () => {
         <div className="mx-auto flex w-full max-w-md flex-col gap-2 px-4 pt-2 pb-4 sm:pt-2 sm:pb-6">
           {/* Error message */}
           {error && (
-            <div className="rounded-lg bg-rose-50 p-3 text-xs text-rose-600 sm:text-sm">
+            <div className="rounded-lg bg-red-50 p-3 text-xs text-red-600 sm:text-sm">
               {error}
             </div>
           )}
@@ -742,8 +742,8 @@ export const AddTransactionPage = () => {
                 type="button"
                 onClick={() => setFormState((prev) => ({ ...prev, type: 'Thu' }))}
                 className={`group flex items-center justify-center gap-2 rounded-2xl border-2 py-3 px-4 text-center text-sm font-bold transition-all ${formState.type === 'Thu'
-                  ? 'border-emerald-600 bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 ring-2 ring-emerald-400/50'
-                  : 'border-slate-200 bg-white text-slate-600 hover:border-emerald-400 hover:bg-emerald-50'
+                  ? 'border-green-500 bg-green-500 text-white shadow-lg shadow-green-500/30'
+                  : 'border-slate-200 bg-white text-slate-600 hover:border-green-300 hover:bg-green-50'
                   }`}
               >
                 <FaArrowUp className="h-5 w-5" />
@@ -753,8 +753,8 @@ export const AddTransactionPage = () => {
                 type="button"
                 onClick={() => setFormState((prev) => ({ ...prev, type: 'Chi' }))}
                 className={`group flex items-center justify-center gap-2 rounded-2xl border-2 py-3 px-4 text-center text-sm font-bold transition-all ${formState.type === 'Chi'
-                  ? 'border-rose-500 bg-rose-500 text-white shadow-lg shadow-rose-500/30'
-                  : 'border-slate-200 bg-white text-slate-600 hover:border-rose-300 hover:bg-rose-50'
+                  ? 'border-red-500 bg-red-500 text-white shadow-lg shadow-red-500/30'
+                  : 'border-slate-200 bg-white text-slate-600 hover:border-red-300 hover:bg-red-50'
                   }`}
               >
                 <FaArrowDown className="h-5 w-5" />
@@ -765,7 +765,7 @@ export const AddTransactionPage = () => {
             {/* Wallet Selection - For both Income and Expense */}
             <div>
               <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-500">
-                {formState.type === 'Chi' ? 'Chọn ví' : 'Chọn ví'} <span className="text-rose-500">*</span>
+                {formState.type === 'Chi' ? 'Chọn ví' : 'Chọn ví'} <span className="text-red-500">*</span>
               </label>
               <CustomSelect
                 options={wallets.map((wallet) => ({
@@ -802,13 +802,13 @@ export const AddTransactionPage = () => {
                     onFocus={() => setIsNumberPadOpen(true)}
                     placeholder="0"
                     className={`text-right bg-transparent border-0 text-3xl font-bold transition-all placeholder:text-slate-300 focus:outline-none cursor-pointer min-w-[80px] ${formState.type === 'Thu'
-                      ? 'text-emerald-600'
-                      : 'text-rose-600'
+                      ? 'text-green-600'
+                      : 'text-red-600'
                       }`}
                     required
                     readOnly
                   />
-                  <span className={`text-xl font-semibold shrink-0 ${formState.type === 'Thu' ? 'text-emerald-600' : 'text-rose-600'
+                  <span className={`text-xl font-semibold shrink-0 ${formState.type === 'Thu' ? 'text-green-600' : 'text-red-600'
                     }`}>
                     ₫
                   </span>
@@ -976,7 +976,7 @@ export const AddTransactionPage = () => {
             {/* Date and Time */}
             <div>
               <label className="mb-2 mt-3 block text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Thời gian giao dịch <span className="text-rose-500">*</span>
+                Thời gian giao dịch <span className="text-red-500">*</span>
               </label>
               <button
                 type="button"
@@ -1231,7 +1231,7 @@ export const AddTransactionPage = () => {
 
                                   window.open(mapsUrl, '_blank', 'noopener,noreferrer')
                                 }}
-                                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border-2 border-emerald-200 bg-emerald-50 text-emerald-600 transition-all hover:border-emerald-300 hover:bg-emerald-100"
+                                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border-2 border-green-200 bg-green-50 text-green-600 transition-all hover:border-green-300 hover:bg-green-100"
                                 title="Mở bản đồ"
                               >
                                 <FaExternalLinkAlt className="h-5 w-5" />
@@ -1542,12 +1542,12 @@ export const AddTransactionPage = () => {
         onClose={() => setIsVoiceModalOpen(false)}
         onSuccess={async (transactionData) => {
           console.log('Voice transaction data received:', transactionData)
-          
+
           setIsVoiceModalOpen(false)
-          
+
           // Tự động submit transaction từ voice data
           const success = await submitTransactionFromVoice(transactionData)
-          
+
           if (!success) {
             // Nếu submit không thành công, điền dữ liệu vào form để người dùng có thể chỉnh sửa và submit thủ công
             setFormState((prev) => ({
@@ -1602,4 +1602,5 @@ export const AddTransactionPage = () => {
 }
 
 export default AddTransactionPage
+
 

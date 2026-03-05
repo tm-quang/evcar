@@ -415,3 +415,4 @@ export const IncomeExpenseOverview = ({ walletId }: IncomeExpenseOverviewProps) 
   )
 }
 
+

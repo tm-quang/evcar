@@ -241,8 +241,8 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
           ) : (
             <div className={`py-3 shadow-sm ring-1 rounded-2xl mx-4 mt-4 ${
               categoryType === 'Chi tiêu'
-                ? 'bg-gradient-to-br from-rose-50/30 to-white ring-rose-100/50'
-                : 'bg-gradient-to-br from-emerald-50/30 to-white ring-emerald-100/50'
+                ? 'bg-gradient-to-br from-red-50/30 to-white ring-red-100/50'
+                : 'bg-gradient-to-br from-green-50/30 to-white ring-green-100/50'
             }`}>
               {filteredCategories.map((parent) => {
                 if (!parent) return null
@@ -422,4 +422,5 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
     </div>
   )
 }
+
 

@@ -189,3 +189,4 @@ export const NotificationSettingsModal = ({ isOpen, onClose }: NotificationSetti
   )
 }
 
+

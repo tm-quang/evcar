@@ -32,3 +32,4 @@ export const persister = createAsyncStoragePersister({
     storage: idbValidKey,
     key: 'bofin_react_query_offline_cache',
 })
+

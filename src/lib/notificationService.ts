@@ -538,3 +538,4 @@ export const sendNoteNotification = async (title: string): Promise<void> => {
     badge: '/bogin-logo.png',
   })
 }
+

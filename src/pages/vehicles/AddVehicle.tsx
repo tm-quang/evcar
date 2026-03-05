@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Car, Bike } from 'lucide-react'
 import { createVehicle, updateVehicle, type VehicleRecord } from '../../lib/vehicles/vehicleService'
@@ -81,7 +81,7 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
         <div className="flex h-full flex-col overflow-hidden bg-[#F7F9FC] text-slate-900">
             <HeaderBar
                 variant="page"
-                title={vehicle ? 'CẬP NHẬT XE' : 'THÊM XE MỚI'}
+                title={vehicle ? 'Cập nhật xe' : 'Thêm xe mới'}
             />
 
             <main className="flex-1 overflow-y-auto overscroll-contain pb-4">
@@ -115,14 +115,14 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
                                 <button
                                     type="button"
                                     onClick={() => setFormData({ ...formData, vehicle_type: 'motorcycle' })}
-                                    className={`rounded-xl border-2 p-4 transition-all ${formData.vehicle_type === 'motorcycle'
+                                    className={`rounded-2xl border-2 p-4 transition-all ${formData.vehicle_type === 'motorcycle'
                                         ? 'border-blue-500 bg-blue-50 shadow-md shadow-blue-100'
                                         : 'border-slate-200 bg-white hover:border-blue-300'
                                         }`}
                                 >
                                     <div className="flex flex-col items-center gap-2">
                                         <div
-                                            className={`rounded-lg p-2 ${formData.vehicle_type === 'motorcycle'
+                                            className={`rounded-3xl p-2 ${formData.vehicle_type === 'motorcycle'
                                                 ? 'bg-blue-500'
                                                 : 'bg-slate-100'
                                                 }`}
@@ -143,14 +143,14 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
                                 <button
                                     type="button"
                                     onClick={() => setFormData({ ...formData, vehicle_type: 'car' })}
-                                    className={`rounded-xl border-2 p-4 transition-all ${formData.vehicle_type === 'car'
+                                    className={`rounded-2xl border-2 p-4 transition-all ${formData.vehicle_type === 'car'
                                         ? 'border-blue-500 bg-blue-50 shadow-md shadow-blue-100'
                                         : 'border-slate-200 bg-white hover:border-blue-300'
                                         }`}
                                 >
                                     <div className="flex flex-col items-center gap-2">
                                         <div
-                                            className={`rounded-lg p-2 ${formData.vehicle_type === 'car' ? 'bg-blue-500' : 'bg-slate-100'
+                                            className={`rounded-3xl p-2 ${formData.vehicle_type === 'car' ? 'bg-blue-500' : 'bg-slate-100'
                                                 }`}
                                         >
                                             <Car
@@ -183,7 +183,7 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
                                         required
                                         value={formData.license_plate}
                                         onChange={(e) => setFormData({ ...formData, license_plate: e.target.value.toUpperCase() })}
-                                        placeholder="51F-12345"
+                                        placeholder="Biển số xe"
                                         className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                                     />
                                 </div>
@@ -195,7 +195,7 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
                                             type="text"
                                             value={formData.brand}
                                             onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                                            placeholder="Honda"
+                                            placeholder="Nhập hãng xe"
                                             className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                                         />
                                     </div>
@@ -209,7 +209,7 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
                                             required
                                             value={formData.model}
                                             onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                                            placeholder="City RS"
+                                            placeholder="Nhập tên xe"
                                             className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                                         />
                                     </div>
@@ -222,7 +222,7 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
                                             type="number"
                                             value={formData.year}
                                             onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
-                                            min="1900"
+                                            min="Năm"
                                             max={new Date().getFullYear() + 1}
                                             className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                                         />
@@ -234,7 +234,7 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
                                             type="text"
                                             value={formData.color}
                                             onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                                            placeholder="Trắng"
+                                            placeholder="Nhập màu sắc"
                                             className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                                         />
                                     </div>
@@ -275,7 +275,7 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
 
                             <div className="space-y-4">
                                 <div>
-                                    <label className="mb-1 block text-sm font-medium text-slate-700">Hạn bảo hiểm</label>
+                                    <label className="mb-1 block text-sm font-medium text-slate-700">Hết hạn bảo hiểm</label>
                                     <input
                                         type="date"
                                         value={formData.insurance_expiry_date}
@@ -285,7 +285,7 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
                                 </div>
 
                                 <div>
-                                    <label className="mb-1 block text-sm font-medium text-slate-700">Hạn đăng kiểm</label>
+                                    <label className="mb-1 block text-sm font-medium text-slate-700">Hết hạn đăng kiểm</label>
                                     <input
                                         type="date"
                                         value={formData.inspection_expiry_date}
@@ -302,7 +302,7 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
 
                             <div className="space-y-4">
                                 <div>
-                                    <label className="mb-1 block text-sm font-medium text-slate-700">Bảo dưỡng lúc (km)</label>
+                                    <label className="mb-1 block text-sm font-medium text-slate-700">Bảo dưỡng lần (km)</label>
                                     <input
                                         type="number"
                                         value={formData.next_maintenance_km || ''}
@@ -314,7 +314,7 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
                                 </div>
 
                                 <div>
-                                    <label className="mb-1 block text-sm font-medium text-slate-700">Bảo dưỡng lúc (ngày)</label>
+                                    <label className="mb-1 block text-sm font-medium text-slate-700">Bảo dưỡng lần (ngày)</label>
                                     <input
                                         type="date"
                                         value={formData.next_maintenance_date}
@@ -344,3 +344,4 @@ export default function AddVehicle({ vehicle, onSuccess }: AddVehicleProps) {
         </div >
     )
 }
+

@@ -343,7 +343,7 @@ export const NumberPadModal = ({ isOpen, onClose, value, onChange, onConfirm }: 
               <NumberButton
                 onClick={() => { }}
                 disabled
-                className="rounded-2xl bg-rose-300 px-3 py-4 text-base font-bold text-gray-700 shadow-md opacity-90 cursor-not-allowed"
+                className="rounded-2xl bg-red-300 px-3 py-4 text-base font-bold text-gray-700 shadow-md opacity-90 cursor-not-allowed"
               >
                 −
               </NumberButton>
@@ -370,7 +370,7 @@ export const NumberPadModal = ({ isOpen, onClose, value, onChange, onConfirm }: 
               <NumberButton
                 onClick={() => { }}
                 disabled
-                className="rounded-2xl bg-emerald-300 px-3 py-4 text-base font-bold text-gray-700 shadow-md opacity-90 cursor-not-allowed"
+                className="rounded-2xl bg-green-300 px-3 py-4 text-base font-bold text-gray-700 shadow-md opacity-90 cursor-not-allowed"
               >
                 +
               </NumberButton>
@@ -428,3 +428,4 @@ export const NumberPadModal = ({ isOpen, onClose, value, onChange, onConfirm }: 
     </>
   )
 }
+

@@ -15,3 +15,4 @@ export const AuthFooter = ({ prompt, linkTo, linkLabel }: AuthFooterProps) => (
   </div>
 )
 
+

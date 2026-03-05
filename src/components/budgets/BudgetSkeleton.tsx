@@ -46,3 +46,4 @@ export const BudgetListSkeleton = ({ count = 3 }: { count?: number }) => {
   )
 }
 
+

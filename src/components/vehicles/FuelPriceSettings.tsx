@@ -215,7 +215,7 @@ export function FuelPriceSettings({ isOpen, onClose, onSave }: FuelPriceSettings
                 <button
                     onClick={handleSave}
                     disabled={loading}
-                    className="w-full rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-3 font-semibold text-white transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
+                    className="w-full rounded-xl bg-gradient-to-r from-green-500 to-green-500 px-4 py-3 font-semibold text-white transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
                 >
                     {loading ? (
                         <>
@@ -233,3 +233,4 @@ export function FuelPriceSettings({ isOpen, onClose, onSave }: FuelPriceSettings
         </div>
     )
 }
+

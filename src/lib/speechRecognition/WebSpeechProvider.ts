@@ -301,3 +301,4 @@ export class WebSpeechProvider implements ISpeechProvider {
     return 200 // ~200ms latency với interim results
   }
 }
+

@@ -116,3 +116,4 @@ export const cleanupNativeScanCallback = () => {
         window.onNativeScanResult = undefined;
     }
 };
+

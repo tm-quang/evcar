@@ -84,8 +84,8 @@ class ErrorBoundary extends Component<Props, State> {
         <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4">
           <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-xl ring-1 ring-slate-200">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-rose-100">
-                <FaExclamationTriangle className="h-8 w-8 text-rose-600" />
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+                <FaExclamationTriangle className="h-8 w-8 text-red-600" />
               </div>
               <h1 className="mb-2 text-xl font-bold text-slate-900">
                 Đã xảy ra lỗi
@@ -124,4 +124,5 @@ class ErrorBoundary extends Component<Props, State> {
 }
 
 export default ErrorBoundary
+
 

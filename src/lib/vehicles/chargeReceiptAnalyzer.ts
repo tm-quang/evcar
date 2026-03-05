@@ -188,3 +188,4 @@ export async function analyzeChargeReceipt(imageFile: File): Promise<ChargeRecei
         throw err
     }
 }
+

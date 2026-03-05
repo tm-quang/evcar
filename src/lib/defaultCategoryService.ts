@@ -259,3 +259,4 @@ export const deleteDefaultCategory = async (id: string): Promise<void> => {
 
   await queryClient.invalidateQueries({ queryKey: ['default_categories'] })
 }
+

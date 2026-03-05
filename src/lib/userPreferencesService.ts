@@ -211,3 +211,4 @@ export const updateTaskViewPreferences = async (
     task_custom_end_date: customEndDate,
   })
 }
+

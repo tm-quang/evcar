@@ -259,3 +259,4 @@ export const getPublicSettings = async (): Promise<Record<string, string | null>
 
   return result
 }
+

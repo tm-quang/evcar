@@ -117,7 +117,7 @@ export const DashboardTaskCard = ({
       case 'completed':
         return { 
           text: 'Hoàn thành', 
-          color: 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/30',
+          color: 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg shadow-green-500/30',
           icon: <FaCheckCircle className="h-3 w-3" />
         }
       case 'in_progress':
@@ -415,7 +415,7 @@ export const DashboardTaskCard = ({
 
             {/* Subtasks - Enhanced */}
             {totalSubtasks > 0 && (
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl px-3 py-2.5">
+              <div className="bg-gradient-to-r from-green-50 to-green-50 border-2 border-green-200 rounded-2xl px-3 py-2.5">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <FaCheckSquare className="text-green-600 shrink-0" />
@@ -486,7 +486,7 @@ export const DashboardTaskCard = ({
                   handleCompleteTask()
                 }}
                 disabled={isUpdating}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white text-sm font-bold shadow-lg shadow-green-500/30 transition-all hover:from-green-600 hover:to-emerald-700 hover:shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-bold shadow-lg shadow-green-500/30 transition-all hover:from-green-600 hover:to-green-700 hover:shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <FaCheckCircle className="h-4 w-4" />
                 <span>Hoàn tất công việc</span>
@@ -511,3 +511,4 @@ export const DashboardTaskCard = ({
     </div>
   )
 }
+

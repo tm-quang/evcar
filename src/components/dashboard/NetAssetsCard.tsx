@@ -227,3 +227,4 @@ export const NetAssetsCard = ({ className = '', refreshTrigger = 0 }: NetAssetsC
     </div>
   )
 }
+

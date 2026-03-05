@@ -168,3 +168,4 @@ export const FooterNav = ({ onAddClick }: FooterNavProps) => {
 }
 
 export default FooterNav
+

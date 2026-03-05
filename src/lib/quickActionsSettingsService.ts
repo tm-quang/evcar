@@ -62,3 +62,4 @@ export const getQuickActionsSettings = async (): Promise<Record<string, boolean>
 
     return data?.quick_actions_settings || null
 }
+

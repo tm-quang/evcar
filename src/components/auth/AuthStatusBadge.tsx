@@ -10,8 +10,8 @@ const statusCopy: Record<ConnectionState, string> = {
 const statusColors: Record<ConnectionState, string> = {
   idle: 'bg-slate-600/50 text-slate-200',
   connecting: 'bg-sky-500/20 text-sky-200 ring-1 ring-sky-400/40',
-  connected: 'bg-emerald-500/20 text-emerald-200 ring-1 ring-emerald-400/50',
-  error: 'bg-rose-500/20 text-rose-200 ring-1 ring-rose-400/50',
+  connected: 'bg-green-500/20 text-green-200 ring-1 ring-green-400/50',
+  error: 'bg-red-500/20 text-red-200 ring-1 ring-red-400/50',
 }
 
 type AuthStatusBadgeProps = {
@@ -29,4 +29,5 @@ export const AuthStatusBadge = ({ status }: AuthStatusBadgeProps) => (
     {statusCopy[status]}
   </span>
 )
+
 

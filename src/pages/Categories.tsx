@@ -436,7 +436,7 @@ export const CategoriesPage = () => {
                             type="button"
                             onClick={() => setActiveTab('expense')}
                             className={`flex-1 rounded-xl px-4 py-2.5 text-sm font-bold transition-all sm:px-5 sm:py-3 ${activeTab === 'expense'
-                                ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-md shadow-rose-500/30'
+                                ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md shadow-red-500/30'
                                 : 'text-slate-600 hover:bg-slate-50'
                                 }`}
                         >
@@ -446,7 +446,7 @@ export const CategoriesPage = () => {
                             type="button"
                             onClick={() => setActiveTab('income')}
                             className={`flex-1 rounded-xl px-4 py-2.5 text-sm font-bold transition-all sm:px-5 sm:py-3 ${activeTab === 'income'
-                                ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-500/30'
+                                ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md shadow-green-500/30'
                                 : 'text-slate-600 hover:bg-slate-50'
                                 }`}
                         >
@@ -691,7 +691,7 @@ export const CategoriesPage = () => {
                                             })
                                         }}
                                         disabled={isSubmitting || isDeleting}
-                                        className="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-lg border border-slate-100 text-rose-600 transition-all hover:bg-rose-50 hover:border-rose-200 disabled:cursor-not-allowed disabled:opacity-50 active:scale-95"
+                                        className="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-lg border border-slate-100 text-red-600 transition-all hover:bg-red-50 hover:border-red-200 disabled:cursor-not-allowed disabled:opacity-50 active:scale-95"
                                         aria-label="Xóa hạng mục"
                                     >
                                         <FaTrash className="h-5 w-5" />
@@ -711,7 +711,7 @@ export const CategoriesPage = () => {
                             {/* Category Name */}
                             <div className="space-y-2">
                                 <label className="block text-sm font-semibold text-slate-700">
-                                    Tên hạng mục <span className="text-rose-500">*</span>
+                                    Tên hạng mục <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     required
@@ -727,14 +727,14 @@ export const CategoriesPage = () => {
                             {/* Category Type */}
                             <div className="space-y-2">
                                 <label className="block text-sm font-semibold text-slate-700">
-                                    Loại hạng mục <span className="text-rose-500">*</span>
+                                    Loại hạng mục <span className="text-red-500">*</span>
                                 </label>
                                 <div className="grid grid-cols-2 gap-3">
                                     <button
                                         type="button"
                                         onClick={() => setFormState((prev) => ({ ...prev, type: 'Chi tiêu' }))}
                                         className={`group relative h-14 rounded-2xl border-2 px-4 text-sm font-bold transition-all active:scale-[0.98] ${formState.type === 'Chi tiêu'
-                                            ? 'border-rose-500 bg-gradient-to-br from-rose-500 to-red-600 text-white shadow-lg shadow-rose-500/30 ring-2 ring-rose-400/20'
+                                            ? 'border-red-500 bg-gradient-to-br from-red-500 to-red-600 text-white shadow-lg shadow-red-500/30 ring-2 ring-red-400/20'
                                             : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
                                             }`}
                                     >
@@ -747,7 +747,7 @@ export const CategoriesPage = () => {
                                         type="button"
                                         onClick={() => setFormState((prev) => ({ ...prev, type: 'Thu nhập' }))}
                                         className={`group relative h-14 rounded-2xl border-2 px-4 text-sm font-bold transition-all active:scale-[0.98] ${formState.type === 'Thu nhập'
-                                            ? 'border-emerald-500 bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30 ring-2 ring-emerald-400/20'
+                                            ? 'border-green-500 bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg shadow-green-500/30 ring-2 ring-green-400/20'
                                             : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
                                             }`}
                                     >
@@ -800,7 +800,7 @@ export const CategoriesPage = () => {
                             {/* Icon Selection */}
                             <div className="space-y-2">
                                 <label className="block text-sm font-semibold text-slate-700">
-                                    Biểu tượng hiển thị <span className="text-rose-500">*</span>
+                                    Biểu tượng hiển thị <span className="text-red-500">*</span>
                                 </label>
                                 <button
                                     type="button"
@@ -841,7 +841,7 @@ export const CategoriesPage = () => {
 
                             {/* Error Message */}
                             {formError && (
-                                <div className="rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-600 ring-1 ring-rose-200">
+                                <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600 ring-1 ring-red-200">
                                     {formError}
                                 </div>
                             )}
@@ -888,3 +888,4 @@ export const CategoriesPage = () => {
 
 
 export default CategoriesPage
+

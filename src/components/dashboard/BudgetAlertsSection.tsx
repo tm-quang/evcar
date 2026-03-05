@@ -57,13 +57,13 @@ export const BudgetAlertsSection = () => {
 
   // Màu sắc và gradient dựa trên mức độ cảnh báo
   const sectionStyles = hasCriticalAlerts
-    ? 'bg-gradient-to-br from-red-50 via-orange-50 to-rose-50 border-2 border-red-300 shadow-red-200/50'
+    ? 'bg-gradient-to-br from-red-50 via-orange-50 to-red-50 border-2 border-red-300 shadow-red-200/50'
     : hasHighAlerts
     ? 'bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 border-2 border-orange-300 shadow-orange-200/50'
     : 'bg-gradient-to-br from-amber-50 via-yellow-50 to-amber-50 border-2 border-amber-300 shadow-amber-200/50'
 
   const headerIconBg = hasCriticalAlerts
-    ? 'bg-gradient-to-br from-red-500 to-rose-600 text-white animate-pulse'
+    ? 'bg-gradient-to-br from-red-500 to-red-600 text-white animate-pulse'
     : hasHighAlerts
     ? 'bg-gradient-to-br from-orange-500 to-amber-600 text-white'
     : 'bg-gradient-to-br from-amber-500 to-yellow-500 text-white'
@@ -125,19 +125,19 @@ export const BudgetAlertsSection = () => {
 
           // Màu sắc nổi bật hơn dựa trên mức độ cảnh báo
           const cardStyles = isCritical
-            ? 'bg-gradient-to-br from-red-50 to-rose-50 border-2 border-red-400 shadow-lg shadow-red-200/50 hover:shadow-xl hover:shadow-red-300/50'
+            ? 'bg-gradient-to-br from-red-50 to-red-50 border-2 border-red-400 shadow-lg shadow-red-200/50 hover:shadow-xl hover:shadow-red-300/50'
             : isHigh
             ? 'bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-400 shadow-lg shadow-orange-200/50 hover:shadow-xl hover:shadow-orange-300/50'
             : 'bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-400 shadow-md shadow-amber-200/50 hover:shadow-lg hover:shadow-amber-300/50'
 
           const badgeStyles = isCritical
-            ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white border-red-700 shadow-lg shadow-red-300/50 animate-pulse'
+            ? 'bg-gradient-to-r from-red-600 to-red-600 text-white border-red-700 shadow-lg shadow-red-300/50 animate-pulse'
             : isHigh
             ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white border-orange-600 shadow-md'
             : 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white border-amber-600'
 
           const progressStyles = isCritical
-            ? 'bg-gradient-to-r from-red-600 via-rose-600 to-red-500 shadow-lg shadow-red-400/50'
+            ? 'bg-gradient-to-r from-red-600 via-red-600 to-red-500 shadow-lg shadow-red-400/50'
             : isHigh
             ? 'bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 shadow-md shadow-orange-400/50'
             : 'bg-gradient-to-r from-amber-400 to-yellow-500'
@@ -156,7 +156,7 @@ export const BudgetAlertsSection = () => {
             >
               {/* Animated background effect */}
               {isCritical && (
-                <div className="absolute inset-0 bg-gradient-to-r from-red-400/10 via-transparent to-rose-400/10 animate-pulse" />
+                <div className="absolute inset-0 bg-gradient-to-r from-red-400/10 via-transparent to-red-400/10 animate-pulse" />
               )}
               
               <div className="relative z-10 flex items-start gap-3">
@@ -230,7 +230,7 @@ export const BudgetAlertsSection = () => {
             onClick={() => navigate('/budgets')}
             className={`mt-4 w-full rounded-xl ${
               hasCriticalAlerts
-                ? 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white shadow-lg shadow-red-300/50'
+                ? 'bg-gradient-to-r from-red-600 to-red-600 hover:from-red-700 hover:to-red-700 text-white shadow-lg shadow-red-300/50'
                 : hasHighAlerts
                 ? 'bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white shadow-lg shadow-orange-300/50'
                 : 'bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white shadow-md'
@@ -244,4 +244,5 @@ export const BudgetAlertsSection = () => {
     </section>
   )
 }
+
 

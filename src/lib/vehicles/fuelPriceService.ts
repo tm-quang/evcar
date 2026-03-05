@@ -225,3 +225,4 @@ export function getElectricDiscountSettings(): { mode: 'pct' | 'vnd'; value: str
 export function setElectricDiscountSettings(prefs: { mode: 'pct' | 'vnd'; value: string }): void {
     localStorage.setItem('BOFIN_ELECTRIC_DISCOUNT_PREFS', JSON.stringify(prefs))
 }
+

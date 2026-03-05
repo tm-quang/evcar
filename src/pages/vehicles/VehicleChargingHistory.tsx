@@ -416,9 +416,9 @@ export default function VehicleChargingHistory() {
 
                 {/* 4 Cards Grid */}
                 <div className="grid grid-cols-2 gap-3 mb-6">
-                    <div className="bg-[#f0fdf4] rounded-[20px] p-5 flex flex-col items-center justify-center text-center shadow-md border border-emerald-200">
-                        <p className="text-[10px] font-bold text-emerald-600 tracking-widest uppercase mb-1.5 leading-none">Năng lượng</p>
-                        <p className="text-xl font-black text-emerald-700 leading-none">{Math.round(totalKwh)} kWh</p>
+                    <div className="bg-[#f0fdf4] rounded-[20px] p-5 flex flex-col items-center justify-center text-center shadow-md border border-green-200">
+                        <p className="text-[10px] font-bold text-green-600 tracking-widest uppercase mb-1.5 leading-none">Năng lượng</p>
+                        <p className="text-xl font-black text-green-700 leading-none">{Math.round(totalKwh)} kWh</p>
                     </div>
                     <div className="bg-[#fdf4ff] rounded-[20px] p-5 flex flex-col items-center justify-center text-center shadow-md border border-fuchsia-200">
                         <p className="text-[10px] font-bold text-fuchsia-600 tracking-widest uppercase mb-1.5 leading-none">Cắm sạc</p>
@@ -500,7 +500,7 @@ export default function VehicleChargingHistory() {
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-5">
                                             <div className="flex items-center gap-1.5">
-                                                <Zap className="h-4 w-4 text-emerald-500" />
+                                                <Zap className="h-4 w-4 text-green-500" />
                                                 <span className="text-[15px] font-black text-slate-800">{log.kwh?.toFixed(1) || 0} kWh</span>
                                             </div>
                                             <div className="flex items-center gap-1.5">
@@ -512,7 +512,7 @@ export default function VehicleChargingHistory() {
                                             {/* Show crossed original price and Free badge if cost is 0 */}
                                             {log.total_cost === 0 ? (
                                                 <>
-                                                    <span className="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md mr-1.5 uppercase">Free</span>
+                                                    <span className="text-xs font-extrabold text-green-600 bg-green-50 px-2 py-0.5 rounded-md mr-1.5 uppercase">Free</span>
                                                     <span className="text-xs font-medium text-slate-400 line-through">{formatCurrency((log.kwh || 0) * (price || 3858)).replace('₫', 'đ').trim()}</span>
                                                 </>
                                             ) : (
@@ -526,11 +526,11 @@ export default function VehicleChargingHistory() {
                                     <div className="mt-1">
                                         <div className="flex justify-between text-[10px] text-slate-500 font-medium mb-1.5 px-0.5">
                                             <span>Tỉ lệ sạc</span>
-                                            <span className="text-emerald-500 font-bold">{Math.round(Math.min(100, Math.max(0, ((log.kwh || 0) / 37.23) * 100)))}%</span>
+                                            <span className="text-green-500 font-bold">{Math.round(Math.min(100, Math.max(0, ((log.kwh || 0) / 37.23) * 100)))}%</span>
                                         </div>
                                         <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                                             <div
-                                                className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                                                className="bg-green-500 h-full rounded-full transition-all duration-500"
                                                 style={{ width: `${Math.min(100, Math.max(0, ((log.kwh || 0) / 37.23) * 100))}%` }}
                                             ></div>
                                         </div>
@@ -628,7 +628,7 @@ export default function VehicleChargingHistory() {
                                             </div>
                                             <div>
                                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Tỉ lệ sạc</p>
-                                                <p className="text-sm font-bold text-emerald-600">~{percentModal}% pin</p>
+                                                <p className="text-sm font-bold text-green-600">~{percentModal}% pin</p>
                                             </div>
 
                                             <div className="col-span-2">
@@ -643,7 +643,7 @@ export default function VehicleChargingHistory() {
                                                         </span>
                                                     )}
                                                     {parsedKhuyenMai && (
-                                                        <span className="text-xs font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">
+                                                        <span className="text-xs font-bold text-green-500 bg-green-50 px-1.5 py-0.5 rounded">
                                                             KM: {parsedKhuyenMai}
                                                         </span>
                                                     )}
@@ -771,3 +771,4 @@ export default function VehicleChargingHistory() {
         </div>
     )
 }
+

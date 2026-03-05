@@ -426,7 +426,7 @@ export default function VehicleMaintenance() {
                                                                         <div className="flex flex-wrap gap-1.5">
                                                                             {log.service_items.map((item, i) => (
                                                                                 <span key={i} className="flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
-                                                                                    <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+                                                                                    <CheckCircle2 className="h-3 w-3 text-green-500" />
                                                                                     {item}
                                                                                 </span>
                                                                             ))}
@@ -855,3 +855,4 @@ function MaintenanceSettingsModal({ vehicle, onClose, onSuccess }: {
         </div>
     )
 }
+

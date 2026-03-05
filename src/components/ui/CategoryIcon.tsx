@@ -116,3 +116,4 @@ export const CategoryIcon = ({ iconId, iconUrl, className, fallback = null, size
   return <>{iconNode}</>
 }
 
+

@@ -40,13 +40,13 @@ export const AdvancedAnalyticsChart = ({ data, height = 300 }: AdvancedAnalytics
                 {
                     data: data.map(d => d.income),
                     label: 'Thu nhập',
-                    color: '#10b981', // emerald-500
+                    color: '#22c55e', // green-500
                     valueFormatter: (v: number | null) => v ? formatCurrency(v) : '0 ₫',
                 },
                 {
                     data: data.map(d => d.expense),
                     label: 'Chi tiêu',
-                    color: '#f43f5e', // rose-500
+                    color: '#ef4444', // red-500
                     valueFormatter: (v: number | null) => v ? formatCurrency(v) : '0 ₫',
                 },
             ]
@@ -125,11 +125,11 @@ export const AdvancedAnalyticsChart = ({ data, height = 300 }: AdvancedAnalytics
                 {stats && (
                     <div className="hidden sm:flex items-center gap-4 text-xs text-slate-500">
                         <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                            <div className="w-2 h-2 rounded-full bg-green-500"></div>
                             <span>TB Thu: {formatCurrency(stats.avgIncome)}</span>
                         </div>
                         <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 rounded-full bg-rose-500"></div>
+                            <div className="w-2 h-2 rounded-full bg-red-500"></div>
                             <span>TB Chi: {formatCurrency(stats.avgExpense)}</span>
                         </div>
                     </div>
@@ -193,14 +193,15 @@ export const AdvancedAnalyticsChart = ({ data, height = 300 }: AdvancedAnalytics
                 <div className="grid grid-cols-2 gap-3 sm:hidden pt-2 border-t border-slate-100 px-5">
                     <div className="flex flex-col">
                         <span className="text-[10px] text-slate-400 uppercase font-semibold">TB Thu nhập</span>
-                        <span className="text-sm font-bold text-emerald-600">{formatCurrency(stats.avgIncome)}</span>
+                        <span className="text-sm font-bold text-green-500">{formatCurrency(stats.avgIncome)}</span>
                     </div>
                     <div className="flex flex-col">
                         <span className="text-[10px] text-slate-400 uppercase font-semibold">TB Chi tiêu</span>
-                        <span className="text-sm font-bold text-rose-600">{formatCurrency(stats.avgExpense)}</span>
+                        <span className="text-sm font-bold text-red-500">{formatCurrency(stats.avgExpense)}</span>
                     </div>
                 </div>
             )}
         </div>
     )
 }
+

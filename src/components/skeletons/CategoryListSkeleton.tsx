@@ -35,3 +35,4 @@ export const CategoryListSkeleton = ({ count = 6 }: CategoryListSkeletonProps) =
   )
 }
 
+

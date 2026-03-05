@@ -237,7 +237,7 @@ const QRResultPage = () => {
                     {/* Selected Result Card */}
                     {currentResult && (
                         <div className="relative overflow-hidden rounded-3xl bg-white p-6 shadow-lg border border-slate-100">
-                            <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-gradient-to-br from-emerald-100 to-teal-50 opacity-50 blur-2xl" />
+                            <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-gradient-to-br from-green-100 to-teal-50 opacity-50 blur-2xl" />
                             <div className="relative z-10">
                                 <div className="flex items-center justify-between mb-4">
                                     <h2 className="text-lg font-bold text-slate-800">Kết quả đang chọn</h2>
@@ -261,7 +261,7 @@ const QRResultPage = () => {
                                         onClick={() => handleCopy()}
                                         className={`flex-1 flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all active:scale-95 border ${
                                             isCopied
-                                                ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                                                ? 'bg-green-50 text-green-600 border-green-200'
                                                 : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                                         }`}
                                     >
@@ -364,3 +364,4 @@ const QRResultPage = () => {
 }
 
 export default QRResultPage
+

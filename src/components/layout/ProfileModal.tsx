@@ -155,10 +155,10 @@ export const ProfileModal = ({ isOpen, onClose, userName, avatarUrl, avatarText 
                             <button
                                 onClick={handleLogout}
                                 disabled={isLoggingOut}
-                                className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl border-2 border-rose-100 bg-rose-50 text-rose-600 font-bold hover:bg-rose-100 hover:border-rose-200 transition-all active:scale-[0.98] disabled:opacity-50"
+                                className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl border-2 border-red-100 bg-red-50 text-red-600 font-bold hover:bg-red-100 hover:border-red-200 transition-all active:scale-[0.98] disabled:opacity-50"
                             >
                                 {isLoggingOut ? (
-                                    <span className="h-5 w-5 border-2 border-rose-600 border-t-transparent rounded-full animate-spin" />
+                                    <span className="h-5 w-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
                                 ) : (
                                     <>
                                         <FaSignOutAlt className="h-5 w-5" /> Đăng xuất khỏi thiết bị
@@ -174,3 +174,4 @@ export const ProfileModal = ({ isOpen, onClose, userName, avatarUrl, avatarText 
 
     return createPortal(modalContent, document.body)
 }
+

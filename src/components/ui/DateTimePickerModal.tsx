@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { FaChevronLeft, FaChevronRight, FaClock, FaTimes } from 'react-icons/fa'
-import { formatDateUTC7, getNowUTC7, createDateUTC7, getDateComponentsUTC7 } from '../../utils/dateUtils'
+import { formatDateUTC7, getNowUTC7, createDateUTC7, getDateComponentsUTC7, getDayOfWeekUTC7 } from '../../utils/dateUtils'
 
 interface DateTimePickerModalProps {
   isOpen: boolean
@@ -116,7 +116,8 @@ export const DateTimePickerModal = ({
   lastDay.setUTCDate(lastDay.getUTCDate() - 1)
   const lastDayComponents = getDateComponentsUTC7(lastDay)
   const daysInMonth = lastDayComponents.day
-  const startingDayOfWeek = firstDay.getUTCDay() === 0 ? 6 : firstDay.getUTCDay() - 1 // Monday = 0
+  const vnDayOfWeek = getDayOfWeekUTC7(firstDay)
+  const startingDayOfWeek = vnDayOfWeek === 0 ? 6 : vnDayOfWeek - 1 // Monday = 0
 
   // Weekday labels
   const weekdays = ['T.2', 'T.3', 'T.4', 'T.5', 'T.6', 'T.7', 'CN']
@@ -389,4 +390,5 @@ export const DateTimePickerModal = ({
     </>
   )
 }
+
 

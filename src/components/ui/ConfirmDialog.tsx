@@ -53,18 +53,18 @@ const getDialogConfig = (type: DialogType = 'confirm') => {
     },
     success: {
       icon: FaCheck,
-      iconColor: 'text-emerald-500',
-      iconBg: 'bg-emerald-100',
+      iconColor: 'text-green-500',
+      iconBg: 'bg-green-100',
       titleColor: 'text-slate-900',
-      buttonColor: 'from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700',
+      buttonColor: 'from-green-500 to-green-600 hover:from-green-600 hover:to-green-700',
       defaultTitle: 'Thành công',
     },
     error: {
       icon: FaExclamationTriangle,
-      iconColor: 'text-rose-500',
-      iconBg: 'bg-rose-100',
-      titleColor: 'text-rose-900',
-      buttonColor: 'from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700',
+      iconColor: 'text-red-500',
+      iconBg: 'bg-red-100',
+      titleColor: 'text-red-900',
+      buttonColor: 'from-red-500 to-red-600 hover:from-red-600 hover:to-red-700',
       defaultTitle: 'Lỗi',
     },
   }
@@ -269,4 +269,5 @@ export const ConfirmDialog = ({
     </div>
   )
 }
+
 

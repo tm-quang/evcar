@@ -27,7 +27,7 @@ const TRIP_TYPES = {
     service: { label: 'Dịch vụ', color: 'teal', bg: 'bg-teal-100', text: 'text-teal-700', dot: 'bg-teal-500' },
     leisure: { label: 'Đi chơi', color: 'green', bg: 'bg-green-100', text: 'text-green-700', dot: 'bg-green-500' },
     hometown: { label: 'Về quê', color: 'orange', bg: 'bg-orange-100', text: 'text-orange-700', dot: 'bg-orange-500' },
-    family: { label: 'Gia đình', color: 'rose', bg: 'bg-rose-100', text: 'text-rose-700', dot: 'bg-rose-500' },
+    family: { label: 'Gia đình', color: 'red', bg: 'bg-red-100', text: 'text-red-700', dot: 'bg-red-500' },
     shopping: { label: 'Mua sắm', color: 'pink', bg: 'bg-pink-100', text: 'text-pink-700', dot: 'bg-pink-500' },
     roadtrip: { label: 'Phượt', color: 'amber', bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500' },
     repair: { label: 'Sửa xe', color: 'sky', bg: 'bg-sky-100', text: 'text-sky-700', dot: 'bg-sky-500' },
@@ -255,8 +255,8 @@ function getTripUXStatus(trip: TripRecord) {
     if (meta.status === 'completed') {
         return {
             key: 'completed', label: 'Hoàn tất',
-            badgeCls: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-            dot: 'bg-emerald-500', border: 'border-l-emerald-400'
+            badgeCls: 'bg-green-100 text-green-700 border-green-200',
+            dot: 'bg-green-500', border: 'border-l-green-400'
         }
     }
 
@@ -321,7 +321,7 @@ function TripCard({
                                     <Navigation className="h-3 w-3 text-blue-500 shrink-0" />
                                     <span className="truncate max-w-[110px]">{trip.start_location || '?'}</span>
                                     <ArrowRight className="h-3 w-3 text-slate-300 shrink-0" />
-                                    <Flag className="h-3 w-3 text-emerald-500 shrink-0" />
+                                    <Flag className="h-3 w-3 text-green-500 shrink-0" />
                                     <span className="truncate max-w-[110px]">{trip.end_location || (inProgress ? '...' : '?')}</span>
                                 </div>
                                 {!inProgress && (
@@ -374,12 +374,12 @@ function TripCard({
 
                 {/* Duration row (if completed) */}
                 {!inProgress && mins !== null && (
-                    <div className="mt-2 flex items-center justify-between rounded-xl bg-emerald-50/50 px-3 py-1.5 border border-emerald-100/50">
-                        <div className="flex flex-1 items-center gap-2 text-[11px] text-emerald-700 font-medium">
+                    <div className="mt-2 flex items-center justify-between rounded-xl bg-green-50/50 px-3 py-1.5 border border-green-100/50">
+                        <div className="flex flex-1 items-center gap-2 text-[11px] text-green-700 font-medium">
                             {startedAt && <span>{fmtTime(startedAt)}</span>}
-                            {completedAt && <><ArrowRight className="h-3 w-3 text-emerald-300" /><span>{fmtTime(completedAt)}</span></>}
+                            {completedAt && <><ArrowRight className="h-3 w-3 text-green-300" /><span>{fmtTime(completedAt)}</span></>}
                         </div>
-                        <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100/50 px-2 py-0.5 rounded-md flex items-center gap-1">
+                        <span className="text-[11px] font-bold text-green-700 bg-green-100/50 px-2 py-0.5 rounded-md flex items-center gap-1">
                             <Timer className="h-3 w-3" />
                             {fmtDur(mins)}
                         </span>
@@ -407,9 +407,9 @@ function TripCard({
                             ) : null}
                         </div>
                         {!inProgress && pricePerKm > 0 && (trip.distance_km || (trip.end_km - trip.start_km)) > 0 && (
-                            <div className="mb-4 flex items-center justify-between rounded-xl bg-emerald-50 border border-emerald-100 px-3 py-2">
-                                <span className="text-[11px] text-emerald-700 font-medium">Thành tiền ({pricePerKm.toLocaleString()} đ/km)</span>
-                                <span className="text-[13px] font-black text-emerald-600">{((trip.distance_km || (trip.end_km - trip.start_km)) * pricePerKm).toLocaleString()} đ</span>
+                            <div className="mb-4 flex items-center justify-between rounded-xl bg-green-50 border border-green-100 px-3 py-2">
+                                <span className="text-[11px] text-green-700 font-medium">Thành tiền ({pricePerKm.toLocaleString()} đ/km)</span>
+                                <span className="text-[13px] font-black text-green-600">{((trip.distance_km || (trip.end_km - trip.start_km)) * pricePerKm).toLocaleString()} đ</span>
                             </div>
                         )}
                         {userNotes && (
@@ -1098,9 +1098,9 @@ function TripModal({
                                                 <span className="text-[13px] font-black text-blue-600">{calcDist.toLocaleString()} km</span>
                                             </div>
                                             {pricePerKm > 0 && (
-                                                <div className="flex items-center justify-between rounded-xl px-3 py-2 bg-emerald-100/40 border border-emerald-200/50 shadow-sm">
-                                                    <span className="text-[11px] font-semibold text-emerald-700 uppercase tracking-wide">Thành tiền ({pricePerKm.toLocaleString()} đ/km)</span>
-                                                    <span className="text-[14px] font-black text-emerald-600">{(calcDist * pricePerKm).toLocaleString()} ₫</span>
+                                                <div className="flex items-center justify-between rounded-xl px-3 py-2 bg-green-100/40 border border-green-200/50 shadow-sm">
+                                                    <span className="text-[11px] font-semibold text-green-700 uppercase tracking-wide">Thành tiền ({pricePerKm.toLocaleString()} đ/km)</span>
+                                                    <span className="text-[14px] font-black text-green-600">{(calcDist * pricePerKm).toLocaleString()} ₫</span>
                                                 </div>
                                             )}
                                         </div>
@@ -1146,7 +1146,7 @@ function TripModal({
                                 form="trip-form"
                                 onClick={() => setSubmitAction('complete')}
                                 disabled={loading}
-                                className={`flex-[1.8] rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-emerald-700 disabled:opacity-50 active:scale-95`}
+                                className={`flex-[1.8] rounded-xl bg-green-600 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-green-700 disabled:opacity-50 active:scale-95`}
                             >
                                 {loading ? '...' : 'Hoàn tất'}
                             </button>
@@ -1425,7 +1425,7 @@ function CompleteTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
     return (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] pointer-events-none">
             <div className="w-full max-w-md flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl max-h-[88vh] pointer-events-auto mt-12 sm:mt-0 safe-area-bottom">
-                <div className="bg-emerald-500 rounded-t-3xl px-5 pt-3 pb-4 text-white">
+                <div className="bg-green-500 rounded-t-3xl px-5 pt-3 pb-4 text-white">
                     {/* Mobile Handle */}
                     <div className="flex w-full justify-center pb-3 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10">
                         <div className="h-1.5 w-12 rounded-full bg-white/40" />
@@ -1469,9 +1469,9 @@ function CompleteTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
                                 onChange={e => setForm({ ...form, end_km: e.target.value })}
                                 placeholder={`(Tùy chọn) Bỏ trống = ${(trip.end_km || trip.start_km).toLocaleString()}`} className={inputCls} />
                             {validDist && (
-                                <div className="mt-2 flex items-center justify-between rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-2">
-                                    <span className="text-xs font-medium text-emerald-700">Quãng đường di chuyển</span>
-                                    <span className="text-base font-black text-emerald-600">{calcDist.toLocaleString()} km</span>
+                                <div className="mt-2 flex items-center justify-between rounded-xl bg-green-50 border border-green-200 px-3 py-2">
+                                    <span className="text-xs font-medium text-green-700">Quãng đường di chuyển</span>
+                                    <span className="text-base font-black text-green-600">{calcDist.toLocaleString()} km</span>
                                 </div>
                             )}
                         </div>
@@ -1492,7 +1492,7 @@ function CompleteTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
                     <button type="button" onClick={onClose}
                         className="flex-1 rounded-xl border border-slate-200 bg-slate-50 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100">Hủy</button>
                     <button type="submit" form="complete-trip-form" disabled={loading}
-                        className="flex-[2] flex items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3 text-sm font-bold text-white shadow-lg hover:bg-emerald-600 disabled:opacity-50 active:scale-95 transition-all">
+                        className="flex-[2] flex items-center justify-center gap-2 rounded-xl bg-green-500 py-3 text-sm font-bold text-white shadow-lg hover:bg-green-600 disabled:opacity-50 active:scale-95 transition-all">
                         <CheckCircle2 className="h-4 w-4" />
                         {loading ? 'Đang lưu...' : 'Hoàn tất lộ trình'}
                     </button>
@@ -1501,3 +1501,4 @@ function CompleteTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
         </div>
     )
 }
+

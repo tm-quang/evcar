@@ -30,3 +30,4 @@ export const WalletListSkeleton = ({ count = 3 }: WalletListSkeletonProps) => {
   )
 }
 
+

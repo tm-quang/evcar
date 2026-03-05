@@ -161,7 +161,7 @@ export const VoiceToTextPage = () => {
                 onClick={handleToggleVoice}
                 disabled={!voiceInput.isSupported}
                 className={`relative flex h-24 w-24 items-center justify-center rounded-full transition-all duration-300 ${isListening
-                    ? 'bg-gradient-to-br from-red-500 via-rose-500 to-pink-600 text-white shadow-[0_8px_30px_rgb(239,68,68,0.4)] scale-110'
+                    ? 'bg-gradient-to-br from-red-500 via-red-500 to-pink-600 text-white shadow-[0_8px_30px_rgb(239,68,68,0.4)] scale-110'
                     : 'bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 text-white shadow-[0_8px_25px_rgb(59,130,246,0.3)] hover:shadow-[0_12px_35px_rgb(59,130,246,0.4)] hover:scale-105 active:scale-95'
                   } ${!voiceInput.isSupported ? 'opacity-50 cursor-not-allowed' : ''}`}
                 title={isListening ? 'Dừng nhận diện giọng nói' : 'Bắt đầu nhận diện giọng nói'}
@@ -252,7 +252,7 @@ export const VoiceToTextPage = () => {
                       <button
                         type="button"
                         onClick={handleCopy}
-                        className="p-2.5 rounded-xl text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition-all hover:scale-110 active:scale-95 shadow-sm hover:shadow-md"
+                        className="p-2.5 rounded-xl text-slate-600 hover:bg-green-50 hover:text-green-600 transition-all hover:scale-110 active:scale-95 shadow-sm hover:shadow-md"
                         title="Sao chép"
                       >
                         <FaCopy className="h-4 w-4" />
@@ -272,7 +272,7 @@ export const VoiceToTextPage = () => {
                       <button
                         type="button"
                         onClick={handleSaveEdit}
-                        className="px-4 py-2.5 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 hover:scale-105 active:scale-95 flex items-center gap-2"
+                        className="px-4 py-2.5 rounded-xl bg-green-500 text-white hover:bg-green-600 transition-all shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 hover:scale-105 active:scale-95 flex items-center gap-2"
                         title="Lưu"
                       >
                         <FaCheck className="h-4 w-4" />
@@ -406,3 +406,4 @@ export const VoiceToTextPage = () => {
 }
 
 export default VoiceToTextPage
+

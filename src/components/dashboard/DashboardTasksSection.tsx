@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { FaCog } from 'react-icons/fa'
 import { fetchTasks, updateTask, type TaskRecord } from '../../lib/taskService'
 import { getTaskViewPeriod, type TaskViewPeriod } from '../../lib/userPreferencesService'
-import { getDateComponentsUTC7, formatDateUTC7, createDateUTC7, getNowUTC7, getFirstDayOfMonthUTC7, getLastDayOfMonthUTC7 } from '../../utils/dateUtils'
+import { getDateComponentsUTC7, formatDateUTC7, createDateUTC7, getNowUTC7, getFirstDayOfMonthUTC7, getLastDayOfMonthUTC7, getDayOfWeekUTC7 } from '../../utils/dateUtils'
 import { DashboardTaskCard } from './DashboardTaskCard'
 import { TaskSettingsModal } from './TaskSettingsModal'
 
@@ -69,30 +69,18 @@ export const DashboardTasksSection = ({
     const components = getDateComponentsUTC7(now)
 
     if (viewPeriod === 'week') {
-      // Get Monday of current week
-      const dayOfWeek = now.getDay()
+      // Get Monday of current week in UTC+7
+      const dayOfWeek = getDayOfWeekUTC7(now)
       const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek // Monday is 1
-      const monday = new Date(now)
-      monday.setDate(now.getDate() + diff)
-      monday.setHours(0, 0, 0, 0)
 
-      const sunday = new Date(monday)
-      sunday.setDate(monday.getDate() + 6)
-      sunday.setHours(23, 59, 59, 999)
+      const monday = createDateUTC7(components.year, components.month, components.day + diff, 0, 0, 0, 0)
+      const mondayComponents = getDateComponentsUTC7(monday)
+
+      const sunday = createDateUTC7(mondayComponents.year, mondayComponents.month, mondayComponents.day + 6, 23, 59, 59, 999)
 
       return {
-        start: formatDateUTC7(createDateUTC7(
-          monday.getFullYear(),
-          monday.getMonth() + 1,
-          monday.getDate(),
-          0, 0, 0, 0
-        )),
-        end: formatDateUTC7(createDateUTC7(
-          sunday.getFullYear(),
-          sunday.getMonth() + 1,
-          sunday.getDate(),
-          23, 59, 59, 999
-        ))
+        start: formatDateUTC7(monday),
+        end: formatDateUTC7(sunday)
       }
     } else if (viewPeriod === 'month') {
       // First and last day of current month
@@ -112,29 +100,16 @@ export const DashboardTasksSection = ({
         }
       }
       // Fallback to current week if custom dates not set
-      const dayOfWeek = now.getDay()
+      const dayOfWeek = getDayOfWeekUTC7(now)
       const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
-      const monday = new Date(now)
-      monday.setDate(now.getDate() + diff)
-      monday.setHours(0, 0, 0, 0)
+      const monday = createDateUTC7(components.year, components.month, components.day + diff, 0, 0, 0, 0)
+      const mondayComponents = getDateComponentsUTC7(monday)
 
-      const sunday = new Date(monday)
-      sunday.setDate(monday.getDate() + 6)
-      sunday.setHours(23, 59, 59, 999)
+      const sunday = createDateUTC7(mondayComponents.year, mondayComponents.month, mondayComponents.day + 6, 23, 59, 59, 999)
 
       return {
-        start: formatDateUTC7(createDateUTC7(
-          monday.getFullYear(),
-          monday.getMonth() + 1,
-          monday.getDate(),
-          0, 0, 0, 0
-        )),
-        end: formatDateUTC7(createDateUTC7(
-          sunday.getFullYear(),
-          sunday.getMonth() + 1,
-          sunday.getDate(),
-          23, 59, 59, 999
-        ))
+        start: formatDateUTC7(monday),
+        end: formatDateUTC7(sunday)
       }
     }
   }, [viewPeriod, customStartDate, customEndDate])
@@ -306,4 +281,5 @@ export const DashboardTasksSection = ({
     </div>
   )
 }
+
 

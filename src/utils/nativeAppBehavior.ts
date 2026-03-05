@@ -287,3 +287,4 @@ export const optimizePerformance = () => {
     document.documentElement.style.scrollBehavior = 'auto'
   }
 }
+

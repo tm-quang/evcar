@@ -45,7 +45,7 @@ const PRESET_COLORS = [
   '#3B82F6', // Blue
   '#EF4444', // Red
   '#F59E0B', // Amber
-  '#10B981', // Emerald
+  '#10B981', // green
   '#8B5CF6', // Violet
   '#EC4899', // Pink
   '#6366F1', // Indigo
@@ -55,9 +55,9 @@ const PRESET_COLORS = [
 // Map hex colors to reminder color names
 const HEX_TO_REMINDER_COLOR: Record<string, string> = {
   '#3B82F6': 'sky',
-  '#EF4444': 'rose',
+  '#EF4444': 'red',
   '#F59E0B': 'amber',
-  '#10B981': 'emerald',
+  '#10B981': 'green',
   '#8B5CF6': 'purple',
   '#EC4899': 'pink',
   '#6366F1': 'indigo',
@@ -68,11 +68,9 @@ const HEX_TO_REMINDER_COLOR: Record<string, string> = {
 const REMINDER_COLOR_TO_HEX: Record<string, string> = {
   'blue': '#3B82F6',
   'sky': '#3B82F6',
-  'rose': '#EF4444',
   'red': '#EF4444',
   'amber': '#F59E0B',
   'orange': '#F59E0B',
-  'emerald': '#10B981',
   'green': '#10B981',
   'purple': '#8B5CF6',
   'violet': '#8B5CF6',
@@ -159,7 +157,7 @@ export const UnifiedItemModal = ({
   const [reminderTime, setReminderTime] = useState('')
   const [reminderRepeatType, setReminderRepeatType] = useState<RepeatType>('none')
   const [reminderNotes, setReminderNotes] = useState('')
-  const [reminderColor, setReminderColor] = useState('rose')
+  const [reminderColor, setReminderColor] = useState('red')
   const [reminderEnableNotification, setReminderEnableNotification] = useState(true)
   const [selectedIcon, setSelectedIcon] = useState<React.ReactNode | null>(null)
 
@@ -285,7 +283,7 @@ export const UnifiedItemModal = ({
         setReminderTime(reminder.reminder_time || '')
         setReminderRepeatType(reminder.repeat_type || 'none')
         setReminderNotes(reminder.notes || '')
-        setReminderColor(reminder.color || (reminder.type === 'Thu' ? 'emerald' : 'rose'))
+        setReminderColor(reminder.color || (reminder.type === 'Thu' ? 'green' : 'red'))
         setReminderEnableNotification(reminder.enable_notification !== undefined ? reminder.enable_notification : true)
       }
     } else if (isOpen && !editingItem) {
@@ -323,7 +321,7 @@ export const UnifiedItemModal = ({
       setReminderTime('')
       setReminderRepeatType('none')
       setReminderNotes('')
-      setReminderColor('rose')
+      setReminderColor('red')
       setReminderEnableNotification(true)
       setSelectedIcon(null)
     }
@@ -556,10 +554,10 @@ export const UnifiedItemModal = ({
 
   return (
     <div className="fixed inset-x-0 bottom-0 sm:inset-0 mt-12 sm:mt-0 z-[60] flex flex-col bg-[#F7F9FC] rounded-t-3xl sm:rounded-none max-h-[calc(100vh-3rem)] sm:max-h-[100vh] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] sm:shadow-none safe-area-bottom pointer-events-auto">
-        {/* Mobile Handle */}
-        <div className="flex w-full justify-center pt-3 pb-2 flex-shrink-0 bg-transparent sm:hidden pointer-events-none sticky top-0 z-10 w-full mb-1">
-          <div className="h-1.5 w-12 rounded-full bg-slate-300/80" />
-        </div>
+      {/* Mobile Handle */}
+      <div className="flex w-full justify-center pt-3 pb-2 flex-shrink-0 bg-transparent sm:hidden pointer-events-none sticky top-0 z-10 w-full mb-1">
+        <div className="h-1.5 w-12 rounded-full bg-slate-300/80" />
+      </div>
 
       {/* Enhanced Header with gradient */}
       <header className="pointer-events-none relative z-10 flex-shrink-0 bg-gradient-to-r from-slate-50 via-white to-slate-50 border-b border-slate-200/50 shadow-sm">
@@ -585,7 +583,7 @@ export const UnifiedItemModal = ({
                   ? 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 hover:shadow-xl hover:scale-105 active:scale-95'
                   : itemType === 'note'
                     ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 hover:shadow-xl hover:scale-105 active:scale-95'
-                    : 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 hover:shadow-xl hover:scale-105 active:scale-95'
+                    : 'bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 hover:shadow-xl hover:scale-105 active:scale-95'
                   }`}
               >
                 {isSubmitting ? 'Đang lưu...' : isEditMode ? 'Cập nhật' : 'Tạo'}
@@ -612,7 +610,7 @@ export const UnifiedItemModal = ({
             type="button"
             onClick={() => setItemType('reminder')}
             className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all duration-300 ${itemType === 'reminder'
-              ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30 scale-105 border border-emerald-300'
+              ? 'bg-gradient-to-r from-green-500 to-teal-500 text-white shadow-lg shadow-green-500/30 scale-105 border border-green-300'
               : 'text-slate-600 hover:text-slate-800 hover:bg-white/50'
               }`}
           >
@@ -635,9 +633,9 @@ export const UnifiedItemModal = ({
       <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 min-h-0">
         <div className="mx-auto max-w-md">
           {error && (
-            <div className="mb-4 rounded-2xl bg-gradient-to-r from-rose-50 to-pink-50 border-2 border-rose-200 p-4 text-sm font-medium text-rose-700 shadow-lg">
+            <div className="mb-4 rounded-2xl bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200 p-4 text-sm font-medium text-red-700 shadow-lg">
               <div className="flex items-start gap-2">
-                <span className="text-rose-500 shrink-0 mt-0.5">⚠</span>
+                <span className="text-red-500 shrink-0 mt-0.5">⚠</span>
                 <span className="flex-1">{error}</span>
               </div>
             </div>
@@ -650,7 +648,7 @@ export const UnifiedItemModal = ({
                 {/* Title - Common field for all tabs */}
                 <div>
                   <label htmlFor="task-title" className="mb-1.5 block text-xs font-semibold text-slate-700 sm:text-sm">
-                    Tiêu đề <span className="text-rose-500">*</span>
+                    Tiêu đề <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -725,7 +723,7 @@ export const UnifiedItemModal = ({
                         <button
                           type="button"
                           onClick={() => setTaskSubtasks(taskSubtasks.filter(s => s.id !== subtask.id))}
-                          className="text-slate-400 hover:text-rose-500 transition-colors shrink-0 p-1 rounded-lg hover:bg-rose-50"
+                          className="text-slate-400 hover:text-red-500 transition-colors shrink-0 p-1 rounded-lg hover:bg-red-50"
                         >
                           <FaTrash className="h-4 w-4" />
                         </button>
@@ -866,7 +864,7 @@ export const UnifiedItemModal = ({
                           e.stopPropagation()
                           setTaskDeadline(null)
                         }}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all active:scale-95"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all active:scale-95"
                         aria-label="Xóa deadline"
                       >
                         <FaTimes className="h-4 w-4" />
@@ -964,8 +962,8 @@ export const UnifiedItemModal = ({
                         type="button"
                         onClick={() => setReminderType('Thu')}
                         className={`group relative flex items-center justify-center gap-2 rounded-2xl border-2 py-3 text-center text-sm font-bold transition-all duration-300 sm:py-3.5 sm:text-base ${reminderType === 'Thu'
-                          ? 'border-emerald-500 bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/30 scale-105'
-                          : 'border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100 text-slate-600 hover:border-emerald-300 hover:from-emerald-50 hover:to-emerald-100 hover:text-emerald-700 hover:shadow-md hover:scale-[1.02]'
+                          ? 'border-green-500 bg-gradient-to-br from-green-400 via-green-500 to-green-600 text-white shadow-lg shadow-green-500/30 scale-105'
+                          : 'border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100 text-slate-600 hover:border-green-300 hover:from-green-50 hover:to-green-100 hover:text-green-700 hover:shadow-md hover:scale-[1.02]'
                           } active:scale-95`}
                       >
                         <FaArrowUp className={`relative z-10 h-5 w-5 transition-transform ${reminderType === 'Thu' ? 'scale-110 drop-shadow-md' : ''} sm:h-6 sm:w-6`} />
@@ -975,8 +973,8 @@ export const UnifiedItemModal = ({
                         type="button"
                         onClick={() => setReminderType('Chi')}
                         className={`group relative flex items-center justify-center gap-2 rounded-2xl border-2 py-3 text-center text-sm font-bold transition-all duration-300 sm:py-3.5 sm:text-base ${reminderType === 'Chi'
-                          ? 'border-rose-500 bg-gradient-to-br from-rose-400 via-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/30 scale-105'
-                          : 'border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100 text-slate-600 hover:border-rose-300 hover:from-rose-50 hover:to-rose-100 hover:text-rose-700 hover:shadow-md hover:scale-[1.02]'
+                          ? 'border-red-500 bg-gradient-to-br from-red-400 via-red-500 to-red-600 text-white shadow-lg shadow-red-500/30 scale-105'
+                          : 'border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100 text-slate-600 hover:border-red-300 hover:from-red-50 hover:to-red-100 hover:text-red-700 hover:shadow-md hover:scale-[1.02]'
                           } active:scale-95`}
                       >
                         <FaArrowDown className={`relative z-10 h-5 w-5 transition-transform ${reminderType === 'Chi' ? 'scale-110 drop-shadow-md' : ''} sm:h-6 sm:w-6`} />
@@ -989,7 +987,7 @@ export const UnifiedItemModal = ({
                 {/* Title - Common field for reminder/note (same position as task) */}
                 <div>
                   <label htmlFor="reminder-title" className="mb-1.5 block text-xs font-semibold text-slate-700 sm:text-sm">
-                    {itemType === 'note' ? 'Tiêu đề ghi chú' : 'Mô tả nhắc nhở'} <span className="text-rose-500">*</span>
+                    {itemType === 'note' ? 'Tiêu đề ghi chú' : 'Mô tả nhắc nhở'} <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -1000,7 +998,7 @@ export const UnifiedItemModal = ({
                       placeholder={itemType === 'note' ? 'Nhập tiêu đề ghi chú...' : 'Nhập mô tả nhắc nhở...'}
                       className={`w-full rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 pr-12 text-sm font-medium text-slate-900 transition-all placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:shadow-lg sm:p-4 sm:pr-12 ${itemType === 'note'
                         ? 'focus:border-amber-400 focus:ring-amber-500/20'
-                        : 'focus:border-emerald-400 focus:ring-emerald-500/20'
+                        : 'focus:border-green-400 focus:ring-green-500/20'
                         }`}
                       required
                     />
@@ -1011,7 +1009,7 @@ export const UnifiedItemModal = ({
                         ? 'bg-red-100 text-red-600 animate-pulse'
                         : itemType === 'note'
                           ? 'bg-amber-50 text-amber-600 hover:bg-amber-100 hover:scale-110 active:scale-95'
-                          : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:scale-110 active:scale-95'
+                          : 'bg-green-50 text-green-600 hover:bg-green-100 hover:scale-110 active:scale-95'
                         }`}
                       title={voiceInput.isListening('reminderTitle') ? 'Dừng nhận diện giọng nói' : 'Nhập bằng giọng nói'}
                     >
@@ -1039,10 +1037,10 @@ export const UnifiedItemModal = ({
                             }}
                             onFocus={() => setIsNumberPadOpen(true)}
                             placeholder="Nhập số tiền"
-                            className="h-full w-full rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 text-base font-semibold text-slate-900 transition-all placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:shadow-lg sm:p-4 sm:text-lg cursor-pointer hover:border-emerald-300"
+                            className="h-full w-full rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 text-base font-semibold text-slate-900 transition-all placeholder:text-slate-400 focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:shadow-lg sm:p-4 sm:text-lg cursor-pointer hover:border-green-300"
                             readOnly
                           />
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-base font-bold text-emerald-600">
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-base font-bold text-green-600">
                             ₫
                           </span>
                         </div>
@@ -1092,17 +1090,17 @@ export const UnifiedItemModal = ({
                 {/* Date/Time - Common field for reminder/note (same position as deadline for task) */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold text-slate-700 sm:text-sm">
-                    Ngày và giờ <span className="text-rose-500">*</span>
+                    Ngày và giờ <span className="text-red-500">*</span>
                   </label>
                   <button
                     type="button"
                     onClick={() => setIsDateTimePickerOpen(true)}
                     className={`relative flex w-full items-center justify-between rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 pl-12 text-left transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:shadow-lg ${itemType === 'note'
                       ? 'hover:border-amber-300 focus:border-amber-400 focus:ring-amber-500/20'
-                      : 'hover:border-emerald-300 focus:border-emerald-400 focus:ring-emerald-500/20'
+                      : 'hover:border-green-300 focus:border-green-400 focus:ring-green-500/20'
                       }`}
                   >
-                    <FaCalendar className={`absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 ${itemType === 'note' ? 'text-amber-500' : 'text-emerald-500'
+                    <FaCalendar className={`absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 ${itemType === 'note' ? 'text-amber-500' : 'text-green-500'
                       }`} />
                     <div className="flex-1 flex items-center gap-3 min-w-0">
                       <div className="flex items-center gap-1.5 text-sm font-medium text-slate-900 truncate">
@@ -1133,7 +1131,7 @@ export const UnifiedItemModal = ({
                       </div>
                       {reminderTime && (
                         <>
-                          <FaClock className={`h-4 w-4 shrink-0 ${itemType === 'note' ? 'text-amber-400' : 'text-emerald-400'
+                          <FaClock className={`h-4 w-4 shrink-0 ${itemType === 'note' ? 'text-amber-400' : 'text-green-400'
                             }`} />
                           <span className="text-sm font-medium text-slate-900 truncate">{reminderTime}</span>
                         </>
@@ -1176,7 +1174,7 @@ export const UnifiedItemModal = ({
                       rows={itemType === 'note' ? 4 : 3}
                       className={`w-full rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 pr-12 text-sm font-medium text-slate-900 transition-all placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:shadow-lg sm:p-4 sm:pr-12 resize-none ${itemType === 'note'
                         ? 'focus:border-amber-400 focus:ring-amber-500/20'
-                        : 'focus:border-emerald-400 focus:ring-emerald-500/20'
+                        : 'focus:border-green-400 focus:ring-green-500/20'
                         }`}
                     />
                     <button
@@ -1186,7 +1184,7 @@ export const UnifiedItemModal = ({
                         ? 'bg-red-100 text-red-600 animate-pulse'
                         : itemType === 'note'
                           ? 'bg-amber-50 text-amber-600 hover:bg-amber-100 hover:scale-110 active:scale-95'
-                          : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:scale-110 active:scale-95'
+                          : 'bg-green-50 text-green-600 hover:bg-green-100 hover:scale-110 active:scale-95'
                         }`}
                       title={voiceInput.isListening('reminderNotes') ? 'Dừng nhận diện giọng nói' : 'Nhập bằng giọng nói'}
                     >
@@ -1206,18 +1204,18 @@ export const UnifiedItemModal = ({
                       onClick={() => setIsIconPickerOpen(true)}
                       className={`flex w-full items-center gap-3 rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 pr-12 text-left transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:shadow-lg sm:p-4 ${itemType === 'note'
                         ? 'hover:border-amber-300 focus:border-amber-400 focus:ring-amber-500/20'
-                        : 'hover:border-emerald-300 focus:border-emerald-400 focus:ring-emerald-500/20'
+                        : 'hover:border-green-300 focus:border-green-400 focus:ring-green-500/20'
                         }`}
                     >
                       {selectedIcon ? (
-                        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${itemType === 'note' ? 'from-amber-50 to-orange-50' : 'from-emerald-50 to-teal-50'
-                          } border-2 ${itemType === 'note' ? 'border-amber-200' : 'border-emerald-200'
+                        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${itemType === 'note' ? 'from-amber-50 to-orange-50' : 'from-green-50 to-teal-50'
+                          } border-2 ${itemType === 'note' ? 'border-amber-200' : 'border-green-200'
                           }`}>
                           {selectedIcon}
                         </div>
                       ) : (
-                        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${itemType === 'note' ? 'from-amber-100 to-orange-100' : 'from-emerald-100 to-teal-100'
-                          } border-2 ${itemType === 'note' ? 'border-amber-200 text-amber-500' : 'border-emerald-200 text-emerald-500'
+                        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${itemType === 'note' ? 'from-amber-100 to-orange-100' : 'from-green-100 to-teal-100'
+                          } border-2 ${itemType === 'note' ? 'border-amber-200 text-amber-500' : 'border-green-200 text-green-500'
                           }`}>
                           <span className="text-lg font-bold">?</span>
                         </div>
@@ -1238,7 +1236,7 @@ export const UnifiedItemModal = ({
                           setReminderIconId('')
                           setSelectedIcon(null)
                         }}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all active:scale-95"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all active:scale-95"
                         aria-label="Xóa biểu tượng"
                       >
                         <FaTimes className="h-4 w-4" />
@@ -1252,7 +1250,7 @@ export const UnifiedItemModal = ({
                   <label className="mb-2 block text-xs font-semibold text-slate-700 sm:text-sm">
                     Màu sắc
                   </label>
-                  <div className={`flex flex-wrap gap-3 p-3 rounded-2xl bg-gradient-to-br from-slate-50 to-white border border-slate-200/50 ${itemType === 'note' ? 'focus-within:border-amber-300' : 'focus-within:border-emerald-300'
+                  <div className={`flex flex-wrap gap-3 p-3 rounded-2xl bg-gradient-to-br from-slate-50 to-white border border-slate-200/50 ${itemType === 'note' ? 'focus-within:border-amber-300' : 'focus-within:border-green-300'
                     }`}>
                     {PRESET_COLORS.map((hexColor) => {
                       const colorName = HEX_TO_REMINDER_COLOR[hexColor] || 'amber'
@@ -1266,7 +1264,7 @@ export const UnifiedItemModal = ({
                           type="button"
                           onClick={() => setReminderColor(colorName)}
                           className={`h-10 w-10 rounded-full transition-all shadow-md hover:shadow-lg ${isSelected
-                            ? `ring-3 ring-offset-2 scale-110 shadow-lg ${itemType === 'note' ? 'ring-amber-400' : 'ring-emerald-400'
+                            ? `ring-3 ring-offset-2 scale-110 shadow-lg ${itemType === 'note' ? 'ring-amber-400' : 'ring-green-400'
                             }`
                             : 'hover:scale-105'
                             }`}
@@ -1280,7 +1278,7 @@ export const UnifiedItemModal = ({
                 {/* Notification Toggle - Only for reminder/note, positioned at end */}
                 <div className={`flex items-center justify-between rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 transition-all hover:shadow-md ${itemType === 'note'
                   ? 'focus-within:border-amber-300 focus-within:ring-2 focus-within:ring-amber-500/20'
-                  : 'focus-within:border-emerald-300 focus-within:ring-2 focus-within:ring-emerald-500/20'
+                  : 'focus-within:border-green-300 focus-within:ring-2 focus-within:ring-green-500/20'
                   }`}>
                   <div className="flex-1">
                     <label htmlFor="enable_notification" className="text-sm font-semibold text-slate-900 block">
@@ -1296,7 +1294,7 @@ export const UnifiedItemModal = ({
                     className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-all duration-300 shadow-inner ${reminderEnableNotification
                       ? `bg-gradient-to-r shadow-lg ${itemType === 'note'
                         ? 'from-amber-400 to-orange-500'
-                        : 'from-emerald-400 to-teal-500'
+                        : 'from-green-400 to-teal-500'
                       }`
                       : 'bg-slate-300'
                       }`}
@@ -1358,4 +1356,5 @@ export const UnifiedItemModal = ({
     </div>
   )
 }
+
 

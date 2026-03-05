@@ -273,3 +273,4 @@ export const CATEGORY_ICON_MAP = CATEGORY_ICON_GROUPS.reduce<Record<string, Icon
   })
   return acc
 }, {})
+

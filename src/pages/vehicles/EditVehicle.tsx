@@ -45,3 +45,4 @@ export default function EditVehicle() {
 
     return <AddVehicle vehicle={vehicle} onSuccess={() => navigate('/vehicles')} />
 }
+

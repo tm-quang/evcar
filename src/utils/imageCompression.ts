@@ -370,3 +370,4 @@ export const isFileSizeAcceptable = (file: File, maxSizeKB: number): boolean => 
   return file.size / 1024 <= maxSizeKB
 }
 
+

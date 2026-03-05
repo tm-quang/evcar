@@ -26,8 +26,8 @@ const ACTION_INFO: Record<string, { icon: typeof FaPaperPlane; description: stri
   'add-transaction': {
     icon: FaPlus,
     description: 'Thêm giao dịch thu chi mới vào sổ sách',
-    color: 'text-emerald-600',
-    bgGradient: 'from-emerald-50 to-teal-50',
+    color: 'text-green-600',
+    bgGradient: 'from-green-50 to-teal-50',
   },
   'categories': {
     icon: FaFolder,
@@ -38,8 +38,8 @@ const ACTION_INFO: Record<string, { icon: typeof FaPaperPlane; description: stri
   'budgets': {
     icon: FaFolder,
     description: 'Quản lý hạn mức chi tiêu cho từng hạng mục theo tháng/quý/năm',
-    color: 'text-rose-600',
-    bgGradient: 'from-rose-50 to-pink-50',
+    color: 'text-red-600',
+    bgGradient: 'from-red-50 to-pink-50',
   },
   'notes-plans': {
     icon: FaTasks,
@@ -322,4 +322,5 @@ export const QuickActionsSettings = ({
     </div>
   )
 }
+
 

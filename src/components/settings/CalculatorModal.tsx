@@ -323,7 +323,7 @@ export const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
             </button>
             <button
               onClick={handleEquals}
-              className="h-14 sm:h-16 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-semibold text-lg sm:text-xl shadow-lg hover:from-emerald-600 hover:to-emerald-700 active:scale-95 transition-all"
+              className="h-14 sm:h-16 rounded-xl bg-gradient-to-br from-green-500 to-green-600 text-white font-semibold text-lg sm:text-xl shadow-lg hover:from-green-600 hover:to-green-700 active:scale-95 transition-all"
             >
               =
             </button>
@@ -333,4 +333,5 @@ export const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
     </div>
   )
 }
+
 

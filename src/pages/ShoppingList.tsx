@@ -278,12 +278,12 @@ const ShoppingListPage = () => {
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => handleOpenPresetSelection(MARKET_SHOPPING_PRESET)}
-              className="flex items-center gap-2 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 p-4 text-white shadow-lg transition hover:scale-105 active:scale-95"
+              className="flex items-center gap-2 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 p-4 text-white shadow-lg transition hover:scale-105 active:scale-95"
             >
               <FaStore className="h-6 w-6" />
               <div className="text-left">
                 <p className="font-bold">Đi chợ</p>
-                <p className="text-xs text-emerald-100">Chọn mục cần mua</p>
+                <p className="text-xs text-green-100">Chọn mục cần mua</p>
               </div>
             </button>
             <button
@@ -341,7 +341,7 @@ const ShoppingListPage = () => {
                             onClick={() => handleCompleteList(list)}
                             className={`h-8 w-8 rounded-full flex items-center justify-center transition ${
                               isCompleted
-                                ? 'bg-emerald-100 text-emerald-600'
+                                ? 'bg-green-100 text-green-600'
                                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                             }`}
                           >
@@ -352,7 +352,7 @@ const ShoppingListPage = () => {
                               setIsDeleteConfirmOpen(true)
                               setListToDelete(list)
                             }}
-                            className="h-8 w-8 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center hover:bg-rose-200 transition"
+                            className="h-8 w-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-200 transition"
                           >
                             <FaTrash className="h-3 w-3" />
                           </button>
@@ -363,11 +363,11 @@ const ShoppingListPage = () => {
                       <div className="mb-2">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs font-semibold text-slate-600">Tiến độ</span>
-                          <span className="text-xs font-bold text-emerald-600">{progress.toFixed(0)}%</span>
+                          <span className="text-xs font-bold text-green-600">{progress.toFixed(0)}%</span>
                         </div>
                         <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-gradient-to-r from-emerald-500 to-green-600 transition-all duration-300"
+                            className="h-full bg-gradient-to-r from-green-500 to-green-600 transition-all duration-300"
                             style={{ width: `${progress}%` }}
                           />
                         </div>
@@ -406,8 +406,8 @@ const ShoppingListPage = () => {
                                 onClick={() => handleToggleItem(list.id, item.id, item.status)}
                                 className={`h-6 w-6 rounded-full flex items-center justify-center transition ${
                                   item.status === 'completed'
-                                    ? 'bg-emerald-500 text-white'
-                                    : 'border-2 border-slate-300 hover:border-emerald-500'
+                                    ? 'bg-green-500 text-white'
+                                    : 'border-2 border-slate-300 hover:border-green-500'
                                 }`}
                               >
                                 {item.status === 'completed' && <FaCheck className="h-3 w-3" />}
@@ -426,7 +426,7 @@ const ShoppingListPage = () => {
                                   <p className="text-xs text-slate-500">Số lượng: {item.quantity}</p>
                                 )}
                                 {item.status === 'completed' && item.completed_at && (
-                                  <p className="text-xs text-emerald-600 mt-1">
+                                  <p className="text-xs text-green-600 mt-1">
                                     ✓ Hoàn thành: {formatTime(item.completed_at)}
                                   </p>
                                 )}
@@ -475,4 +475,5 @@ const ShoppingListPage = () => {
 }
 
 export default ShoppingListPage
+
 

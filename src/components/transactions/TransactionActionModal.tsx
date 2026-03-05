@@ -63,9 +63,9 @@ export const TransactionActionModal = ({
         {/* Delete Button */}
         <button
           onClick={onDelete}
-          className="flex items-center gap-3 rounded-xl px-4 py-3 text-left transition hover:bg-rose-50 active:bg-rose-100"
+          className="flex items-center gap-3 rounded-xl px-4 py-3 text-left transition hover:bg-red-50 active:bg-red-100"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-100 text-rose-600">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100 text-red-600">
             <FaTrash className="h-5 w-5" />
           </div>
           <div className="flex-1">
@@ -87,4 +87,5 @@ export const TransactionActionModal = ({
     </>
   )
 }
+
 

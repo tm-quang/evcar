@@ -113,3 +113,4 @@ export function TripPriceModal({
         </div>
     )
 }
+

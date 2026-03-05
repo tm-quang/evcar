@@ -8,7 +8,6 @@ import {
   FaWallet,
   FaExclamationCircle,
   FaSignOutAlt,
-  FaCog,
   FaChevronRight,
   FaQrcode,
   FaCalculator,
@@ -18,9 +17,7 @@ import {
 
 import FooterNav from '../components/layout/FooterNav'
 import HeaderBar from '../components/layout/HeaderBar'
-import { IconManagementModal } from '../components/settings/IconManagementModal'
 import { NotificationSettingsModal } from '../components/settings/NotificationSettingsModal'
-import { AdminSettingsModal } from '../components/settings/AdminSettingsModal'
 import { CalculatorModal } from '../components/settings/CalculatorModal'
 import { getCurrentProfile, type ProfileRecord } from '../lib/profileService'
 import { queryClient } from '../lib/react-query'
@@ -28,7 +25,6 @@ import { useDialog } from '../contexts/dialogContext.helpers'
 import { getSupabaseClient } from '../lib/supabaseClient'
 import { useNotification } from '../contexts/notificationContext.helpers'
 import { clearUserCache } from '../lib/userCache'
-import { getCachedAdminStatus } from '../lib/adminService'
 import { isAndroidApp, startNativeScan, setupNativeScanCallback, cleanupNativeScanCallback } from '../utils/androidBridge'
 import { startWebQRScan, stopWebQRScan } from '../utils/webQRScanner'
 
@@ -38,8 +34,8 @@ const financeToggleSettings = [
     title: 'Tự động phân loại',
     description: 'AI phân loại giao dịch',
     icon: <FaWallet className="h-5 w-5" />,
-    color: 'text-emerald-600',
-    bg: 'bg-emerald-100',
+    color: 'text-green-600',
+    bg: 'bg-green-100',
   },
   {
     id: 'budgetSuggestion',
@@ -66,12 +62,8 @@ const SettingsPage = () => {
   const { error: showError } = useNotification()
   const [profile, setProfile] = useState<ProfileRecord | null>(null)
   const [isLoadingProfile, setIsLoadingProfile] = useState(true)
-  const [isIconManagementOpen, setIsIconManagementOpen] = useState(false)
   const [isNotificationSettingsOpen, setIsNotificationSettingsOpen] = useState(false)
-  const [isAdminSettingsModalOpen, setIsAdminSettingsModalOpen] = useState(false)
   const [isCalculatorModalOpen, setIsCalculatorModalOpen] = useState(false)
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [isCheckingAdmin, setIsCheckingAdmin] = useState(true)
   const { success } = useNotification()
 
   const [financeToggles, setFinanceToggles] = useState<Record<string, boolean>>({
@@ -105,27 +97,7 @@ const SettingsPage = () => {
       }
     }
 
-    const checkAdmin = async () => {
-      setIsCheckingAdmin(true)
-      try {
-        const adminStatus = await getCachedAdminStatus()
-        if (mounted) {
-          setIsAdmin(adminStatus)
-        }
-      } catch (error) {
-        console.error('Error checking admin status:', error)
-        if (mounted) {
-          setIsAdmin(false)
-        }
-      } finally {
-        if (mounted) {
-          setIsCheckingAdmin(false)
-        }
-      }
-    }
-
     loadProfile()
-    checkAdmin()
 
     return () => {
       mounted = false
@@ -245,7 +217,7 @@ const SettingsPage = () => {
     <div className="flex h-full flex-col overflow-hidden bg-[#F7F9FC] text-slate-900">
       <HeaderBar variant="page" title="Cài đặt" />
       <main className="flex-1 overflow-y-auto overscroll-contain p-4 pb-24">
-        <div className="mx-auto max-w-2xl space-y-6">
+        <div className="mx-auto max-w-md space-y-6">
 
           {/* Profile Section - Hero Card */}
           <section className="relative overflow-hidden rounded-3xl bg-white p-6 shadow-lg border border-slate-100 transition-all hover:shadow-xl">
@@ -274,7 +246,7 @@ const SettingsPage = () => {
                         <FaUser className="h-8 w-8" />
                       </div>
                     )}
-                    <div className="absolute bottom-0 right-0 h-5 w-5 rounded-full bg-emerald-500 ring-2 ring-white" />
+                    <div className="absolute bottom-0 right-0 h-5 w-5 rounded-full bg-green-500 ring-2 ring-white" />
                   </div>
 
                   <div className="flex-1">
@@ -301,35 +273,13 @@ const SettingsPage = () => {
             <h2 className="mb-3 px-1 text-lg font-bold text-slate-800">Quản lý chung</h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
 
-              {/* Admin Settings */}
-              {!isCheckingAdmin && isAdmin && (
-                <button
-                  onClick={async () => {
-                    const adminStatus = await getCachedAdminStatus()
-                    if (!adminStatus) {
-                      showError('Bạn không có quyền truy cập.')
-                      return
-                    }
-                    setIsAdminSettingsModalOpen(true)
-                  }}
-                  className="group flex flex-col items-center justify-center gap-3 rounded-3xl bg-white p-4 text-center shadow-lg border border-slate-100 transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95"
-                >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 shadow-inner group-hover:scale-110 transition-transform">
-                    <FaCog className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-800">Admin</p>
-                    <p className="text-xs text-slate-500">Hệ thống</p>
-                  </div>
-                </button>
-              )}
 
               {/* Notification Settings */}
               <button
                 onClick={() => setIsNotificationSettingsOpen(true)}
                 className="group flex flex-col items-center justify-center gap-3 rounded-3xl bg-white p-4 text-center shadow-lg border border-slate-100 transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 shadow-inner group-hover:scale-110 transition-transform">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-600 shadow-inner group-hover:scale-110 transition-transform">
                   <FaBell className="h-6 w-6" />
                 </div>
                 <div>
@@ -479,7 +429,7 @@ const SettingsPage = () => {
           {/* Logout Button */}
           <button
             onClick={handleLogout}
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-3xl bg-rose-50 p-4 text-rose-600 shadow-lg border border-rose-100 transition-all hover:bg-rose-100 hover:shadow-xl active:scale-95"
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-3xl bg-red-50 p-4 text-red-600 shadow-lg border border-red-100 transition-all hover:bg-red-100 hover:shadow-xl active:scale-95"
           >
             <FaSignOutAlt className="h-5 w-5" />
             <span className="font-bold">Đăng xuất khỏi thiết bị</span>
@@ -495,9 +445,10 @@ const SettingsPage = () => {
 
       <FooterNav onAddClick={() => navigate('/add-transaction')} />
 
-      <IconManagementModal
-        isOpen={isIconManagementOpen}
-        onClose={() => setIsIconManagementOpen(false)}
+
+      <CalculatorModal
+        isOpen={isCalculatorModalOpen}
+        onClose={() => setIsCalculatorModalOpen(false)}
       />
 
       <NotificationSettingsModal
@@ -505,19 +456,9 @@ const SettingsPage = () => {
         onClose={() => setIsNotificationSettingsOpen(false)}
       />
 
-      <AdminSettingsModal
-        isOpen={isAdminSettingsModalOpen}
-        onClose={() => setIsAdminSettingsModalOpen(false)}
-        onIconManagementClick={() => setIsIconManagementOpen(true)}
-      />
-
-      <CalculatorModal
-        isOpen={isCalculatorModalOpen}
-        onClose={() => setIsCalculatorModalOpen(false)}
-      />
-
     </div>
   )
 }
 
 export default SettingsPage
+

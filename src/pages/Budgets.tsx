@@ -182,12 +182,12 @@ export const BudgetsPage = () => {
                     }).format(totalBudget)}
                   </p>
                 </div>
-                <div className="rounded-2xl bg-gradient-to-br from-rose-50 to-white p-3 sm:p-4 border border-rose-100 shadow-lg overflow-hidden">
+                <div className="rounded-2xl bg-gradient-to-br from-red-50 to-white p-3 sm:p-4 border border-red-100 shadow-lg overflow-hidden">
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-2">
-                    <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-rose-100 flex items-center justify-center shrink-0">
-                      <FaChartPie className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-rose-600" />
+                    <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
+                      <FaChartPie className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-600" />
                     </div>
-                    <span className="text-[10px] sm:text-xs font-semibold text-rose-600 truncate">Đã chi</span>
+                    <span className="text-[10px] sm:text-xs font-semibold text-red-600 truncate">Đã chi</span>
                   </div>
                   <p className="text-sm sm:text-lg font-bold text-slate-900 break-words leading-tight">
                     {new Intl.NumberFormat('vi-VN', {
@@ -196,18 +196,18 @@ export const BudgetsPage = () => {
                       maximumFractionDigits: 0,
                     }).format(totalSpent)}
                   </p>
-                  <p className="text-[10px] sm:text-xs text-rose-600 font-medium mt-0.5 truncate">
+                  <p className="text-[10px] sm:text-xs text-red-600 font-medium mt-0.5 truncate">
                     {overallPercentage.toFixed(1)}% tổng
                   </p>
                 </div>
-                <div className="rounded-2xl bg-gradient-to-br from-emerald-50 to-white p-3 sm:p-4 border border-emerald-100 shadow-lg overflow-hidden">
+                <div className="rounded-2xl bg-gradient-to-br from-green-50 to-white p-3 sm:p-4 border border-green-100 shadow-lg overflow-hidden">
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-2">
-                    <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
-                      <FaExclamationTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600" />
+                    <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
+                      <FaExclamationTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600" />
                     </div>
-                    <span className="text-[10px] sm:text-xs font-semibold text-emerald-600 truncate">Còn lại</span>
+                    <span className="text-[10px] sm:text-xs font-semibold text-green-600 truncate">Còn lại</span>
                   </div>
-                  <p className={`text-sm sm:text-lg font-bold break-words leading-tight ${totalRemaining >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                  <p className={`text-sm sm:text-lg font-bold break-words leading-tight ${totalRemaining >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {new Intl.NumberFormat('vi-VN', {
                       style: 'currency',
                       currency: 'VND',
@@ -215,7 +215,7 @@ export const BudgetsPage = () => {
                     }).format(Math.abs(totalRemaining))}
                   </p>
                   {overBudgetCount > 0 && (
-                    <p className="text-[10px] sm:text-xs text-rose-600 font-medium mt-0.5 truncate">
+                    <p className="text-[10px] sm:text-xs text-red-600 font-medium mt-0.5 truncate">
                       {overBudgetCount} vượt mức
                     </p>
                   )}
@@ -284,4 +284,5 @@ export const BudgetsPage = () => {
 }
 
 export default BudgetsPage
+
 

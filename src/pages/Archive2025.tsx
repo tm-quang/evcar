@@ -26,7 +26,7 @@ const ArchiveDashboardPage = () => {
         {
             title: 'Thu Chi (Giao dịch)',
             icon: <FaRegMoneyBillAlt className="h-6 w-6" />,
-            colors: 'bg-emerald-50 text-emerald-600',
+            colors: 'bg-green-50 text-green-600',
             path: '/transactions',
             desc: 'Xem lại các giao dịch thu/chi năm 2025',
         },
@@ -96,3 +96,4 @@ const ArchiveDashboardPage = () => {
 }
 
 export default ArchiveDashboardPage
+

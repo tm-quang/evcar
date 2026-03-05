@@ -25,7 +25,7 @@ const COLORS = [
   '#8B5CF6', // purple (violet-500)
   '#3B82F6', // blue
   '#EC4899', // pink
-  '#10B981', // emerald
+  '#10B981', // green
   '#F59E0B', // amber
   '#06B6D4', // cyan
   '#6366F1', // indigo
@@ -241,4 +241,5 @@ export const DonutChartWithLegend = ({
     </div>
   )
 }
+
 

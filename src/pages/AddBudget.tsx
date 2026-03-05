@@ -22,6 +22,7 @@ import { LoadingRing } from '../components/ui/LoadingRing'
 import { FaWallet } from 'react-icons/fa'
 import { fetchCategoriesHierarchical, type CategoryWithChildren } from '../lib/categoryService'
 import { CategorySelectHierarchical } from '../components/ui/CategorySelectHierarchical'
+import { getNowUTC7, getDateComponentsUTC7, getDayOfWeekUTC7, createDateUTC7 } from '../utils/dateUtils'
 
 const PERIOD_TYPES: { value: PeriodType; label: string }[] = [
   { value: 'monthly', label: 'Hàng tháng' },
@@ -48,7 +49,7 @@ export const AddBudgetPage = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { success, error: showError } = useNotification()
-  
+
   const budgetId = searchParams.get('id')
   const isEditMode = !!budgetId
 
@@ -57,9 +58,9 @@ export const AddBudgetPage = () => {
     wallet_id: '',
     amount: '',
     period_type: 'monthly' as PeriodType,
-    month: new Date().getMonth() + 1,
-    year: new Date().getFullYear(),
-    weekStartDate: new Date().toISOString().split('T')[0], // For weekly: date to calculate week from
+    month: getNowUTC7().getMonth() + 1,
+    year: getNowUTC7().getFullYear(),
+    weekStartDate: getNowUTC7().toISOString().split('T')[0], // For weekly: date to calculate week from
     limit_type: 'soft' as 'hard' | 'soft',
     notes: '',
   })
@@ -86,7 +87,7 @@ export const AddBudgetPage = () => {
 
         // Filter only expense categories
         const expenseCategories = categoriesData.filter(c => c.type === 'Chi tiêu')
-        
+
         // Load icons for all categories using icon_url from category
         const iconsMap: Record<string, React.ReactNode> = {}
         await Promise.all(
@@ -122,7 +123,7 @@ export const AddBudgetPage = () => {
           })
         )
         setCategoryIcons(iconsMap)
-        
+
         setHierarchicalCategories(hierarchicalData)
         setWallets(walletsData)
 
@@ -200,10 +201,10 @@ export const AddBudgetPage = () => {
         formData.period_type === 'monthly' ? formData.month : undefined,
         weekStartDate
       )
-      
+
       // Format dates in UTC+7 timezone
       const { formatDateUTC7 } = await import('../utils/dateUtils')
-      
+
       const payload: BudgetInsert = {
         category_id: formData.category_id,
         wallet_id: formData.wallet_id || null,
@@ -271,20 +272,18 @@ export const AddBudgetPage = () => {
     }
   }
 
-  // Get Monday of a given date (week starts on Monday)
+  // Get Monday of a given date in UTC+7 (week starts on Monday)
   const getMonday = (date: Date): Date => {
-    const d = new Date(date)
-    const day = d.getDay()
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1) // Adjust when day is Sunday
-    return new Date(d.setDate(diff))
+    const vnDay = getDayOfWeekUTC7(date)
+    const components = getDateComponentsUTC7(date)
+    const diff = vnDay === 0 ? -6 : 1 - vnDay // Monday is 1
+    return createDateUTC7(components.year, components.month, components.day + diff, 0, 0, 0, 0)
   }
 
-  // Get Sunday of a given week (week ends on Sunday)
+  // Get Sunday of a given week in UTC+7 (week ends on Sunday)
   const getSunday = (monday: Date): Date => {
-    const sunday = new Date(monday)
-    sunday.setDate(sunday.getDate() + 6)
-    sunday.setHours(23, 59, 59, 999)
-    return sunday
+    const components = getDateComponentsUTC7(monday)
+    return createDateUTC7(components.year, components.month, components.day + 6, 23, 59, 59, 999)
   }
 
   // Format week range for display
@@ -292,13 +291,13 @@ export const AddBudgetPage = () => {
     const date = new Date(dateStr)
     const monday = getMonday(date)
     const sunday = getSunday(monday)
-    
+
     const formatDate = (d: Date) => {
       const day = String(d.getDate()).padStart(2, '0')
       const month = String(d.getMonth() + 1).padStart(2, '0')
       return `${day}/${month}/${d.getFullYear()}`
     }
-    
+
     return `${formatDate(monday)} - ${formatDate(sunday)}`
   }
 
@@ -310,15 +309,15 @@ export const AddBudgetPage = () => {
 
   return (
     <div className="flex h-full flex-col overflow-hidden bg-[#F7F9FC] text-slate-900">
-      <HeaderBar 
-        variant="page" 
+      <HeaderBar
+        variant="page"
         title={isEditMode ? 'SỬA HẠN MỨC' : 'TẠO HẠN MỨC'}
       />
 
       <main className="flex-1 overflow-y-auto overscroll-contain pb-20">
         <div className="mx-auto flex w-full max-w-md flex-col gap-5 px-4 pt-2 pb-5 sm:pt-2 sm:pb-6">
           {error && (
-            <div className="rounded-2xl bg-gradient-to-r from-rose-50 to-red-50 border-2 border-rose-200 p-4 text-sm text-rose-700 font-medium shadow-sm">
+            <div className="rounded-2xl bg-gradient-to-r from-red-50 to-red-50 border-2 border-red-200 p-4 text-sm text-red-700 font-medium shadow-sm">
               <div className="flex items-center gap-2">
                 <span className="text-lg">⚠️</span>
                 <span>{error}</span>
@@ -401,11 +400,10 @@ export const AddBudgetPage = () => {
                           weekStartDate: now.toISOString().split('T')[0],
                         }))
                       }}
-                      className={`rounded-2xl border-2 p-4 text-sm font-semibold transition-all ${
-                        formData.period_type === type.value
+                      className={`rounded-2xl border-2 p-4 text-sm font-semibold transition-all ${formData.period_type === type.value
                           ? 'border-sky-500 bg-gradient-to-br from-sky-50 to-blue-50 text-sky-700 shadow-sm'
                           : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:shadow-sm'
-                      }`}
+                        }`}
                     >
                       {type.label}
                     </button>
@@ -422,11 +420,10 @@ export const AddBudgetPage = () => {
                   <button
                     type="button"
                     onClick={() => setFormData((prev) => ({ ...prev, limit_type: 'soft' }))}
-                    className={`rounded-2xl border-2 p-4 text-left transition-all ${
-                      formData.limit_type === 'soft'
+                    className={`rounded-2xl border-2 p-4 text-left transition-all ${formData.limit_type === 'soft'
                         ? 'border-amber-500 bg-gradient-to-br from-amber-50 to-yellow-50 text-amber-700 shadow-sm'
                         : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:shadow-sm'
-                    }`}
+                      }`}
                   >
                     <div className="font-bold text-sm mb-1.5">Giới hạn mềm</div>
                     <div className="text-xs text-slate-600 font-medium">Cảnh báo khi vượt quá</div>
@@ -434,23 +431,21 @@ export const AddBudgetPage = () => {
                   <button
                     type="button"
                     onClick={() => setFormData((prev) => ({ ...prev, limit_type: 'hard' }))}
-                    className={`rounded-2xl border-2 p-4 text-left transition-all ${
-                      formData.limit_type === 'hard'
-                        ? 'border-rose-500 bg-gradient-to-br from-rose-50 to-pink-50 text-rose-700 shadow-sm'
+                    className={`rounded-2xl border-2 p-4 text-left transition-all ${formData.limit_type === 'hard'
+                        ? 'border-red-500 bg-gradient-to-br from-red-50 to-pink-50 text-red-700 shadow-sm'
                         : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:shadow-sm'
-                    }`}
+                      }`}
                   >
                     <div className="font-bold text-sm mb-1.5">Giới hạn cứng</div>
                     <div className="text-xs text-slate-600 font-medium">Từ chối khi vượt quá</div>
                   </button>
                 </div>
-                <div className={`mt-3 rounded-xl p-3 ${
-                  formData.limit_type === 'soft' 
-                    ? 'bg-amber-50 border border-amber-200' 
-                    : 'bg-rose-50 border border-rose-200'
-                }`}>
+                <div className={`mt-3 rounded-xl p-3 ${formData.limit_type === 'soft'
+                    ? 'bg-amber-50 border border-amber-200'
+                    : 'bg-red-50 border border-red-200'
+                  }`}>
                   <p className="text-xs font-medium text-slate-700">
-                    {formData.limit_type === 'soft' 
+                    {formData.limit_type === 'soft'
                       ? '⚠️ Hệ thống sẽ cảnh báo nhưng vẫn cho phép giao dịch khi vượt quá hạn mức'
                       : '🚫 Hệ thống sẽ từ chối giao dịch khi vượt quá hạn mức'}
                   </p>
@@ -521,7 +516,7 @@ export const AddBudgetPage = () => {
                       const date = new Date(selectedDate)
                       const weekStart = getMonday(date)
                       const weekEnd = getSunday(weekStart)
-                      
+
                       // If selected week is in the past, use current week
                       if (weekEnd < now) {
                         const currentWeekStart = getMonday(now)
@@ -578,7 +573,7 @@ export const AddBudgetPage = () => {
       {/* Fixed Footer with Action Buttons */}
       <ModalFooterButtons
         onCancel={() => navigate(-1)}
-        onConfirm={() => {}}
+        onConfirm={() => { }}
         confirmText={isSubmitting ? 'Đang lưu...' : isEditMode ? 'Cập nhật' : 'Tạo hạn mức'}
         isSubmitting={isSubmitting}
         disabled={isSubmitting || isLoading}
@@ -600,4 +595,5 @@ export const AddBudgetPage = () => {
 }
 
 export default AddBudgetPage
+
 

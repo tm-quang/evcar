@@ -98,3 +98,4 @@ export const getSupabaseClient = (): SupabaseClient => {
   return supabase
 }
 
+

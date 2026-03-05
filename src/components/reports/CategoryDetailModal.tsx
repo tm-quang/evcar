@@ -173,22 +173,22 @@ export const CategoryDetailModal = ({
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div className="rounded-2xl bg-white p-3 shadow-sm border border-slate-100">
               <div className="flex items-center gap-2 mb-1">
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-green-100 text-green-600">
                   <FaArrowUp className="h-3 w-3" />
                 </div>
                 <p className="text-xs font-semibold text-slate-500">Thu nhập</p>
               </div>
-              <p className="text-lg font-bold text-emerald-600">+{formatCurrency(stats.income)}</p>
+              <p className="text-lg font-bold text-green-600">+{formatCurrency(stats.income)}</p>
             </div>
 
             <div className="rounded-2xl bg-white p-3 shadow-sm border border-slate-100">
               <div className="flex items-center gap-2 mb-1">
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-100 text-rose-600">
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-red-100 text-red-600">
                   <FaArrowDown className="h-3 w-3" />
                 </div>
                 <p className="text-xs font-semibold text-slate-500">Chi tiêu</p>
               </div>
-              <p className="text-lg font-bold text-rose-600">-{formatCurrency(stats.expense)}</p>
+              <p className="text-lg font-bold text-red-600">-{formatCurrency(stats.expense)}</p>
             </div>
           </div>
 
@@ -234,7 +234,7 @@ export const CategoryDetailModal = ({
                     {/* Date Header */}
                     <div className="flex items-center justify-between px-2 py-1">
                       <p className="text-xs font-bold text-slate-600">{dateKey}</p>
-                      <p className={`text-xs font-bold ${dayTotal >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                      <p className={`text-xs font-bold ${dayTotal >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {dayTotal >= 0 ? '+' : ''}
                         {formatCurrency(Math.abs(dayTotal))}
                       </p>
@@ -256,8 +256,8 @@ export const CategoryDetailModal = ({
                                 <div
                                   className={`flex h-6 w-6 items-center justify-center rounded-full ${
                                     transaction.type === 'Thu'
-                                      ? 'bg-emerald-100 text-emerald-600'
-                                      : 'bg-rose-100 text-rose-600'
+                                      ? 'bg-green-100 text-green-600'
+                                      : 'bg-red-100 text-red-600'
                                   }`}
                                 >
                                   {transaction.type === 'Thu' ? (
@@ -277,7 +277,7 @@ export const CategoryDetailModal = ({
                             <div className="text-right ml-2">
                               <p
                                 className={`text-sm font-bold ${
-                                  transaction.type === 'Thu' ? 'text-emerald-600' : 'text-rose-600'
+                                  transaction.type === 'Thu' ? 'text-green-600' : 'text-red-600'
                                 }`}
                               >
                                 {transaction.type === 'Thu' ? '+' : '-'}
@@ -298,4 +298,5 @@ export const CategoryDetailModal = ({
     </div>
   )
 }
+
 

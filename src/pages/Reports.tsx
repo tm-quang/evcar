@@ -26,7 +26,7 @@ import { CATEGORY_ICON_MAP } from '../constants/categoryIcons'
 import { getIconNodeFromCategory } from '../utils/iconLoader'
 import { fetchCategories, fetchCategoriesHierarchical, type CategoryRecord, type CategoryWithChildren } from '../lib/categoryService'
 import { fetchTransactions, type TransactionRecord } from '../lib/transactionService'
-import { getNowUTC7, getDateComponentsUTC7, getFirstDayOfMonthUTC7, getLastDayOfMonthUTC7, formatDateUTC7, createDateUTC7 } from '../utils/dateUtils'
+import { getNowUTC7, getDateComponentsUTC7, getFirstDayOfMonthUTC7, getLastDayOfMonthUTC7, formatDateUTC7, createDateUTC7, getDayOfWeekUTC7 } from '../utils/dateUtils'
 
 export type DateRangeType = 'day' | 'week' | 'month' | 'quarter' | 'year' | 'custom'
 type TabType = 'overview' | 'income' | 'expense'
@@ -50,18 +50,14 @@ const getDateRange = (rangeType: DateRangeType, customStart?: string, customEnd?
       endDate = createDateUTC7(components.year, components.month, components.day, 23, 59, 59, 999)
       break
     case 'week': {
-      const dayOfWeek = now.getDay()
-      const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek // Monday is 1
-      const monday = new Date(now)
-      monday.setDate(now.getDate() + diff)
-      monday.setHours(0, 0, 0, 0)
-      const mondayComponents = getDateComponentsUTC7(monday)
+      const vnDay = getDayOfWeekUTC7(now)
+      const diff = vnDay === 0 ? -6 : 1 - vnDay // Monday is 1
 
+      const monday = createDateUTC7(components.year, components.month, components.day + diff, 0, 0, 0, 0)
+      const mondayComponents = getDateComponentsUTC7(monday)
       startDate = createDateUTC7(mondayComponents.year, mondayComponents.month, mondayComponents.day, 0, 0, 0, 0)
 
-      const sunday = new Date(monday)
-      sunday.setDate(monday.getDate() + 6)
-      sunday.setHours(23, 59, 59, 999)
+      const sunday = createDateUTC7(mondayComponents.year, mondayComponents.month, mondayComponents.day + 6, 23, 59, 59, 999)
       const sundayComponents = getDateComponentsUTC7(sunday)
       endDate = createDateUTC7(sundayComponents.year, sundayComponents.month, sundayComponents.day, 23, 59, 59, 999)
       break
@@ -544,22 +540,22 @@ const ReportPage = () => {
 
                 <div className="rounded-3xl bg-white p-4 shadow-lg border border-slate-100">
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100 text-green-500">
                       <FaArrowUp className="h-3 w-3" />
                     </div>
                     <p className="text-xs font-semibold text-slate-500">Thu nhập</p>
                   </div>
-                  <p className="text-lg font-bold text-emerald-600">{formatCurrency(stats.income)}</p>
+                  <p className="text-lg font-bold text-green-500">{formatCurrency(stats.income)}</p>
                 </div>
 
                 <div className="rounded-3xl bg-white p-4 shadow-lg border border-slate-100">
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-rose-100 text-rose-600">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-100 text-red-500">
                       <FaArrowDown className="h-3 w-3" />
                     </div>
                     <p className="text-xs font-semibold text-slate-500">Chi tiêu</p>
                   </div>
-                  <p className="text-lg font-bold text-rose-600">{formatCurrency(stats.expense)}</p>
+                  <p className="text-lg font-bold text-red-500">{formatCurrency(stats.expense)}</p>
                 </div>
               </div>
 
@@ -627,7 +623,7 @@ const ReportPage = () => {
                               <p className="text-xs text-slate-500">{item.percentage.toFixed(1)}%</p>
                             </div>
                           </div>
-                          <p className="font-bold text-emerald-600">+{formatCurrency(item.amount)}</p>
+                          <p className="font-bold text-green-600">+{formatCurrency(item.amount)}</p>
                         </button>
                       ))}
                     </section>
@@ -666,7 +662,7 @@ const ReportPage = () => {
                               <p className="text-xs text-slate-500">{item.percentage.toFixed(1)}%</p>
                             </div>
                           </div>
-                          <p className="font-bold text-rose-600">-{formatCurrency(item.amount)}</p>
+                          <p className="font-bold text-red-600">-{formatCurrency(item.amount)}</p>
                         </button>
                       ))}
                     </section>
@@ -770,3 +766,4 @@ const ReportPage = () => {
 }
 
 export default ReportPage
+

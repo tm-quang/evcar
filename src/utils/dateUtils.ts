@@ -9,7 +9,7 @@
  */
 export const getNowUTC7 = (): Date => {
   const now = new Date()
-  
+
   // Use Intl.DateTimeFormat to get UTC+7 components
   const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone: 'Asia/Ho_Chi_Minh',
@@ -21,7 +21,7 @@ export const getNowUTC7 = (): Date => {
     second: '2-digit',
     hour12: false
   })
-  
+
   const parts = formatter.formatToParts(now)
   const year = parseInt(parts.find(p => p.type === 'year')?.value || '0')
   const month = parseInt(parts.find(p => p.type === 'month')?.value || '0')
@@ -29,7 +29,7 @@ export const getNowUTC7 = (): Date => {
   const hour = parseInt(parts.find(p => p.type === 'hour')?.value || '0')
   const minute = parseInt(parts.find(p => p.type === 'minute')?.value || '0')
   const second = parseInt(parts.find(p => p.type === 'second')?.value || '0')
-  
+
   // Create date in UTC+7 timezone
   return createDateUTC7(year, month, day, hour, minute, second)
 }
@@ -50,7 +50,7 @@ export const toUTC7 = (date: Date): Date => {
     second: '2-digit',
     hour12: false
   })
-  
+
   const parts = formatter.formatToParts(date)
   const year = parseInt(parts.find(p => p.type === 'year')?.value || '0')
   const month = parseInt(parts.find(p => p.type === 'month')?.value || '0')
@@ -58,7 +58,7 @@ export const toUTC7 = (date: Date): Date => {
   const hour = parseInt(parts.find(p => p.type === 'hour')?.value || '0')
   const minute = parseInt(parts.find(p => p.type === 'minute')?.value || '0')
   const second = parseInt(parts.find(p => p.type === 'second')?.value || '0')
-  
+
   // Create date in UTC+7 timezone
   return createDateUTC7(year, month, day, hour, minute, second)
 }
@@ -111,7 +111,7 @@ export const getDateComponentsUTC7 = (date: Date): { year: number; month: number
     second: '2-digit',
     hour12: false
   })
-  
+
   const parts = formatter.formatToParts(date)
   return {
     year: parseInt(parts.find(p => p.type === 'year')?.value || '0'),
@@ -151,15 +151,24 @@ export const getLastDayOfMonthUTC7 = (year: number, month: number): Date => {
   // Get first day of next month
   const nextMonth = month === 12 ? { year: year + 1, month: 1 } : { year, month: month + 1 }
   const firstDayNextMonth = getStartOfDayUTC7(nextMonth.year, nextMonth.month, 1)
-  
+
   // Subtract 1 millisecond to get the last moment of the current month
   const lastDayMs = firstDayNextMonth.getTime() - 1
-  
+
   // Get UTC+7 components of that moment
   const lastDayDate = new Date(lastDayMs)
   const lastDayComponents = getDateComponentsUTC7(lastDayDate)
-  
+
   // Return the end of that day in UTC+7
   return getEndOfDayUTC7(lastDayComponents.year, lastDayComponents.month, lastDayComponents.day)
 }
 
+/**
+ * Get day of week in UTC+7 (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+ * Use this to get the correct day of week for Vietnam regardless of system timezone
+ */
+export const getDayOfWeekUTC7 = (date: Date): number => {
+  // Vietnam is UTC+7. We shift the date by 7 hours to align UTC components with VN local components
+  const vnShifted = new Date(date.getTime() + 7 * 60 * 60 * 1000)
+  return vnShifted.getUTCDay()
+}
