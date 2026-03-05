@@ -175,7 +175,7 @@ export default function VehicleMaintenance() {
                 }
             />
 
-            <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4 pt-4">
+            <main className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-md mx-auto px-4 pb-4 pt-4">
 
 
 
@@ -601,11 +601,15 @@ function AddMaintenanceModal({ vehicle, onClose, onSuccess }: {
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-[3px]">
-            <div className="w-full max-h-[92vh] overflow-y-auto rounded-t-3xl bg-white shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] pointer-events-none">
+            <div className="w-full max-w-md max-h-[92vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl pointer-events-auto mt-12 sm:mt-0 safe-area-bottom overflow-hidden">
                 {/* Header */}
-                <div className="sticky top-0 z-10 rounded-t-3xl bg-gray-500 px-5 pt-5 pb-4 text-white">
-                    <div className="flex items-center justify-between">
+                <div className="sticky top-0 z-10 bg-gray-500 px-5 pt-3 pb-4 text-white">
+                    {/* Mobile Handle */}
+                    <div className="flex w-full justify-center pb-3 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10">
+                        <div className="h-1.5 w-12 rounded-full bg-white/40" />
+                    </div>
+                    <div className="flex items-center justify-between mt-1">
                         <div className="flex items-center gap-2">
                             <div className="rounded-xl bg-white/20 p-1.5"><Wrench className="h-4 w-4" /></div>
                             <h3 className="text-base font-bold">Thêm nhật ký bảo dưỡng</h3>
@@ -617,7 +621,7 @@ function AddMaintenanceModal({ vehicle, onClose, onSuccess }: {
                     <p className="text-xs opacity-70 mt-1 ml-10">{vehicle.license_plate} · {vehicle.current_odometer.toLocaleString()} km hiện tại</p>
                 </div>
 
-                <div className="px-5 py-5 space-y-5">
+                <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
                     {/* Date + ODO */}
                     <div className="grid grid-cols-2 gap-3">
                         <div>
@@ -796,27 +800,33 @@ function MaintenanceSettingsModal({ vehicle, onClose, onSuccess }: {
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-[3px]">
-            <div className="w-full max-h-[90vh] overflow-y-auto rounded-t-3xl bg-white shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] pointer-events-none">
+            <div className="w-full max-w-md max-h-[90vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl pointer-events-auto mt-12 sm:mt-0 safe-area-bottom overflow-hidden">
                 {/* Header */}
-                <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-5 py-4">
-                    <div className="flex items-center gap-3">
-                        <div className="rounded-xl bg-gray-100 p-2 text-gray-600">
-                            <Settings className="h-5 w-5" />
-                        </div>
-                        <div>
-                            <h3 className="text-base font-bold text-slate-800">Cài đặt chu kỳ xe</h3>
-                            <p className="text-xs font-medium text-slate-500">
-                                {vehicle.license_plate} · {vehicle.vehicle_type === 'motorcycle' ? 'Xe máy' : 'Ô tô'}
-                            </p>
-                        </div>
+                <div className="sticky top-0 z-10 flex flex-col border-b border-slate-100 bg-white">
+                    {/* Mobile Handle */}
+                    <div className="flex w-full justify-center pt-3 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10">
+                        <div className="h-1.5 w-12 rounded-full bg-slate-300" />
                     </div>
-                    <button onClick={onClose} className="rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200">
-                        <X className="h-5 w-5" />
-                    </button>
+                    <div className="flex items-center justify-between px-5 py-4">
+                        <div className="flex items-center gap-3">
+                            <div className="rounded-xl bg-gray-100 p-2 text-gray-600">
+                                <Settings className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <h3 className="text-base font-bold text-slate-800">Cài đặt chu kỳ xe</h3>
+                                <p className="text-xs font-medium text-slate-500">
+                                    {vehicle.license_plate} · {vehicle.vehicle_type === 'motorcycle' ? 'Xe máy' : 'Ô tô'}
+                                </p>
+                            </div>
+                        </div>
+                        <button onClick={onClose} className="rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200">
+                            <X className="h-5 w-5" />
+                        </button>
+                    </div>
                 </div>
 
-                <div className="px-5 py-5 space-y-5">
+                <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
                     <div className="rounded-2xl bg-gray-50 p-3 border border-gray-100 flex gap-2">
                         <AlertTriangle className="h-4 w-4 text-gray-600 shrink-0 mt-0.5" />
                         <p className="text-xs text-gray-700 leading-snug">

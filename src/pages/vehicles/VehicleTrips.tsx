@@ -539,7 +539,7 @@ export default function VehicleTrips() {
         <div className="flex h-screen flex-col overflow-hidden bg-[#F7F9FC]">
             <HeaderBar variant="page" title="Quản Lý Lộ Trình" />
 
-            <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4 pt-4">
+            <main className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-md mx-auto px-4 pb-4 pt-4">
 
                 {/* ── Stats Card ───────────────────────────────────────── */}
                 {selectedVehicle && !loading && (
@@ -954,11 +954,15 @@ function TripModal({
     const labelCls = 'mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wide'
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-[3px]">
-            <div className="w-full rounded-t-3xl bg-white shadow-2xl max-h-[92vh] flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] pointer-events-none">
+            <div className="w-full max-w-md flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl max-h-[92vh] pointer-events-auto mt-12 sm:mt-0 safe-area-bottom">
                 {/* Modal Header */}
-                <div className={`${accentBg} rounded-t-3xl px-5 pt-5 pb-4 text-white`}>
-                    <div className="flex items-center justify-between mb-1">
+                <div className={`${accentBg} rounded-t-3xl px-5 pt-3 pb-4 text-white`}>
+                    {/* Mobile Handle */}
+                    <div className="flex w-full justify-center pb-3 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10">
+                        <div className="h-1.5 w-12 rounded-full bg-white/40" />
+                    </div>
+                    <div className="flex items-center justify-between mb-1 mt-1">
                         <div className="flex items-center gap-2">
                             <div className="rounded-xl bg-white/20 p-1.5">
                                 <Route className="h-4 w-4" />
@@ -1272,10 +1276,14 @@ function CheckpointTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-[3px]">
-            <div className="w-full rounded-t-3xl bg-white shadow-2xl max-h-[88vh] flex flex-col">
-                <div className="bg-cyan-500 rounded-t-3xl px-5 pt-5 pb-4 text-white">
-                    <div className="flex items-center justify-between mb-2">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] pointer-events-none">
+            <div className="w-full max-w-md flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl max-h-[88vh] pointer-events-auto mt-12 sm:mt-0 safe-area-bottom">
+                <div className="bg-cyan-500 rounded-t-3xl px-5 pt-3 pb-4 text-white">
+                    {/* Mobile Handle */}
+                    <div className="flex w-full justify-center pb-3 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10">
+                        <div className="h-1.5 w-12 rounded-full bg-white/40" />
+                    </div>
+                    <div className="flex items-center justify-between mb-2 mt-1">
                         <div className="flex items-center gap-2">
                             <div className="rounded-xl bg-white/20 p-1.5"><MapPin className="h-4 w-4" /></div>
                             <h3 className="text-base font-bold">dừng điểm mới (Tour)</h3>
@@ -1415,10 +1423,14 @@ function CompleteTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-[3px]">
-            <div className="w-full rounded-t-3xl bg-white shadow-2xl max-h-[88vh] flex flex-col">
-                <div className="bg-emerald-500 rounded-t-3xl px-5 pt-5 pb-4 text-white">
-                    <div className="flex items-center justify-between mb-2">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] pointer-events-none">
+            <div className="w-full max-w-md flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl max-h-[88vh] pointer-events-auto mt-12 sm:mt-0 safe-area-bottom">
+                <div className="bg-emerald-500 rounded-t-3xl px-5 pt-3 pb-4 text-white">
+                    {/* Mobile Handle */}
+                    <div className="flex w-full justify-center pb-3 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10">
+                        <div className="h-1.5 w-12 rounded-full bg-white/40" />
+                    </div>
+                    <div className="flex items-center justify-between mb-2 mt-1">
                         <div className="flex items-center gap-2">
                             <div className="rounded-xl bg-white/20 p-1.5"><Flag className="h-4 w-4" /></div>
                             <h3 className="text-base font-bold">Hoàn tất lộ trình</h3>

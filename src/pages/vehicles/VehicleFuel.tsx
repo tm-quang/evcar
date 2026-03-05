@@ -1,9 +1,9 @@
-﻿import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
     Plus, Calendar, Trash2, MapPin, Settings, Zap, Droplet,
     BatteryCharging, Activity, TrendingUp, Clock, ChevronDown, ChevronUp,
-    Bolt, Gauge, Check, Gift, DollarSign, Image, Loader2,
+    Bolt, Check, Gift, DollarSign, Image, Loader2,
     Fuel, CreditCard, ScanLine, X, CheckSquare, Square, Save,
     ChevronLeft, ChevronRight, Edit, Search
 } from 'lucide-react'
@@ -22,6 +22,7 @@ import { SimpleLocationInput, type SimpleLocationData } from '../../components/v
 import { VehicleFooterNav } from '../../components/vehicles/VehicleFooterNav'
 import { analyzeChargeReceipt, type ChargeReceiptData } from '../../lib/vehicles/chargeReceiptAnalyzer'
 import { useVehicleStore } from '../../store/useVehicleStore'
+import { DateTimePickerModal } from '../../components/ui/DateTimePickerModal'
 
 const FUEL_TYPES = {
     petrol_a95: { label: 'Xăng A95', color: 'gray', category: 'fuel' as const },
@@ -30,11 +31,6 @@ const FUEL_TYPES = {
     electric: { label: 'Điện', color: 'green', category: 'electric' as const },
 }
 
-// Charging location presets for quick input
-const CHARGE_LOCATION_PRESETS = [
-    { label: 'Trạm sạc Vinfast' },
-    { label: 'Trạm sạc khác' },
-]
 
 // Quick amount presets (kWh) - reserved for future use
 // const KWH_PRESETS = [10, 20, 30, 40, 50, 70]
@@ -623,7 +619,7 @@ export default function VehicleFuel() {
                 }
             />
 
-            <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4 pt-4">
+            <main className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-md mx-auto px-4 pb-4 pt-4">
                 {/* Electric header when electric vehicle */}
                 {isElectricVehicle && (
                     <div className="mb-4 flex items-center gap-3 rounded-2xl bg-green-500 px-4 py-3 text-white">
@@ -905,6 +901,7 @@ function AddChargeModal({
     const [scanResult, setScanResult] = useState<ChargeReceiptData | null>(null)
     const [scanPreviewUrl, setScanPreviewUrl] = useState<string | null>(null)
     const scanInputRef = useRef<HTMLInputElement>(null)
+    const [showDatePicker, setShowDatePicker] = useState(false)
 
     const vehicleFuelConfig = getVehicleFuelConfig(vehicle.fuel_type)
     const defaultFuelType = category === 'electric'
@@ -1014,12 +1011,7 @@ function AddChargeModal({
         return h > 0 ? `${h}g ${m}ph` : `${m} phút`
     }, [formData.start_time, formData.end_time])
 
-    // applyKwhPreset reserved for future kWh quick-select UI
 
-    // Quick location preset
-    const applyLocationPreset = useCallback((label: string) => {
-        setFormData(prev => ({ ...prev, station_name: label }))
-    }, [])
 
     // Friendly number display helper
     const fmtInput = (raw: string) => {
@@ -1141,382 +1133,369 @@ function AddChargeModal({
 
     // ── RENDER ───────────────────────────────────────────────────────────
     return (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-[3px]">
-            <div className="w-full max-w-md rounded-t-3xl bg-white shadow-2xl max-h-[95vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] pointer-events-none">
+            <div className="w-full max-w-md flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl max-h-[95vh] pointer-events-auto mt-12 sm:mt-0 safe-area-bottom overflow-hidden">
 
-                {/* Handle */}
-                <div className="flex justify-center pt-3 pb-1">
-                    <div className="h-1.5 w-12 rounded-full bg-slate-200" />
-                </div>
-
-                {/* Header */}
-                <div className={`mx-4 mb-4 mt-2 rounded-2xl px-4 py-3 ${isElectric ? 'bg-green-500 text-white' : 'bg-slate-600 text-white'
-                    }`}>
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            {isElectric ? <BatteryCharging className="h-5 w-5" /> : <Droplet className="h-5 w-5" />}
-                            <div>
-                                <h3 className="font-bold">
-                                    {editingLog
-                                        ? (isElectric ? 'Sửa lịch sử sạc' : 'Sửa nhật ký đổ xăng')
-                                        : (isElectric ? 'Thêm lịch sử sạc' : 'Thêm nhật ký đổ xăng')}
-                                </h3>
-                                <p className="text-xs opacity-75">{vehicle.license_plate} · {vehicle.brand} {vehicle.model}</p>
+                <div className="flex-1 overflow-y-auto">
+                    {/* Header */}
+                    <div className={`sticky top-0 z-10 px-5 pt-3 pb-4 text-white ${isElectric ? 'bg-green-500' : 'bg-slate-600'}`}>
+                        {/* Mobile Handle */}
+                        <div className="flex w-full justify-center pb-3 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10">
+                            <div className="h-1.5 w-12 rounded-full bg-white/40" />
+                        </div>
+                        <div className="flex items-center justify-between mb-1 mt-1">
+                            <div className="flex items-center gap-2">
+                                <div className="rounded-xl bg-white/20 p-1.5">
+                                    {isElectric ? <BatteryCharging className="h-5 w-5" /> : <Droplet className="h-5 w-5" />}
+                                </div>
+                                <div>
+                                    <h3 className="font-bold">
+                                        {editingLog
+                                            ? (isElectric ? 'Sửa lịch sử sạc' : 'Sửa nhật ký đổ xăng')
+                                            : (isElectric ? 'Thêm lịch sử sạc' : 'Thêm nhật ký đổ xăng')}
+                                    </h3>
+                                    <p className="text-xs opacity-75">{vehicle.license_plate} · {vehicle.brand} {vehicle.model}</p>
+                                </div>
                             </div>
+                            <button onClick={onClose} className="rounded-full bg-white/20 p-1.5 hover:bg-white/30 transition-colors">
+                                <X className="h-4 w-4" />
+                            </button>
                         </div>
-                        <button onClick={onClose} className="rounded-full bg-white/20 p-1.5 hover:bg-white/30 transition-colors">
-                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
-                <form onSubmit={handleSubmit} className="px-4 pb-8 space-y-4">
-
-                    {/* ── AI SCAN BANNER (electric only) ── */}
-                    {isElectric && (
-                        <div className="rounded-2xl border-2 border-dashed border-green-200 bg-green-50 overflow-hidden">
-                            {scanning ? (
-                                <div className="flex flex-col items-center gap-2 py-5">
-                                    <div className="relative h-10 w-10">
-                                        <div className="absolute inset-0 rounded-full border-4 border-green-200" />
-                                        <div className="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-green-500" />
-                                    </div>
-                                    <p className="text-sm font-semibold text-green-700">Đang phân tích ảnh...</p>
-                                </div>
-                            ) : scanResult ? (
-                                <div className="p-3">
-                                    <div className="mb-2 flex items-center gap-2">
-                                        <div className="rounded-full bg-green-500 p-1"><Check className="h-3 w-3 text-white" /></div>
-                                        <span className="text-xs font-bold text-green-700">Đã trích xuất dữ liệu từ ảnh</span>
-                                        <button type="button" onClick={() => scanInputRef.current?.click()} className="ml-auto text-xs text-green-600 underline">Scan lại</button>
-                                    </div>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {scanResult.kwh != null && <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-bold text-green-700 shadow-md border border-green-200"><Zap className="h-3 w-3" /> {scanResult.kwh} kWh</span>}
-                                        {(scanResult.chargeAmount ?? scanResult.totalPayment) != null && <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-bold text-slate-700 shadow-md border border-slate-200"><CreditCard className="h-3 w-3" /> {((scanResult.chargeAmount ?? scanResult.totalPayment) ?? 0).toLocaleString('vi-VN')}đ</span>}
-                                        {scanResult.date && <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs text-slate-600 shadow-md border border-slate-200"><Calendar className="h-3 w-3" /> {new Date(scanResult.date).toLocaleDateString('vi-VN')}</span>}
-                                        {scanResult.stationName && <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs text-slate-600 shadow-md border border-slate-200 max-w-[180px] truncate"><MapPin className="h-3 w-3 shrink-0" /> {scanResult.stationName}</span>}
-                                    </div>
-                                    {scanResult.summary && <p className="mt-1.5 text-[10px] text-green-600">{scanResult.summary}</p>}
-                                    {scanPreviewUrl && <img src={scanPreviewUrl} alt="Hóa đơn" className="mt-2 h-16 w-auto rounded-lg object-cover border border-green-200" />}
-                                </div>
-                            ) : (
-                                <button type="button" onClick={() => scanInputRef.current?.click()} className="flex w-full items-center gap-3 px-4 py-3.5 hover:bg-green-100 transition-colors">
-                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-500 shadow-md shadow-green-200">
-                                        <ScanLine className="h-5 w-5 text-white" />
-                                    </div>
-                                    <div className="text-left">
-                                        <p className="text-sm font-bold text-green-700">Scan ảnh hóa đơn sạc</p>
-                                        <p className="text-xs text-green-500">Tự động điền ngày, kWh, chi phí, địa chỉ</p>
-                                    </div>
-                                    <Zap className="ml-auto h-4 w-4 text-green-400" />
-                                </button>
-                            )}
-                            <input ref={scanInputRef} type="file" accept="image/*" className="hidden"
-                                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleScanImage(f); e.target.value = '' }}
-                            />
-                        </div>
-                    )}
-
-                    {/* ── 1. NGÀY SẠC ── */}
-                    <div>
-                        <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            <Calendar className="h-3 w-3" /> Ngày sạc
-                        </label>
-                        <input type="date" required
-                            value={formData.refuel_date}
-                            onChange={(e) => setFormData({ ...formData, refuel_date: e.target.value })}
-                            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-100"
-                        />
                     </div>
 
-                    {/* ── 2. ĐỊA CHỈ TRẠM SẠC ── */}
-                    <div>
-                        <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            <MapPin className="h-3 w-3 text-red-500" /> {isElectric ? 'Địa chỉ trạm sạc' : 'Trạm xăng'}
-                        </label>
+                    <form onSubmit={handleSubmit} className="px-5 py-5 space-y-4">
+
+                        {/* ── AI SCAN BANNER (electric only) ── */}
                         {isElectric && (
-                            <div className="mb-2 flex gap-1.5 overflow-x-auto scrollbar-hide">
-                                {CHARGE_LOCATION_PRESETS.map(p => (
-                                    <button key={p.label} type="button" onClick={() => applyLocationPreset(p.label)}
-                                        className={`flex shrink-0 items-center gap-1 rounded-xl border px-3 py-1.5 text-xs font-medium transition-all ${formData.station_name === p.label
-                                            ? 'border-green-500 bg-green-50 text-green-700'
-                                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-                                            }`}>
-                                        <Zap className="h-3 w-3 text-green-600" />{p.label}
-                                        {formData.station_name === p.label && <Check className="h-3 w-3 text-green-600" />}
+                            <div className="rounded-2xl border-2 border-dashed border-green-200 bg-green-50 overflow-hidden">
+                                {scanning ? (
+                                    <div className="flex flex-col items-center gap-2 py-5">
+                                        <div className="relative h-10 w-10">
+                                            <div className="absolute inset-0 rounded-full border-4 border-green-200" />
+                                            <div className="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-green-500" />
+                                        </div>
+                                        <p className="text-sm font-semibold text-green-700">Đang phân tích ảnh...</p>
+                                    </div>
+                                ) : scanResult ? (
+                                    <div className="p-3">
+                                        <div className="mb-2 flex items-center gap-2">
+                                            <div className="rounded-full bg-green-500 p-1"><Check className="h-3 w-3 text-white" /></div>
+                                            <span className="text-xs font-bold text-green-700">Đã trích xuất dữ liệu từ ảnh</span>
+                                            <button type="button" onClick={() => scanInputRef.current?.click()} className="ml-auto text-xs text-green-600 underline">Scan lại</button>
+                                        </div>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {scanResult.kwh != null && <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-bold text-green-700 shadow-md border border-green-200"><Zap className="h-3 w-3" /> {scanResult.kwh} kWh</span>}
+                                            {(scanResult.chargeAmount ?? scanResult.totalPayment) != null && <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-bold text-slate-700 shadow-md border border-slate-200"><CreditCard className="h-3 w-3" /> {((scanResult.chargeAmount ?? scanResult.totalPayment) ?? 0).toLocaleString('vi-VN')}đ</span>}
+                                            {scanResult.date && <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs text-slate-600 shadow-md border border-slate-200"><Calendar className="h-3 w-3" /> {new Date(scanResult.date).toLocaleDateString('vi-VN')}</span>}
+                                            {scanResult.stationName && <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs text-slate-600 shadow-md border border-slate-200 max-w-[180px] truncate"><MapPin className="h-3 w-3 shrink-0" /> {scanResult.stationName}</span>}
+                                        </div>
+                                        {scanResult.summary && <p className="mt-1.5 text-[10px] text-green-600">{scanResult.summary}</p>}
+                                        {scanPreviewUrl && <img src={scanPreviewUrl} alt="Hóa đơn" className="mt-2 h-16 w-auto rounded-lg object-cover border border-green-200" />}
+                                    </div>
+                                ) : (
+                                    <button type="button" onClick={() => scanInputRef.current?.click()} className="flex w-full items-center gap-3 px-4 py-3.5 hover:bg-green-100 transition-colors">
+                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-500 shadow-md shadow-green-200">
+                                            <ScanLine className="h-5 w-5 text-white" />
+                                        </div>
+                                        <div className="text-left">
+                                            <p className="text-sm font-bold text-green-700">Scan ảnh hóa đơn sạc</p>
+                                            <p className="text-xs text-green-500">Tự động điền ngày, kWh, chi phí, địa chỉ</p>
+                                        </div>
+                                        <Zap className="ml-auto h-4 w-4 text-green-400" />
                                     </button>
-                                ))}
-                            </div>
-                        )}
-                        <SimpleLocationInput label="" value={formData.station_name} locationData={stationLocationData}
-                            onChange={(addr, loc) => { setFormData({ ...formData, station_name: addr }); setStationLocationData(loc || null) }}
-                            placeholder={isElectric ? 'Hoặc nhập địa chỉ / lấy vị trí GPS' : 'Petrolimex, Shell...'}
-                        />
-                    </div>
-
-                    {/* ── 3. THỜI GIAN SẠC ── */}
-                    <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3 space-y-3">
-                        <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            <Clock className="h-3 w-3" /> Thời gian {isElectric ? 'sạc' : ''}
-                        </p>
-                        <div className="grid grid-cols-2 gap-3">
-                            <div>
-                                <label className="mb-1 block text-xs font-medium text-slate-400">Bắt đầu</label>
-                                <input type="time" value={formData.start_time}
-                                    onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
-                                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-100"
+                                )}
+                                <input ref={scanInputRef} type="file" accept="image/*" className="hidden"
+                                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleScanImage(f); e.target.value = '' }}
                                 />
                             </div>
-                            <div>
-                                <label className="mb-1 block text-xs font-medium text-slate-400">Kết thúc</label>
-                                <input type="time" value={formData.end_time}
-                                    onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
-                                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-100"
-                                />
-                            </div>
-                        </div>
-                        {duration && (
-                            <div className="flex items-center justify-between rounded-xl bg-green-100 px-3 py-2">
-                                <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700"><Clock className="h-3 w-3" /> Tổng thời gian sạc</span>
-                                <span className="text-sm font-black text-green-700">{duration}</span>
-                            </div>
                         )}
-                    </div>
 
-                    {/* ── 4. SỐ ĐIỆN + ĐƠN GIÁ ── */}
-                    <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3 space-y-3">
-                        <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            <Zap className="h-3 w-3 text-green-500" /> {isElectric ? 'Điện năng & chi phí' : 'Nhiên liệu & chi phí'}
-                        </p>
-                        <div className="grid grid-cols-2 gap-3">
-                            {/* kWh / Liters */}
-                            <div>
-                                <label className="mb-1 block text-xs font-medium text-slate-400">
-                                    {isElectric ? 'Số điện đã sạc' : 'Số lít'}
-                                </label>
-                                <div className="relative">
-                                    <input type="text" required
-                                        value={(() => {
-                                            if (formData.quantity === '') return ''
-                                            if (formData.quantity.endsWith('.')) {
-                                                const p = formData.quantity.split('.')
-                                                return (p[0] ? parseInt(p[0]).toLocaleString('vi-VN') : '') + ','
-                                            }
-                                            const v = parseFloat(formData.quantity)
-                                            if (isNaN(v)) return formData.quantity
-                                            const p = formData.quantity.split('.')
-                                            p[0] = parseInt(p[0]).toLocaleString('vi-VN')
-                                            return p.join(',')
-                                        })()}
-                                        onChange={(e) => {
-                                            const v = e.target.value.replace(/,/g, '.')
-                                            if (!/^[\d.]*$/.test(v)) return
-                                            if ((v.match(/\./g) || []).length > 1) return
-                                            setFormData({ ...formData, quantity: v })
-                                        }}
-                                        placeholder=""
-                                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 pr-12 text-right text-lg font-black text-slate-800 focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-100"
-                                    />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400 pointer-events-none">{isElectric ? 'kWh' : 'lít'}</span>
-                                </div>
-                            </div>
-                            {/* Unit price */}
-                            <div>
-                                <label className="mb-1 block text-xs font-medium text-slate-400">
-                                    Đơn giá{isElectric ? ' /kWh' : ' /lít'}
-                                </label>
-                                <div className="relative">
-                                    <input type="text" required
-                                        value={fmtInput(formData.unit_price)}
-                                        onChange={(e) => setFormData({ ...formData, unit_price: e.target.value.replace(/[^\d]/g, '') })}
-                                        placeholder=""
-                                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 pr-8 text-right text-lg font-black text-slate-800 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100"
-                                    />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400 pointer-events-none">đ</span>
-                                </div>
-                            </div>
+                        {/* ── 1. NGÀY SẠC ── */}
+                        <div>
+                            <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                <Calendar className="h-3 w-3" /> {isElectric ? 'Ngày sạc' : 'Ngày đổ xăng'}
+                            </label>
+                            <button
+                                type="button"
+                                onClick={() => setShowDatePicker(true)}
+                                className={`flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-left text-sm font-semibold text-slate-800 transition-all hover:border-slate-300 focus:outline-none focus:ring-2 ${isElectric ? 'focus:border-green-400 focus:ring-green-100' : 'focus:border-slate-500 focus:ring-slate-200'}`}
+                            >
+                                <span>{formData.refuel_date ? (() => { const [y, m, d] = formData.refuel_date.split('-'); return `${d}/${m}/${y}` })() : ''}</span>
+                                <Calendar className="h-4 w-4 text-slate-400" />
+                            </button>
                         </div>
 
-                        {/* 5. Phí sạc thực tế (auto-calculated) */}
-                        {chargeAmount > 0 && (
-                            <div className="flex items-center justify-between rounded-xl bg-white border border-slate-200 px-3 py-2.5">
-                                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600"><Zap className="h-3 w-3 text-green-500" /> Phí sạc thực tế</span>
-                                <span className="text-md font-black text-slate-800">{Math.round(chargeAmount).toLocaleString('vi-VN')} đ</span>
-                            </div>
-                        )}
-                    </div>
+                        {/* ── 2. ĐỊA CHỈ TRẠM SẠC ── */}
+                        <div>
+                            <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                <MapPin className="h-3 w-3 text-red-500" /> {isElectric ? 'Địa chỉ trạm sạc' : 'Trạm xăng'}
+                            </label>
+                            <SimpleLocationInput label="" value={formData.station_name} locationData={stationLocationData}
+                                onChange={(addr, loc) => { setFormData({ ...formData, station_name: addr }); setStationLocationData(loc || null) }}
+                                placeholder={isElectric ? 'Hoặc nhập địa chỉ / lấy vị trí GPS' : 'Petrolimex, Shell...'}
+                            />
+                        </div>
 
-                    {/* ── 6. KHUYẾN MÃI (electric only, optional) ── */}
-                    {isElectric && (
-                        <div className="rounded-2xl border border-pink-100 bg-red-50 p-3 space-y-3">
-                            {/* Header */}
-                            <div className="flex items-center justify-between">
-                                <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                                    <Gift className="h-3.5 w-3.5 text-red-500" /> Khuyến mãi
-                                    <span className="normal-case font-normal text-slate-400">(tùy chọn)</span>
-                                </p>
-                                {/* % / VND toggle */}
-                                <div className="flex rounded-lg overflow-hidden border border-pink-200">
-                                    <button type="button"
-                                        onClick={() => { setDiscountMode('pct'); setFormData(prev => ({ ...prev, discount: '' })) }}
-                                        className={`px-2.5 py-1 text-xs font-bold transition-colors ${discountMode === 'pct' ? 'bg-red-500 text-white' : 'bg-white text-slate-500 hover:bg-red-50'
-                                            }`}>%</button>
-                                    <button type="button"
-                                        onClick={() => { setDiscountMode('vnd'); setFormData(prev => ({ ...prev, discount: '' })) }}
-                                        className={`px-2.5 py-1 text-xs font-bold transition-colors ${discountMode === 'vnd' ? 'bg-red-500 text-white' : 'bg-white text-slate-500 hover:bg-red-50'
-                                            }`}>đ</button>
+                        {/* ── 3. THỜI GIAN SẠC ── */}
+                        <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3 space-y-3">
+                            <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                <Clock className="h-3 w-3" /> Thời gian {isElectric ? 'sạc' : ''}
+                            </p>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="mb-1 block text-xs font-medium text-slate-400">Bắt đầu</label>
+                                    <input type="time" value={formData.start_time}
+                                        onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+                                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-100"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-xs font-medium text-slate-400">Kết thúc</label>
+                                    <input type="time" value={formData.end_time}
+                                        onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
+                                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-100"
+                                    />
                                 </div>
                             </div>
-
-                            {/* Quick % presets */}
-                            {discountMode === 'pct' && (
-                                <div className="flex gap-1.5">
-                                    {[25, 50, 100].map(pct => (
-                                        <button key={pct} type="button"
-                                            onClick={() => setFormData(prev => ({ ...prev, discount: pct.toString() }))}
-                                            className={`flex-1 rounded-xl border py-2 text-sm font-bold transition-all ${formData.discount === pct.toString()
-                                                ? 'border-red-500 bg-red-500 text-white shadow-md'
-                                                : 'border-red-200 bg-white text-red-600 hover:border-red-400'
-                                                }`}>
-                                            -{pct}%
-                                        </button>
-                                    ))}
+                            {duration && (
+                                <div className="flex items-center justify-between rounded-xl bg-green-100 px-3 py-2">
+                                    <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700"><Clock className="h-3 w-3" /> Tổng thời gian sạc</span>
+                                    <span className="text-sm font-black text-green-700">{duration}</span>
                                 </div>
                             )}
+                        </div>
 
-                            {/* Input */}
-                            <div className="relative">
-                                <input type="text"
-                                    value={discountMode === 'vnd' ? fmtInput(formData.discount) : formData.discount}
-                                    onChange={(e) => {
-                                        const raw = e.target.value.replace(/[^\d]/g, '')
-                                        if (discountMode === 'pct') {
-                                            // clamp to 100
-                                            const n = parseInt(raw) || 0
-                                            setFormData(prev => ({ ...prev, discount: n > 100 ? '100' : raw }))
-                                        } else {
-                                            setFormData(prev => ({ ...prev, discount: raw }))
-                                        }
-                                    }}
-                                    placeholder={discountMode === 'pct' ? 'Nhập % giảm...' : 'Nhập số tiền được giảm...'}
-                                    className="w-full rounded-xl border border-red-200 bg-white px-3 py-2.5 pr-10 text-sm font-semibold focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-100"
-                                />
-                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-red-400">
-                                    {discountMode === 'pct' ? '%' : 'đ'}
-                                </span>
-                            </div>
-
-                            {/* Preview */}
-                            {discount > 0 && chargeAmount > 0 && (
-                                <div className="flex items-center justify-between rounded-xl bg-red-100 px-3 py-2">
-                                    <span className="text-xs font-medium text-red-700">Tiết kiệm được</span>
-                                    <div className="text-right">
-                                        <span className="text-sm font-black text-red-700">-{discount.toLocaleString('vi-VN')}đ</span>
-                                        {discountMode === 'vnd' && chargeAmount > 0 && (
-                                            <span className="ml-1.5 text-xs text-red-500">({discountPct.toFixed(0)}%)</span>
-                                        )}
+                        {/* ── 4. SỐ ĐIỆN + ĐƠN GIÁ ── */}
+                        <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3 space-y-3">
+                            <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                <Zap className="h-3 w-3 text-green-500" /> {isElectric ? 'Điện năng & chi phí' : 'Nhiên liệu & chi phí'}
+                            </p>
+                            <div className="grid grid-cols-2 gap-3">
+                                {/* kWh / Liters */}
+                                <div>
+                                    <label className="mb-1 block text-xs font-medium text-slate-400">
+                                        {isElectric ? 'Số điện đã sạc' : 'Số lít'}
+                                    </label>
+                                    <div className="relative">
+                                        <input type="text" required
+                                            value={(() => {
+                                                if (formData.quantity === '') return ''
+                                                if (formData.quantity.endsWith('.')) {
+                                                    const p = formData.quantity.split('.')
+                                                    return (p[0] ? parseInt(p[0]).toLocaleString('vi-VN') : '') + ','
+                                                }
+                                                const v = parseFloat(formData.quantity)
+                                                if (isNaN(v)) return formData.quantity
+                                                const p = formData.quantity.split('.')
+                                                p[0] = parseInt(p[0]).toLocaleString('vi-VN')
+                                                return p.join(',')
+                                            })()}
+                                            onChange={(e) => {
+                                                const v = e.target.value.replace(/,/g, '.')
+                                                if (!/^[\d.]*$/.test(v)) return
+                                                if ((v.match(/\./g) || []).length > 1) return
+                                                setFormData({ ...formData, quantity: v })
+                                            }}
+                                            placeholder=""
+                                            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 pr-12 text-right text-lg font-black text-slate-800 focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-100"
+                                        />
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400 pointer-events-none">{isElectric ? 'kWh' : 'lít'}</span>
                                     </div>
                                 </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* ── 7. TỔNG THANH TOÁN ── */}
-                    {chargeAmount > 0 && (
-                        <div className="rounded-2xl bg-green-500 px-4 py-3 text-white">
-                            <div className="flex items-center justify-between">
-                                <span className="inline-flex items-center gap-1.5 text-sm font-semibold opacity-90"><DollarSign className="h-4 w-4" /> Tổng thanh toán</span>
-                                <span className="text-xl font-black">{totalPayment.toLocaleString('vi-VN')}đ</span>
+                                {/* Unit price */}
+                                <div>
+                                    <label className="mb-1 block text-xs font-medium text-slate-400">
+                                        Đơn giá{isElectric ? ' /kWh' : ' /lít'}
+                                    </label>
+                                    <div className="relative">
+                                        <input type="text" required
+                                            value={fmtInput(formData.unit_price)}
+                                            onChange={(e) => setFormData({ ...formData, unit_price: e.target.value.replace(/[^\d]/g, '') })}
+                                            placeholder=""
+                                            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 pr-8 text-right text-lg font-black text-slate-800 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100"
+                                        />
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400 pointer-events-none">đ</span>
+                                    </div>
+                                </div>
                             </div>
-                            {discount > 0 && (
-                                <div className="mt-1.5 flex items-center justify-between rounded-xl bg-white/20 px-3 py-1.5 text-xs">
-                                    <span>Phí gốc: {chargeAmount.toLocaleString('vi-VN')}đ</span>
-                                    <span className="inline-flex items-center gap-1"><Gift className="h-3 w-3" /> -{discount.toLocaleString('vi-VN')}đ</span>
+
+                            {/* 5. Phí sạc thực tế (auto-calculated) */}
+                            {chargeAmount > 0 && (
+                                <div className="flex items-center justify-between rounded-xl bg-white border border-slate-200 px-3 py-2.5">
+                                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600"><Zap className="h-3 w-3 text-green-500" /> Phí sạc thực tế</span>
+                                    <span className="text-md font-black text-slate-800">{Math.round(chargeAmount).toLocaleString('vi-VN')} đ</span>
                                 </div>
                             )}
                         </div>
-                    )}
 
-                    {/* Fuel type selector (fuel only, when multiple types) */}
-                    {!isElectric && availableFuelTypes.length > 1 && (
-                        <div>
-                            <label className="mb-1.5 block text-xs font-semibold text-slate-500 uppercase tracking-wide">Loại nhiên liệu</label>
-                            <div className="flex gap-2">
-                                {availableFuelTypes.map(([key, { label }]) => {
-                                    const sel = formData.fuel_type === key
-                                    return (
-                                        <label key={key} className={`flex-1 cursor-pointer rounded-xl border-2 px-3 py-2 text-center text-xs font-semibold transition-all ${sel ? 'border-slate-500 bg-slate-50 text-slate-700' : 'border-slate-200 hover:border-slate-300 text-slate-500'
-                                            }`}>
-                                            <input type="radio" name="fuel_type" value={key} checked={sel}
-                                                onChange={(e) => setFormData({ ...formData, fuel_type: e.target.value as any })}
-                                                className="hidden" />
-                                            {key === 'electric' ? <Zap className="h-3 w-3 inline mr-0.5" /> : <Fuel className="h-3 w-3 inline mr-0.5" />}{label}
-                                        </label>
-                                    )
-                                })}
+                        {/* ── 6. KHUYẾN MÃI (electric only, optional) ── */}
+                        {isElectric && (
+                            <div className="rounded-2xl border border-pink-100 bg-red-50 p-3 space-y-3">
+                                {/* Header */}
+                                <div className="flex items-center justify-between">
+                                    <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                        <Gift className="h-3.5 w-3.5 text-red-500" /> Khuyến mãi
+                                        <span className="normal-case font-normal text-slate-400">(tùy chọn)</span>
+                                    </p>
+                                    {/* % / VND toggle */}
+                                    <div className="flex rounded-lg overflow-hidden border border-pink-200">
+                                        <button type="button"
+                                            onClick={() => { setDiscountMode('pct'); setFormData(prev => ({ ...prev, discount: '' })) }}
+                                            className={`px-2.5 py-1 text-xs font-bold transition-colors ${discountMode === 'pct' ? 'bg-red-500 text-white' : 'bg-white text-slate-500 hover:bg-red-50'
+                                                }`}>%</button>
+                                        <button type="button"
+                                            onClick={() => { setDiscountMode('vnd'); setFormData(prev => ({ ...prev, discount: '' })) }}
+                                            className={`px-2.5 py-1 text-xs font-bold transition-colors ${discountMode === 'vnd' ? 'bg-red-500 text-white' : 'bg-white text-slate-500 hover:bg-red-50'
+                                                }`}>đ</button>
+                                    </div>
+                                </div>
+
+                                {/* Quick % presets */}
+                                {discountMode === 'pct' && (
+                                    <div className="flex gap-1.5">
+                                        {[25, 50, 100].map(pct => (
+                                            <button key={pct} type="button"
+                                                onClick={() => setFormData(prev => ({ ...prev, discount: pct.toString() }))}
+                                                className={`flex-1 rounded-xl border py-2 text-sm font-bold transition-all ${formData.discount === pct.toString()
+                                                    ? 'border-red-500 bg-red-500 text-white shadow-md'
+                                                    : 'border-red-200 bg-white text-red-600 hover:border-red-400'
+                                                    }`}>
+                                                -{pct}%
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Input */}
+                                <div className="relative">
+                                    <input type="text"
+                                        value={discountMode === 'vnd' ? fmtInput(formData.discount) : formData.discount}
+                                        onChange={(e) => {
+                                            const raw = e.target.value.replace(/[^\d]/g, '')
+                                            if (discountMode === 'pct') {
+                                                // clamp to 100
+                                                const n = parseInt(raw) || 0
+                                                setFormData(prev => ({ ...prev, discount: n > 100 ? '100' : raw }))
+                                            } else {
+                                                setFormData(prev => ({ ...prev, discount: raw }))
+                                            }
+                                        }}
+                                        placeholder={discountMode === 'pct' ? 'Nhập % giảm...' : 'Nhập số tiền được giảm...'}
+                                        className="w-full rounded-xl border border-red-200 bg-white px-3 py-2.5 pr-10 text-sm font-semibold focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-100"
+                                    />
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-red-400">
+                                        {discountMode === 'pct' ? '%' : 'đ'}
+                                    </span>
+                                </div>
+
+                                {/* Preview */}
+                                {discount > 0 && chargeAmount > 0 && (
+                                    <div className="flex items-center justify-between rounded-xl bg-red-100 px-3 py-2">
+                                        <span className="text-xs font-medium text-red-700">Tiết kiệm được</span>
+                                        <div className="text-right">
+                                            <span className="text-sm font-black text-red-700">-{discount.toLocaleString('vi-VN')}đ</span>
+                                            {discountMode === 'vnd' && chargeAmount > 0 && (
+                                                <span className="ml-1.5 text-xs text-red-500">({discountPct.toFixed(0)}%)</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {/* ── ODO ── */}
-                    <div>
-                        <label className="mb-1.5 flex items-center gap-1 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                            <Gauge className="h-3 w-3" /> ODO hiện tại (km)
-                        </label>
-                        <input type="number" required
-                            value={formData.odometer_at_refuel}
-                            onChange={(e) => setFormData({ ...formData, odometer_at_refuel: parseInt(e.target.value) || 0 })}
-                            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                        />
-                    </div>
+                        {/* ── 7. TỔNG THANH TOÁN ── */}
+                        {chargeAmount > 0 && (
+                            <div className="rounded-2xl bg-green-500 px-4 py-3 text-white">
+                                <div className="flex items-center justify-between">
+                                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold opacity-90"><DollarSign className="h-4 w-4" /> Tổng thanh toán</span>
+                                    <span className="text-xl font-black">{totalPayment.toLocaleString('vi-VN')}đ</span>
+                                </div>
+                                {discount > 0 && (
+                                    <div className="mt-1.5 flex items-center justify-between rounded-xl bg-white/20 px-3 py-1.5 text-xs">
+                                        <span>Phí gốc: {chargeAmount.toLocaleString('vi-VN')}đ</span>
+                                        <span className="inline-flex items-center gap-1"><Gift className="h-3 w-3" /> -{discount.toLocaleString('vi-VN')}đ</span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
-                    {/* ── ẢNH & GHI CHÚ (collapsible) ── */}
-                    <button type="button" onClick={() => setShowAdvanced(!showAdvanced)}
-                        className="flex w-full items-center justify-between text-sm text-slate-500 hover:text-slate-700 transition-colors">
-                        <span className="inline-flex items-center gap-2 font-medium"><Image className="h-4 w-4" /> Ảnh hóa đơn &amp; ghi chú</span>
-                        {showAdvanced ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    </button>
-
-                    {showAdvanced && (
-                        <div className="space-y-4 border-t border-slate-100 pt-3">
-                            <ImageUpload
-                                value={scanPreviewUrl || formData.receipt_image_url}
-                                onChange={(url) => {
-                                    if (!url) { setSelectedImageFile(null); setScanPreviewUrl(null); setFormData({ ...formData, receipt_image_url: null }) }
-                                    else { setFormData({ ...formData, receipt_image_url: url }) }
-                                }}
-                                onFileSelect={(file) => setSelectedImageFile(file)}
-                                label="Ảnh hóa đơn"
-                            />
+                        {/* Fuel type selector (fuel only, when multiple types) */}
+                        {!isElectric && availableFuelTypes.length > 1 && (
                             <div>
-                                <label className="mb-1 block text-xs font-semibold text-slate-500 uppercase tracking-wide">Ghi chú</label>
-                                <textarea rows={2}
-                                    value={formData.notes}
-                                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                                    placeholder={isElectric ? 'Ví dụ: pin sạc từ 20% → 80%...' : 'Ghi chú thêm...'}
-                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                                />
+                                <label className="mb-1.5 block text-xs font-semibold text-slate-500 uppercase tracking-wide">Loại nhiên liệu</label>
+                                <div className="flex gap-2">
+                                    {availableFuelTypes.map(([key, { label }]) => {
+                                        const sel = formData.fuel_type === key
+                                        return (
+                                            <label key={key} className={`flex-1 cursor-pointer rounded-xl border-2 px-3 py-2 text-center text-xs font-semibold transition-all ${sel ? 'border-slate-500 bg-slate-50 text-slate-700' : 'border-slate-200 hover:border-slate-300 text-slate-500'
+                                                }`}>
+                                                <input type="radio" name="fuel_type" value={key} checked={sel}
+                                                    onChange={(e) => setFormData({ ...formData, fuel_type: e.target.value as any })}
+                                                    className="hidden" />
+                                                {key === 'electric' ? <Zap className="h-3 w-3 inline mr-0.5" /> : <Fuel className="h-3 w-3 inline mr-0.5" />}{label}
+                                            </label>
+                                        )
+                                    })}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {/* ── SUBMIT ── */}
-                    <button type="submit" disabled={loading}
-                        className={`w-full rounded-2xl py-4 text-base font-bold text-white shadow-lg transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:scale-100 ${isElectric ? 'bg-green-500 shadow-green-200' : 'bg-slate-600 shadow-slate-200'
-                            }`}>
-                        {loading
-                            ? <span className="flex items-center justify-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Đang lưu...</span>
-                            : editingLog
-                                ? <span className="flex items-center justify-center gap-2"><Save className="h-4 w-4" /> Lưu cập nhật</span>
-                                : isElectric
-                                    ? <span className="flex items-center justify-center gap-2"><Zap className="h-4 w-4" /> Lưu lịch sử sạc</span>
-                                    : <span className="flex items-center justify-center gap-2"><Droplet className="h-4 w-4" /> Lưu nhật ký</span>
-                        }
-                    </button>
-                </form>
+                        {/* ── ẢNH & GHI CHÚ (collapsible) ── */}
+                        <button type="button" onClick={() => setShowAdvanced(!showAdvanced)}
+                            className="flex w-full items-center justify-between text-sm text-slate-500 hover:text-slate-700 transition-colors">
+                            <span className="inline-flex items-center gap-2 font-medium"><Image className="h-4 w-4" /> Ảnh hóa đơn &amp; ghi chú</span>
+                            {showAdvanced ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        </button>
+
+                        {showAdvanced && (
+                            <div className="space-y-4 border-t border-slate-100 pt-3">
+                                <ImageUpload
+                                    value={scanPreviewUrl || formData.receipt_image_url}
+                                    onChange={(url) => {
+                                        if (!url) { setSelectedImageFile(null); setScanPreviewUrl(null); setFormData({ ...formData, receipt_image_url: null }) }
+                                        else { setFormData({ ...formData, receipt_image_url: url }) }
+                                    }}
+                                    onFileSelect={(file) => setSelectedImageFile(file)}
+                                    label="Ảnh hóa đơn"
+                                />
+                                <div>
+                                    <label className="mb-1 block text-xs font-semibold text-slate-500 uppercase tracking-wide">Ghi chú</label>
+                                    <textarea rows={2}
+                                        value={formData.notes}
+                                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                                        placeholder={isElectric ? 'Ví dụ: pin sạc từ 20% → 80%...' : 'Ghi chú thêm...'}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ── SUBMIT ── */}
+                        <button type="submit" disabled={loading}
+                            className={`w-full rounded-2xl py-4 text-base font-bold text-white shadow-lg transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:scale-100 ${isElectric ? 'bg-green-500 shadow-green-200' : 'bg-slate-600 shadow-slate-200'
+                                }`}>
+                            {loading
+                                ? <span className="flex items-center justify-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Đang lưu...</span>
+                                : editingLog
+                                    ? <span className="flex items-center justify-center gap-2"><Save className="h-4 w-4" /> Lưu cập nhật</span>
+                                    : isElectric
+                                        ? <span className="flex items-center justify-center gap-2"><Zap className="h-4 w-4" /> Lưu lịch sử sạc</span>
+                                        : <span className="flex items-center justify-center gap-2"><Droplet className="h-4 w-4" /> Lưu nhật ký</span>
+                            }
+                        </button>
+                    </form>
+                </div>
             </div>
+
+            <DateTimePickerModal
+                isOpen={showDatePicker}
+                onClose={() => setShowDatePicker(false)}
+                onConfirm={(date) => {
+                    setFormData({ ...formData, refuel_date: date })
+                }}
+                initialDate={formData.refuel_date}
+                showTime={false}
+            />
         </div>
     )
 }
@@ -1598,10 +1577,14 @@ function BulkDiscountModal({
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-[3px]">
-            <div className="w-full max-w-md rounded-t-3xl bg-white shadow-2xl flex flex-col max-h-[90vh] animate-in slide-in-from-bottom">
-                <div className="bg-red-500 rounded-t-3xl px-5 pt-5 pb-4 text-white">
-                    <div className="flex items-center justify-between mb-1">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] pointer-events-none">
+            <div className="w-full max-w-md rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl flex flex-col max-h-[90vh] animate-in slide-in-from-bottom pointer-events-auto mt-12 sm:mt-0 safe-area-bottom overflow-hidden">
+                <div className="bg-red-500 sm:rounded-t-3xl px-5 pt-3 pb-4 text-white">
+                    {/* Mobile Handle */}
+                    <div className="flex w-full justify-center pb-3 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10">
+                        <div className="h-1.5 w-12 rounded-full bg-white/40" />
+                    </div>
+                    <div className="flex items-center justify-between mb-1 mt-1">
                         <h3 className="text-base font-bold flex items-center gap-2">
                             <Gift className="h-5 w-5 fill-white/20" />
                             Áp khuyến mãi hàng loạt
@@ -1739,11 +1722,15 @@ function ChargeDetailModal({
     }
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-[3px] animate-in fade-in">
-            <div className="w-full max-w-sm rounded-3xl bg-blue-600 shadow-xl flex flex-col overflow-hidden animate-in zoom-in-95">
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] animate-in fade-in pointer-events-none">
+            <div className="w-full max-w-sm rounded-t-3xl sm:rounded-3xl bg-blue-600 shadow-xl flex flex-col overflow-hidden animate-in sm:zoom-in-95 pointer-events-auto mt-12 sm:mt-0 safe-area-bottom pb-3 sm:pb-0">
                 {/* Header blue */}
-                <div className="px-5 pt-5 pb-4 text-white">
-                    <div className="flex items-center justify-between mb-1">
+                <div className="px-5 pt-3 pb-4 text-white">
+                    {/* Mobile Handle */}
+                    <div className="flex w-full justify-center pb-3 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10">
+                        <div className="h-1.5 w-12 rounded-full bg-white/40" />
+                    </div>
+                    <div className="flex items-center justify-between mb-1 mt-1">
                         <h3 className="text-base font-bold flex items-center gap-2">
                             <Zap className="h-5 w-5 fill-white/20" />
                             Chi tiết phiên sạc

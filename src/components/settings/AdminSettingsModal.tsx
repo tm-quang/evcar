@@ -96,8 +96,13 @@ export const AdminSettingsModal = ({
   ]
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="relative w-full max-w-md rounded-3xl bg-white shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4 pointer-events-none">
+      <div className="relative w-full max-w-md rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl mt-12 sm:mt-0 max-h-[calc(100vh-3rem)] sm:max-h-[85vh] overflow-y-auto safe-area-bottom pointer-events-auto">
+        {/* Mobile Handle */}
+        <div className="flex w-full justify-center pt-3 pb-2 flex-shrink-0 bg-transparent sm:hidden scroll-none pointer-events-none sticky top-0 z-10 w-full mb-1">
+          <div className="h-1.5 w-12 rounded-full bg-slate-300/80" />
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-200 p-6">
           <div>

@@ -52,8 +52,13 @@ export const ExportExcelModal = ({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm sm:items-center p-4">
-      <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl animate-in slide-in-from-bottom-10 fade-in duration-300 sm:animate-in sm:zoom-in-95">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm sm:items-end sm:items-center p-0 sm:p-4 pointer-events-none">
+      <div className="w-full max-w-md rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl animate-in slide-in-from-bottom-10 fade-in duration-300 sm:animate-in sm:zoom-in-95 mt-12 sm:mt-0 max-h-[calc(100vh-3rem)] sm:max-h-[85vh] overflow-y-auto safe-area-bottom pointer-events-auto">
+        {/* Mobile Handle */}
+        <div className="flex w-full justify-center pt-3 pb-2 flex-shrink-0 bg-transparent sm:hidden scroll-none pointer-events-none sticky top-0 z-10 w-full mb-1">
+          <div className="h-1.5 w-12 rounded-full bg-slate-300/80" />
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 p-4">
           <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">

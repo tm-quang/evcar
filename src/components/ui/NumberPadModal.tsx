@@ -15,12 +15,12 @@ const QUICK_VALUES = [10000, 30000, 50000, 100000]
 const getNumericValue = (formatted: string) => formatted.replace(/\./g, '')
 
 // Memoized button component for better performance and responsiveness
-const NumberButton = ({ 
-  children, 
-  onClick, 
+const NumberButton = ({
+  children,
+  onClick,
   className = '',
-  disabled = false 
-}: { 
+  disabled = false
+}: {
   children: React.ReactNode
   onClick: () => void
   className?: string
@@ -40,16 +40,16 @@ const NumberButton = ({
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    
+
     if (touchTimeoutRef.current) {
       clearTimeout(touchTimeoutRef.current)
     }
-    
+
     if (!disabled) {
       // Immediate execution for better responsiveness
       onClick()
     }
-    
+
     // Delay removal for visual feedback
     touchTimeoutRef.current = setTimeout(() => {
       if (buttonRef.current) {
@@ -113,8 +113,8 @@ const NumberButton = ({
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseLeave}
       className={`touch-manipulation select-none active:outline-none focus:outline-none ${className}`}
-      style={{ 
-        touchAction: 'manipulation', 
+      style={{
+        touchAction: 'manipulation',
         WebkitTapHighlightColor: 'transparent',
         WebkitUserSelect: 'none',
         userSelect: 'none'
@@ -140,11 +140,11 @@ export const NumberPadModal = ({ isOpen, onClose, value, onChange, onConfirm }: 
   const handleValueChange = useCallback((newValue: string) => {
     if (isUpdatingRef.current) return
     isUpdatingRef.current = true
-    
+
     setDisplayValue(newValue)
     const formatted = formatVNDInput(newValue)
     onChange(formatted)
-    
+
     // Reset flag after a short delay to allow rapid clicks
     setTimeout(() => {
       isUpdatingRef.current = false
@@ -232,15 +232,20 @@ export const NumberPadModal = ({ isOpen, onClose, value, onChange, onConfirm }: 
           }
         }
       `}</style>
-      <div 
-        className="fixed inset-0 z-[60] flex items-end backdrop-blur-sm bg-slate-950/50"
+      <div
+        className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 backdrop-blur-sm bg-slate-950/50 pointer-events-none"
         onClick={(e) => {
           if (e.target === e.currentTarget) {
             onClose()
           }
         }}
       >
-        <div className="flex w-full max-w-md mx-auto max-h-[75vh] flex-col rounded-t-3xl shadow-2xl overflow-hidden" style={{ backgroundColor: '#F2F4F7' }}>
+        <div className="flex w-full max-w-md mx-auto max-h-[85vh] flex-col rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden pointer-events-auto mt-12 sm:mt-0 safe-area-bottom" style={{ backgroundColor: '#F2F4F7' }}>
+          {/* Mobile Handle */}
+          <div className="flex w-full justify-center pt-3 pb-2 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10 w-full mb-1" style={{ backgroundColor: '#F2F4F7' }}>
+            <div className="h-1.5 w-12 rounded-full bg-slate-300" />
+          </div>
+
           {/* Header */}
           <div className="flex shrink-0 items-center justify-between border-b border-slate-200 px-3 py-2" style={{ backgroundColor: '#F2F4F7' }}>
             <div>
@@ -296,14 +301,14 @@ export const NumberPadModal = ({ isOpen, onClose, value, onChange, onConfirm }: 
                 C
               </NumberButton>
               <NumberButton
-                onClick={() => {}}
+                onClick={() => { }}
                 disabled
                 className="rounded-2xl bg-blue-400 px-3 py-4 text-base font-bold text-gray-700 shadow-md opacity-90 cursor-not-allowed"
               >
                 ÷
               </NumberButton>
               <NumberButton
-                onClick={() => {}}
+                onClick={() => { }}
                 disabled
                 className="rounded-2xl bg-amber-300 px-3 py-4 text-base font-bold text-gray-700 shadow-md opacity-90 cursor-not-allowed"
               >
@@ -336,7 +341,7 @@ export const NumberPadModal = ({ isOpen, onClose, value, onChange, onConfirm }: 
                 9
               </NumberButton>
               <NumberButton
-                onClick={() => {}}
+                onClick={() => { }}
                 disabled
                 className="rounded-2xl bg-rose-300 px-3 py-4 text-base font-bold text-gray-700 shadow-md opacity-90 cursor-not-allowed"
               >
@@ -363,7 +368,7 @@ export const NumberPadModal = ({ isOpen, onClose, value, onChange, onConfirm }: 
                 6
               </NumberButton>
               <NumberButton
-                onClick={() => {}}
+                onClick={() => { }}
                 disabled
                 className="rounded-2xl bg-emerald-300 px-3 py-4 text-base font-bold text-gray-700 shadow-md opacity-90 cursor-not-allowed"
               >
@@ -410,7 +415,7 @@ export const NumberPadModal = ({ isOpen, onClose, value, onChange, onConfirm }: 
                 000
               </NumberButton>
               <NumberButton
-                onClick={() => {}}
+                onClick={() => { }}
                 disabled
                 className="rounded-2xl bg-gray-500 px-3 py-4 text-xl font-bold text-white shadow-md opacity-90 cursor-not-allowed"
               >

@@ -134,29 +134,36 @@ export const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
   if (!isOpen) return null
 
   // Format display for better readability
-  const displayValue = display.length > 12 
-    ? display 
-    : parseFloat(display).toLocaleString('vi-VN', { 
-        maximumFractionDigits: 10,
-        useGrouping: false 
-      })
+  const displayValue = display.length > 12
+    ? display
+    : parseFloat(display).toLocaleString('vi-VN', {
+      maximumFractionDigits: 10,
+      useGrouping: false
+    })
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-slate-950/50 animate-in fade-in duration-200">
-      <div className="relative w-full max-w-sm flex flex-col rounded-3xl bg-gradient-to-br from-slate-50 to-slate-100 shadow-2xl ring-1 ring-slate-200/50 overflow-hidden animate-in zoom-in-95 duration-300">
-        {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-slate-200/50 bg-gradient-to-r from-white to-slate-50 px-4 py-3 sm:px-6 sm:py-4">
-          <div>
-            <h2 className="text-lg font-bold text-slate-900 sm:text-xl">Bàn phím máy tính</h2>
-            <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">Máy tính cầm tay</p>
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 backdrop-blur-sm bg-slate-950/50 animate-in fade-in duration-200 pointer-events-none">
+      <div className="relative w-full max-w-md flex flex-col rounded-t-3xl sm:rounded-3xl bg-gradient-to-br from-slate-50 to-slate-100 shadow-2xl ring-1 ring-slate-200/50 overflow-hidden animate-in zoom-in-95 duration-300 pointer-events-auto mt-12 sm:mt-0 safe-area-bottom">
+        {/* Header with Handle */}
+        <div className="shrink-0 border-b border-slate-200/50 bg-gradient-to-r from-white to-slate-50 sticky top-0 z-20">
+          {/* Mobile Handle */}
+          <div className="flex w-full justify-center pt-3 pb-2 sm:hidden scroll-none pointer-events-none sticky top-0 z-10 w-full">
+            <div className="h-1.5 w-12 rounded-full bg-slate-300" />
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all hover:bg-slate-200 hover:scale-110 active:scale-95 sm:h-10 sm:w-10"
-          >
-            <FaTimes className="h-4 w-4 sm:h-5 sm:w-5" />
-          </button>
+
+          <div className="flex items-center justify-between px-4 py-2 sm:px-6 sm:py-4">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900 sm:text-xl">Bàn phím máy tính</h2>
+              <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">Máy tính cầm tay</p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all hover:bg-slate-200 hover:scale-110 active:scale-95 sm:h-10 sm:w-10"
+            >
+              <FaTimes className="h-4 w-4 sm:h-5 sm:w-5" />
+            </button>
+          </div>
         </div>
 
         {/* Calculator Body */}
@@ -200,11 +207,10 @@ export const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
             </button>
             <button
               onClick={() => handleOperation('/')}
-              className={`h-14 sm:h-16 rounded-xl font-semibold text-lg sm:text-xl shadow-lg active:scale-95 transition-all ${
-                operation === '/'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-blue-500 text-white hover:bg-blue-600'
-              }`}
+              className={`h-14 sm:h-16 rounded-xl font-semibold text-lg sm:text-xl shadow-lg active:scale-95 transition-all ${operation === '/'
+                ? 'bg-blue-600 text-white'
+                : 'bg-blue-500 text-white hover:bg-blue-600'
+                }`}
             >
               ÷
             </button>
@@ -230,11 +236,10 @@ export const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
             </button>
             <button
               onClick={() => handleOperation('*')}
-              className={`h-14 sm:h-16 rounded-xl font-semibold text-lg sm:text-xl shadow-lg active:scale-95 transition-all ${
-                operation === '*'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-blue-500 text-white hover:bg-blue-600'
-              }`}
+              className={`h-14 sm:h-16 rounded-xl font-semibold text-lg sm:text-xl shadow-lg active:scale-95 transition-all ${operation === '*'
+                ? 'bg-blue-600 text-white'
+                : 'bg-blue-500 text-white hover:bg-blue-600'
+                }`}
             >
               ×
             </button>
@@ -260,11 +265,10 @@ export const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
             </button>
             <button
               onClick={() => handleOperation('-')}
-              className={`h-14 sm:h-16 rounded-xl font-semibold text-lg sm:text-xl shadow-lg active:scale-95 transition-all ${
-                operation === '-'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-blue-500 text-white hover:bg-blue-600'
-              }`}
+              className={`h-14 sm:h-16 rounded-xl font-semibold text-lg sm:text-xl shadow-lg active:scale-95 transition-all ${operation === '-'
+                ? 'bg-blue-600 text-white'
+                : 'bg-blue-500 text-white hover:bg-blue-600'
+                }`}
             >
               −
             </button>
@@ -290,11 +294,10 @@ export const CalculatorModal = ({ isOpen, onClose }: CalculatorModalProps) => {
             </button>
             <button
               onClick={() => handleOperation('+')}
-              className={`h-14 sm:h-16 rounded-xl font-semibold text-lg sm:text-xl shadow-lg active:scale-95 transition-all ${
-                operation === '+'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-blue-500 text-white hover:bg-blue-600'
-              }`}
+              className={`h-14 sm:h-16 rounded-xl font-semibold text-lg sm:text-xl shadow-lg active:scale-95 transition-all ${operation === '+'
+                ? 'bg-blue-600 text-white'
+                : 'bg-blue-500 text-white hover:bg-blue-600'
+                }`}
             >
               +
             </button>

@@ -19,12 +19,12 @@ type PlanDayModalProps = {
   anchorPosition?: { top: number; left: number } // Position of the date button that triggered this modal
 }
 
-export const PlanDayModal = ({ 
-  isOpen, 
-  onClose, 
-  tasks, 
-  reminders, 
-  date, 
+export const PlanDayModal = ({
+  isOpen,
+  onClose,
+  tasks,
+  reminders,
+  date,
   onTaskClick,
   onReminderClick,
   onCreateNote,
@@ -114,12 +114,12 @@ export const PlanDayModal = ({
       />
 
       {/* Modal with arrow indicator */}
-      <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pointer-events-none" style={{ paddingTop: anchorPosition ? `${anchorPosition.top}px` : '50%' }}>
+      <div className="fixed inset-x-0 bottom-0 sm:inset-0 z-50 flex items-end sm:items-start justify-center p-0 sm:p-4 pointer-events-none" style={{ paddingTop: anchorPosition ? `${anchorPosition.top}px` : '10%' }}>
         {/* Arrow pointing up */}
         {anchorPosition && (
-          <div 
-            className="absolute z-[60] pointer-events-none"
-            style={{ 
+          <div
+            className="hidden sm:block absolute z-[60] pointer-events-none"
+            style={{
               left: `${anchorPosition.left}px`,
               top: `${anchorPosition.top - 12}px`,
               transform: 'translateX(-50%)'
@@ -128,14 +128,19 @@ export const PlanDayModal = ({
             <div className="h-0 w-0 border-l-[12px] border-r-[12px] border-b-[12px] border-l-transparent border-r-transparent border-b-white drop-shadow-lg" />
           </div>
         )}
-        
+
         <div
-          className="bg-white rounded-3xl shadow-2xl max-w-sm w-full max-h-[60vh] flex flex-col pointer-events-auto animate-in zoom-in-95 duration-200 border border-slate-200/50"
+          className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl max-w-md w-full max-h-[85vh] flex flex-col pointer-events-auto animate-in zoom-in-95 duration-200 border border-slate-200/50 safe-area-bottom mt-12 sm:mt-0"
           onClick={(e) => e.stopPropagation()}
           style={{ marginTop: anchorPosition ? '8px' : '0' }}
         >
+          {/* Mobile Handle */}
+          <div className="flex w-full justify-center pt-3 pb-2 flex-shrink-0 bg-transparent sm:hidden scroll-none pointer-events-none sticky top-0 z-10 w-full mb-1">
+            <div className="h-1.5 w-12 rounded-full bg-slate-300" />
+          </div>
+
           {/* Header with gradient */}
-          <div className="relative flex items-center justify-between p-5 bg-gradient-to-r from-sky-500 to-blue-600 rounded-t-3xl">
+          <div className="relative flex items-center justify-between p-5 bg-gradient-to-r from-sky-500 to-blue-600 sm:rounded-t-3xl border-b border-sky-400">
             <div className="flex-1">
               <h3 className="text-lg font-bold text-white drop-shadow-sm">
                 {formatDate(date)}
@@ -172,7 +177,7 @@ export const PlanDayModal = ({
                 </div>
                 <span className="text-xs font-semibold text-amber-700">Ghi chú</span>
               </button>
-              
+
               <button
                 type="button"
                 onClick={() => {
@@ -188,7 +193,7 @@ export const PlanDayModal = ({
                 </div>
                 <span className="text-xs font-semibold text-indigo-700">Công việc</span>
               </button>
-              
+
               <button
                 type="button"
                 onClick={() => {
@@ -245,9 +250,8 @@ export const PlanDayModal = ({
                               <FaCheckCircle className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
                             )}
                             <div className="flex-1 min-w-0">
-                              <p className={`text-sm font-semibold truncate ${
-                                task.status === 'completed' ? 'text-slate-400 line-through' : 'text-slate-900'
-                              }`}>
+                              <p className={`text-sm font-semibold truncate ${task.status === 'completed' ? 'text-slate-400 line-through' : 'text-slate-900'
+                                }`}>
                                 {task.title}
                               </p>
                               {task.description && (

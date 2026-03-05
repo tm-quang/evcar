@@ -221,12 +221,12 @@ export const DateTimePickerModal = ({
 
   // Generate calendar days
   const calendarDays: (number | null)[] = []
-  
+
   // Add empty cells for days before month starts
   for (let i = 0; i < startingDayOfWeek; i++) {
     calendarDays.push(null)
   }
-  
+
   // Add days of month
   for (let day = 1; day <= daysInMonth; day++) {
     calendarDays.push(day)
@@ -241,23 +241,31 @@ export const DateTimePickerModal = ({
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="relative w-full max-w-sm max-h-[85vh] flex flex-col rounded-3xl bg-white shadow-[0_25px_80px_rgba(0,0,0,0.5)] ring-1 ring-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-300">
-          {/* Header */}
-          <div className="flex shrink-0 items-center justify-between border-b border-slate-200 px-4 py-3">
-            <div>
-              <h2 className="text-base font-bold text-slate-900">Chọn ngày{showTime ? ' và giờ' : ''}</h2>
-              <p className="mt-0.5 text-xs text-slate-500">
-                {isToday ? 'Hôm nay' : formatSelectedDate()} {showTime && formatDisplayTime() && `- ${formatDisplayTime()}`}
-              </p>
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 pointer-events-none">
+        <div className="relative w-full max-w-md max-h-[85vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-[0_25px_80px_rgba(0,0,0,0.5)] ring-1 ring-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-300 mt-12 sm:mt-0 pointer-events-auto">
+          {/* Header with Handle */}
+          <div className="sticky top-0 z-10 bg-white border-b border-slate-200 shrink-0">
+            {/* Mobile Handle */}
+            <div className="flex w-full justify-center pt-3 pb-2 sm:hidden scroll-none pointer-events-none sticky top-0 z-10 w-full">
+              <div className="h-1.5 w-12 rounded-full bg-slate-300/80" />
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all hover:bg-slate-200 hover:scale-110 active:scale-95"
-            >
-              <FaTimes className="h-4 w-4" />
-            </button>
+
+            {/* Header Content */}
+            <div className="flex shrink-0 items-center justify-between px-4 pb-3">
+              <div>
+                <h2 className="text-base font-bold text-slate-900">Chọn ngày{showTime ? ' và giờ' : ''}</h2>
+                <p className="mt-0.5 text-xs text-slate-500">
+                  {isToday ? 'Hôm nay' : formatSelectedDate()} {showTime && formatDisplayTime() && `- ${formatDisplayTime()}`}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all hover:bg-slate-200 hover:scale-110 active:scale-95"
+              >
+                <FaTimes className="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
           {/* Content */}
@@ -274,11 +282,11 @@ export const DateTimePickerModal = ({
                 >
                   <FaChevronLeft className="h-4 w-4" />
                 </button>
-                
+
                 <div className="flex items-center gap-1">
                   <span className="text-sm font-bold text-slate-900">{formatMonthYear()}</span>
                 </div>
-                
+
                 <button
                   type="button"
                   onClick={goToNextMonth}
@@ -316,13 +324,12 @@ export const DateTimePickerModal = ({
                       key={day}
                       type="button"
                       onClick={() => selectDate(day)}
-                      className={`relative flex h-9 items-center justify-center rounded-lg text-sm font-semibold transition-all active:scale-95 ${
-                        isSelected
-                          ? 'bg-sky-500 text-white shadow-md shadow-sky-500/30'
-                          : isTodayDate
+                      className={`relative flex h-9 items-center justify-center rounded-lg text-sm font-semibold transition-all active:scale-95 ${isSelected
+                        ? 'bg-sky-500 text-white shadow-md shadow-sky-500/30'
+                        : isTodayDate
                           ? 'bg-sky-100 text-sky-700 font-bold'
                           : 'text-slate-700 hover:bg-slate-100'
-                      }`}
+                        }`}
                     >
                       {day}
                     </button>
@@ -359,7 +366,7 @@ export const DateTimePickerModal = ({
             >
               Hôm nay
             </button>
-            
+
             <div className="flex items-center gap-2">
               <button
                 type="button"

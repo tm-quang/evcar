@@ -26,9 +26,12 @@ export const TaskActionModal = ({
       />
 
       {/* Modal - Always centered */}
-      <div
-        className="fixed left-1/2 top-1/2 z-[70] flex w-full max-w-sm -translate-x-1/2 -translate-y-1/2 flex-col gap-2 rounded-2xl bg-white p-2 shadow-[0_10px_40px_rgba(0,0,0,0.2)] ring-1 ring-slate-200"
-      >
+      <div className="fixed inset-x-0 bottom-0 sm:left-1/2 sm:top-1/2 mt-12 sm:mt-0 z-[70] flex w-full max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 flex-col gap-2 rounded-t-3xl sm:rounded-2xl bg-white p-2 shadow-[0_10px_40px_rgba(0,0,0,0.2)] ring-1 ring-slate-200 max-h-[calc(100vh-3rem)] sm:max-h-[85vh] overflow-y-auto safe-area-bottom pointer-events-auto shadow-[0_-10px_40px_rgba(0,0,0,0.1)] sm:shadow-2xl">
+        {/* Mobile Handle */}
+        <div className="flex w-full justify-center pt-3 pb-2 flex-shrink-0 bg-transparent sm:hidden pointer-events-none sticky top-0 z-10 w-full mb-1">
+          <div className="h-1.5 w-12 rounded-full bg-slate-300/80" />
+        </div>
+
         {/* View Button */}
         <button
           onClick={onView}

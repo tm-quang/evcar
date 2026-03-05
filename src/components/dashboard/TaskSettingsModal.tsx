@@ -143,8 +143,13 @@ export const TaskSettingsModal = ({
 
   return (
     <>
-      <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 backdrop-blur-sm bg-slate-950/50 animate-in fade-in duration-200">
-        <div className="relative w-full max-w-md transform overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-slate-200/50 animate-in zoom-in-95 fade-in duration-300">
+      <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 backdrop-blur-sm bg-slate-950/50 animate-in fade-in duration-200 pointer-events-none">
+        <div className="relative w-full max-w-md transform overflow-hidden rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl ring-1 ring-slate-200/50 animate-in zoom-in-95 fade-in duration-300 mt-12 sm:mt-0 max-h-[calc(100vh-3rem)] sm:max-h-[85vh] overflow-y-auto safe-area-bottom pointer-events-auto">
+        {/* Mobile Handle */}
+        <div className="flex w-full justify-center pt-3 pb-2 flex-shrink-0 bg-transparent sm:hidden scroll-none pointer-events-none sticky top-0 z-10 w-full mb-1">
+          <div className="h-1.5 w-12 rounded-full bg-slate-300/80" />
+        </div>
+
           {/* Header */}
           <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-gradient-to-r from-white to-slate-50 px-4 py-4 sm:px-6 sm:py-5">
             <div>

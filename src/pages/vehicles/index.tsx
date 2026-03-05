@@ -208,7 +208,7 @@ export default function VehicleManagement() {
         return (
             <div className="flex h-screen flex-col overflow-hidden bg-[#F7F9FC]">
                 <HeaderBar variant="page" title="Quản Lý Phương Tiện" />
-                <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4 pt-4">
+                <main className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-md mx-auto px-4 pb-4 pt-4">
                     <div className="animate-pulse space-y-4">
                         <div className="h-48 bg-gray-200 rounded-3xl" />
                         <div className="h-32 bg-gray-200 rounded-2xl" />
@@ -238,7 +238,7 @@ export default function VehicleManagement() {
                 }
             />
 
-            <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4 pt-4">
+            <main className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-md mx-auto px-4 pb-4 pt-4">
 
                 {/* ── Xe của bạn ──────────────────────────────────────────── */}
                 <div className="mb-5">

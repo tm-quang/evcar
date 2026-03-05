@@ -170,7 +170,12 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
   const favoriteCount = favoriteIds.size
 
   return (
-    <div className="fixed inset-0 z-[99999] flex flex-col bg-[#F7F9FC]">
+    <div className="fixed inset-x-0 bottom-0 sm:inset-0 mt-12 sm:mt-0 z-[99999] flex flex-col bg-[#F7F9FC] rounded-t-3xl sm:rounded-none max-h-[calc(100vh-3rem)] sm:max-h-[100vh] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] sm:shadow-none safe-area-bottom pointer-events-auto">
+        {/* Mobile Handle */}
+        <div className="flex w-full justify-center pt-3 pb-2 flex-shrink-0 bg-transparent sm:hidden pointer-events-none sticky top-0 z-10 w-full mb-1">
+          <div className="h-1.5 w-12 rounded-full bg-slate-300/80" />
+        </div>
+
       {/* Header */}
       <HeaderBar 
         variant="page" 
@@ -229,7 +234,7 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
               <h4 className="text-base font-semibold text-slate-900 mb-1">
                 Không tìm thấy hạng mục
               </h4>
-              <p className="text-sm text-slate-500 text-center max-w-xs">
+              <p className="text-sm text-slate-500 text-center max-w-md">
                 Thử tìm kiếm với từ khóa khác
               </p>
             </div>
