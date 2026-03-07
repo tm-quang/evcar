@@ -22,6 +22,7 @@ import {
     X,
     Shield,
     ClipboardCheck,
+    Calculator,
 } from 'lucide-react'
 import { useVehicles, useVehicleStats, useVehicleAlerts, useSetDefaultVehicle, vehicleKeys } from '../../lib/vehicles/useVehicleQueries'
 import { updateVehicle } from '../../lib/vehicles/vehicleService'
@@ -177,6 +178,15 @@ export default function VehicleManagement() {
             color: 'text-indigo-600',
             bgColor: 'bg-indigo-50',
         },
+        ...(isElectric ? [{
+            id: 'calculator',
+            name: 'Tính Toán',
+            subtitle: 'Công cụ EV',
+            icon: Calculator,
+            color: 'text-teal-600',
+            bgColor: 'bg-teal-50',
+            electric: true,
+        }] : []),
     ]
 
     const getAlertInfo = (alert: VehicleAlert) => {

@@ -1,10 +1,9 @@
 import { useState, useMemo } from 'react'
 import {
-    Receipt, Plus, Calendar, Trash2, MapPin,
+    Receipt, Calendar, Trash2, MapPin,
     ChevronDown, ChevronUp, DollarSign, FileText,
-    X, Save,
-    BarChart3, TrendingUp, Activity,
-    ChevronLeft, ChevronRight,
+    X, Save, Filter,
+    TrendingUp, Activity, Check
 } from 'lucide-react'
 import { createExpense, deleteExpense, type VehicleRecord } from '../../lib/vehicles/vehicleService'
 import { useVehicles, useVehicleExpenses, vehicleKeys } from '../../lib/vehicles/useVehicleQueries'
@@ -12,8 +11,10 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useNotification } from '../../contexts/notificationContext.helpers'
 import HeaderBar from '../../components/layout/HeaderBar'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
+import { LoadingOverlay } from '../../components/ui/LoadingOverlay'
 import { VehicleFooterNav } from '../../components/vehicles/VehicleFooterNav'
 import { useVehicleStore } from '../../store/useVehicleStore'
+import { NumberPadModal } from '../../components/ui/NumberPadModal'
 
 const fmt = (v: number) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(v)
@@ -27,9 +28,6 @@ const EXPENSE_TYPES: Record<string, { label: string; accentBar: string; bg: stri
     fine: { label: 'Phạt', accentBar: 'bg-red-400', bg: 'bg-red-100', text: 'text-red-700', iconBg: 'bg-red-100' },
     other: { label: 'Khác', accentBar: 'bg-slate-400', bg: 'bg-slate-100', text: 'text-slate-600', iconBg: 'bg-slate-100' },
 }
-
-// Quick amount presets
-const AMOUNT_PRESETS = [10_000, 20_000, 50_000, 100_000, 200_000, 500_000]
 
 type FilterPeriod = 'day' | 'week' | 'month' | 'quarter' | 'all'
 const PERIOD_TABS: { id: FilterPeriod; label: string }[] = [
@@ -88,12 +86,13 @@ export default function VehicleExpenses() {
 
     const { selectedVehicleId } = useVehicleStore()
     const [showAddModal, setShowAddModal] = useState(false)
+    const [showFilterModal, setShowFilterModal] = useState(false)
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
     const [deleting, setDeleting] = useState(false)
     const [expandedId, setExpandedId] = useState<string | null>(null)
     const [filterType, setFilterType] = useState<string>('all')
     const [filterPeriod, setFilterPeriod] = useState<FilterPeriod>('month')
-    const [periodOffset, setPeriodOffset] = useState(0)
+    const [periodOffset] = useState(0) // Still maintain this but inside the UI maybe simplified
 
     const effectiveId = selectedVehicleId || vehicles.find(v => v.is_default)?.id || vehicles[0]?.id || ''
     const { data: logs = [], isLoading: loading } = useVehicleExpenses(effectiveId || undefined)
@@ -112,13 +111,6 @@ export default function VehicleExpenses() {
     }, [logs])
     const thisMonthCost = useMemo(() => thisMonthLogs.reduce((s, l) => s + l.amount, 0), [thisMonthLogs])
     const avgCost = totalCount > 0 ? totalCost / totalCount : 0
-
-    // Type breakdown
-    const byType = useMemo(() => {
-        const map: Record<string, number> = {}
-        logs.forEach(l => { map[l.expense_type] = (map[l.expense_type] || 0) + l.amount })
-        return Object.entries(map).sort((a, b) => b[1] - a[1])
-    }, [logs])
 
     // Period filter
     const periodRange = getPeriodRange(filterPeriod, periodOffset)
@@ -157,6 +149,8 @@ export default function VehicleExpenses() {
         }
     }
 
+    const appliedFilterCount = (filterPeriod !== 'month' ? 1 : 0) + (filterType !== 'all' ? 1 : 0)
+
     return (
         <div className="flex h-screen flex-col overflow-hidden bg-[#F7F9FC]">
             <HeaderBar
@@ -164,210 +158,142 @@ export default function VehicleExpenses() {
                 title="Chi Phí Khác"
                 customContent={
                     <button
-                        onClick={() => setShowAddModal(true)}
-                        className="flex items-center justify-center rounded-full bg-orange-500 p-2 shadow-md hover:bg-orange-600 active:scale-95 transition-all"
+                        onClick={() => setShowFilterModal(true)}
+                        className={`relative flex items-center justify-center rounded-full p-2 shadow-sm transition-all active:scale-95 ${appliedFilterCount > 0 ? 'bg-blue-100 text-blue-600 border border-blue-200' : 'bg-white text-slate-600 border border-slate-200'}`}
                     >
-                        <Plus className="h-5 w-5 text-white" />
+                        <Filter className="h-5 w-5" />
+                        {appliedFilterCount > 0 && (
+                            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white ring-2 ring-white">
+                                {appliedFilterCount}
+                            </span>
+                        )}
                     </button>
                 }
             />
 
             <main className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-md mx-auto px-4 pb-4 pt-4">
 
-
-
                 {/* ── Hero Stats Card ───────────────────────────────────── */}
                 {selectedVehicle && (
                     <div className="mb-4 space-y-3">
-                        {/* Main card - solid orange */}
-                        <div className="rounded-2xl bg-orange-500 p-4 text-white shadow-lg shadow-orange-200">
-                            <div className="mb-3 flex items-center gap-2">
-                                <div className="rounded-xl bg-white/20 p-1.5">
-                                    <Receipt className="h-4 w-4" />
+                        {/* Main card - solid blue */}
+                        <div className="rounded-3xl bg-blue-500 p-5 text-white shadow-lg shadow-blue-200 overflow-hidden relative">
+                            {/* Decorative background shapes */}
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
+                            <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-400/50 rounded-full translate-y-1/2 -translate-x-1/2 blur-xl"></div>
+
+                            <div className="relative z-10">
+                                <div className="mb-4 flex items-center gap-2">
+                                    <div className="rounded-xl bg-white/20 p-2 backdrop-blur-sm">
+                                        <Receipt className="h-5 w-5 text-white" />
+                                    </div>
+                                    <span className="text-sm font-semibold opacity-90 tracking-wide">Tổng chi phí phát sinh</span>
+                                    <span className="ml-auto rounded-full bg-blue-600/50 border border-blue-400/30 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider">
+                                        {isMoto ? 'Xe máy' : 'Ô tô'}
+                                    </span>
                                 </div>
-                                <span className="text-sm font-semibold opacity-90">Tổng quan chi phí</span>
-                                <span className="ml-auto rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">{isMoto ? 'Xe máy' : 'Ô tô'} · {selectedVehicle.license_plate}</span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <p className="text-2xl font-black">{logs.length}</p>
-                                    <p className="text-xs opacity-75">Khoản chi</p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-2xl font-black">{fmt(totalCost)}</p>
-                                    <p className="text-xs opacity-75">Tổng chi phí</p>
+                                <div className="flex items-end justify-between">
+                                    <div>
+                                        <p className="text-sm opacity-80 mb-0.5">Giá trị</p>
+                                        <p className="text-3xl font-black tracking-tight">{fmt(totalCost)}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm opacity-80 mb-0.5">Số lần</p>
+                                        <p className="text-2xl font-black">{logs.length}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Mini stats row */}
-                        <div className="grid grid-cols-3 gap-2">
-                            <div className="flex flex-col items-center rounded-xl bg-white p-3 shadow-md">
-                                <div className="mb-1 rounded-lg bg-orange-100 p-1.5">
-                                    <Receipt className="h-4 w-4 text-orange-600" />
+                        <div className="grid grid-cols-3 gap-2.5">
+                            <div className="flex flex-col items-center justify-center rounded-2xl bg-white p-3.5 shadow-md shadow-slate-200/60 border border-slate-100">
+                                <div className="mb-2 rounded-full bg-blue-50 p-2">
+                                    <Activity className="h-4 w-4 text-blue-500" />
                                 </div>
-                                <p className="text-sm font-bold text-slate-800">
-                                    {avgCost > 0 ? `${Math.round(avgCost / 1000)}k` : '--'}
-                                </p>
-                                <p className="text-center text-[10px] leading-tight text-slate-500">TB/khoản</p>
+                                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-0.5">Tháng này</p>
+                                <p className="text-base font-black text-slate-800">{thisMonthLogs.length}</p>
                             </div>
-                            <div className="flex flex-col items-center rounded-xl bg-white p-3 shadow-md">
-                                <div className="mb-1 rounded-lg bg-blue-100 p-1.5">
-                                    <Activity className="h-4 w-4 text-blue-600" />
+                            <div className="flex flex-col items-center justify-center rounded-2xl bg-white p-3.5 shadow-md shadow-slate-200/60 border border-slate-100">
+                                <div className="mb-2 rounded-full bg-green-50 p-2">
+                                    <TrendingUp className="h-4 w-4 text-green-500" />
                                 </div>
-                                <p className="text-sm font-bold text-slate-800">{thisMonthLogs.length}</p>
-                                <p className="text-center text-[10px] leading-tight text-slate-500">Tháng này</p>
-                            </div>
-                            <div className="flex flex-col items-center rounded-xl bg-white p-3 shadow-md">
-                                <div className="mb-1 rounded-lg bg-green-100 p-1.5">
-                                    <TrendingUp className="h-4 w-4 text-green-600" />
-                                </div>
-                                <p className="text-sm font-bold text-slate-800">
+                                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-0.5">Chi tháng</p>
+                                <p className="text-base font-black text-slate-800">
                                     {thisMonthCost > 0 ? `${Math.round(thisMonthCost / 1000)}k` : '--'}
                                 </p>
-                                <p className="text-center text-[10px] leading-tight text-slate-500">Chi tháng</p>
                             </div>
-                        </div>
-
-                        {/* Month cost badge */}
-                        {thisMonthCost > 0 && (
-                            <div className="flex items-center justify-between rounded-xl bg-orange-50 border border-orange-200 px-4 py-2.5">
-                                <div className="flex items-center gap-2">
-                                    <Calendar className="h-4 w-4 text-orange-600" />
-                                    <span className="text-sm font-medium text-orange-700">Chi phí tháng này</span>
+                            <div className="flex flex-col items-center justify-center rounded-2xl bg-white p-3.5 shadow-md shadow-slate-200/60 border border-slate-100">
+                                <div className="mb-2 rounded-full bg-sky-50 p-2">
+                                    <Receipt className="h-4 w-4 text-sky-500" />
                                 </div>
-                                <span className="text-sm font-bold text-orange-700">{fmt(thisMonthCost)}</span>
+                                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-0.5">TB/khoản</p>
+                                <p className="text-base font-black text-slate-800">
+                                    {avgCost > 0 ? `${Math.round(avgCost / 1000)}k` : '--'}
+                                </p>
                             </div>
-                        )}
-                    </div>
-                )}
-
-                {/* ── By-type breakdown ─────────────────────────────────── */}
-                {byType.length > 0 && (
-                    <div className="mb-4 rounded-2xl bg-white border border-slate-100 shadow-md overflow-hidden">
-                        <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-50">
-                            <BarChart3 className="h-4 w-4 text-orange-500" />
-                            <span className="text-sm font-bold text-slate-700">Phân loại chi phí</span>
-                        </div>
-                        <div className="px-4 py-3 space-y-2.5">
-                            {byType.slice(0, 5).map(([type, amount]) => {
-                                const t = EXPENSE_TYPES[type] || EXPENSE_TYPES.other
-                                const pct = totalCost > 0 ? (amount / totalCost) * 100 : 0
-                                return (
-                                    <div key={type}>
-                                        <div className="flex items-center justify-between mb-1">
-                                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${t.bg} ${t.text}`}>{t.label}</span>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs text-slate-400">{Math.round(pct)}%</span>
-                                                <span className="text-xs font-bold text-slate-700">{fmt(amount)}</span>
-                                            </div>
-                                        </div>
-                                        <div className="h-1.5 rounded-full bg-slate-100">
-                                            <div className="h-full rounded-full bg-orange-400 transition-all" style={{ width: `${pct}%` }} />
-                                        </div>
-                                    </div>
-                                )
-                            })}
                         </div>
                     </div>
                 )}
 
-                {/* ── Type Filter Tabs ──────────────────────────────────── */}
-                {logs.length > 0 && (
-                    <div className="mb-3 flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-                        <button onClick={() => setFilterType('all')}
-                            className={`shrink-0 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all ${filterType === 'all' ? 'border-orange-400 bg-orange-50 text-orange-700' : 'border-slate-200 bg-white text-slate-500'}`}>
-                            Tất cả ({logs.length})
-                        </button>
-                        {byType.map(([type]) => {
-                            const t = EXPENSE_TYPES[type] || EXPENSE_TYPES.other
-                            return (
-                                <button key={type} onClick={() => setFilterType(type)}
-                                    className={`shrink-0 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all ${filterType === type ? `${t.bg} ${t.text} border-transparent` : 'border-slate-200 bg-white text-slate-500'}`}>
-                                    {t.label}
-                                </button>
-                            )
-                        })}
-                    </div>
-                )}
-
-                {/* ── Add Button ───────────────────────────────────────── */}
-                <button
-                    onClick={() => setShowAddModal(true)}
-                    className="w-full mb-4 flex items-center justify-center gap-2.5 rounded-2xl bg-orange-500 px-4 py-3.5 font-bold text-white shadow-lg shadow-orange-200 transition-all hover:scale-[1.02] hover:bg-orange-600 active:scale-95"
-                >
-                    <Plus className="h-5 w-5" />
-                    Thêm khoản chi mới
-                </button>
-
-                {/* ── Filter Bar ───────────────────────────────────────── */}
-                <div className="mb-3 space-y-2">
-                    <div className="flex rounded-xl bg-slate-100 p-1 gap-0.5">
-                        {PERIOD_TABS.map(tab => (
-                            <button key={tab.id} type="button"
-                                onClick={() => { setFilterPeriod(tab.id); setPeriodOffset(0) }}
-                                className={`flex-1 rounded-lg py-1.5 text-xs font-semibold transition-all ${filterPeriod === tab.id
-                                    ? 'bg-orange-500 text-white shadow-md'
-                                    : 'text-slate-500 hover:text-slate-700'
-                                    }`}>
-                                {tab.label}
-                            </button>
-                        ))}
-                    </div>
-
-                    {filterPeriod !== 'all' && (
-                        <div className="flex items-center gap-2">
-                            <button type="button"
-                                onClick={() => setPeriodOffset(o => o - 1)}
-                                className="rounded-xl border border-slate-200 bg-white p-1.5 text-slate-600 hover:bg-slate-50 active:scale-95 transition-all">
-                                <ChevronLeft className="h-4 w-4" />
-                            </button>
-                            <div className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-center">
-                                <p className="text-sm font-bold text-orange-700">{periodRange.label}</p>
+                {/* ── Filter Result Bar (Chỉ hiển thị khi đang lọc) ───────────────────────────────────────── */}
+                <div className="mb-4">
+                    {(filterPeriod !== 'all' || filterType !== 'all') ? (
+                        <div className="flex items-center justify-between rounded-xl bg-blue-50/80 border border-blue-100 px-4 py-3 shadow-sm shadow-blue-100/50">
+                            <div className="flex flex-col">
+                                <span className="text-xs font-semibold text-blue-800 mb-0.5">
+                                    {filterPeriod !== 'all' ? periodRange.label : 'Tất cả thời gian'}
+                                    {filterType !== 'all' && ` • ${EXPENSE_TYPES[filterType]?.label || 'Khác'}`}
+                                </span>
+                                <span className="text-[11px] text-blue-600/80">
+                                    Tìm thấy <span className="font-bold">{periodFilteredLogs.length}</span> giao dịch
+                                </span>
                             </div>
-                            <button type="button"
-                                onClick={() => setPeriodOffset(o => Math.min(0, o + 1))}
-                                disabled={periodOffset >= 0}
-                                className="rounded-xl border border-slate-200 bg-white p-1.5 text-slate-600 hover:bg-slate-50 disabled:opacity-30 active:scale-95 transition-all">
-                                <ChevronRight className="h-4 w-4" />
-                            </button>
+                            <span className="text-base font-black text-blue-700">{fmt(periodTotalCost)}</span>
                         </div>
-                    )}
-
-                    {periodFilteredLogs.length > 0 && (
-                        <div className="flex items-center justify-between rounded-xl bg-orange-50 border border-orange-100 px-3 py-2">
-                            <span className="text-xs text-slate-500">
-                                <span className="font-bold text-slate-700">{periodFilteredLogs.length}</span> khoản chi
-                            </span>
-                            <span className="text-sm font-black text-orange-700">{fmt(periodTotalCost)}</span>
+                    ) : periodFilteredLogs.length > 0 ? (
+                        <div className="flex items-center gap-2 mb-2">
+                            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Tất cả chi phí</h3>
                         </div>
-                    )}
+                    ) : null}
                 </div>
 
                 {/* ── Logs ──────────────────────────────────────────────── */}
                 {loading ? (
                     <div className="space-y-3">
                         {[1, 2, 3].map(i => (
-                            <div key={i} className="animate-pulse overflow-hidden rounded-2xl bg-white p-4 shadow-md">
-                                <div className="mb-3 h-4 w-2/3 rounded-lg bg-slate-100" />
-                                <div className="h-16 w-full rounded-xl bg-slate-50" />
+                            <div key={i} className="animate-pulse flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm border border-slate-100">
+                                <div className="h-12 w-12 rounded-xl bg-slate-100 shrink-0" />
+                                <div className="flex-1 space-y-2">
+                                    <div className="h-4 w-1/2 rounded bg-slate-100" />
+                                    <div className="h-3 w-1/3 rounded bg-slate-50" />
+                                </div>
                             </div>
                         ))}
                     </div>
                 ) : periodFilteredLogs.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center rounded-3xl bg-white border border-slate-100 py-14 shadow-md">
-                        <div className="mb-4 rounded-3xl bg-orange-50 p-6">
-                            <Receipt className="h-12 w-12 text-orange-300" />
+                    <div className="flex flex-col items-center justify-center rounded-3xl bg-white border border-slate-100 py-14 shadow-sm">
+                        <div className="mb-4 rounded-full bg-slate-50 p-6">
+                            <Receipt className="h-10 w-10 text-slate-300" />
                         </div>
                         <p className="font-semibold text-slate-600">
-                            {filterPeriod === 'all' ? 'Chưa có chi phí nào'
-                                : `Không có dữ liệu trong ${periodRange.label.toLowerCase()}`}
+                            {filterPeriod === 'all' && filterType === 'all'
+                                ? 'Chưa có chi phí nào'
+                                : 'Không tìm thấy chi phí'}
                         </p>
-                        <p className="mt-1 text-sm text-slate-400">
-                            {filterPeriod !== 'all' ? 'Thử chọn khung thời gian khác'
-                                : filterType !== 'all' ? 'Thử chọn loại khác'
-                                    : 'Thêm khoản chi đầu tiên ngay'}
+                        <p className="mt-1 text-sm text-slate-400 text-center px-6">
+                            {(filterPeriod !== 'all' || filterType !== 'all')
+                                ? 'Thử thay đổi bộ lọc hoặc chọn khu vực thời gian khác'
+                                : 'Các chi phí phát sinh như gửi xe, rửa xe sẽ hiển thị ở đây'}
                         </p>
+                        {(filterPeriod !== 'all' || filterType !== 'all') && (
+                            <button
+                                onClick={() => { setFilterPeriod('all'); setFilterType('all'); }}
+                                className="mt-4 text-sm font-bold text-blue-500 hover:text-blue-600 px-4 py-2 bg-blue-50 rounded-xl"
+                            >
+                                Xóa bộ lọc
+                            </button>
+                        )}
                     </div>
                 ) : (
                     <div className="space-y-4">
@@ -380,88 +306,91 @@ export default function VehicleExpenses() {
                                 : dateKey === yesterdayKey ? 'Hôm qua'
                                     : d.toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric', month: 'numeric' })
                             const dayTotal = dayLogs.reduce((s, l) => s + l.amount, 0)
+
                             return (
                                 <div key={dateKey}>
                                     {/* Date separator */}
-                                    <div className="mb-2 flex items-center justify-between">
+                                    <div className="mb-2 flex items-center justify-between pl-1">
                                         <div className="flex items-center gap-2">
-                                            <div className="h-2 w-2 rounded-full bg-orange-400" />
-                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">{dayLabel}</span>
+                                            <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{dayLabel}</span>
                                         </div>
-                                        <span className="text-xs font-semibold text-slate-400">{fmt(dayTotal)}</span>
+                                        <span className="text-[11px] font-bold text-slate-400">{fmt(dayTotal)}</span>
                                     </div>
-                                    <div className="space-y-2 pl-4 border-l-2 border-orange-100">
+                                    <div className="space-y-2.5">
                                         {dayLogs.map(log => {
                                             const t = EXPENSE_TYPES[log.expense_type] || EXPENSE_TYPES.other
                                             const isExpanded = expandedId === log.id
                                             return (
-                                                <div key={log.id} className="overflow-hidden rounded-2xl bg-white shadow-md transition-all hover:shadow-lg border border-slate-100">
-                                                    {/* Top accent bar by type */}
-                                                    <div className={`h-1 w-full ${t.accentBar}`} />
+                                                <div key={log.id}
+                                                    className={`overflow-hidden rounded-2xl bg-white shadow-md shadow-slate-200/50 border transition-all ${isExpanded ? 'border-slate-300 shadow-lg shadow-slate-300/50 scale-[1.01]' : 'border-slate-100 hover:border-slate-200'} `}>
 
-                                                    <div className="p-4">
-                                                        <button
-                                                            onClick={() => setExpandedId(isExpanded ? null : log.id)}
-                                                            className="flex w-full items-start justify-between text-left"
-                                                        >
-                                                            <div>
-                                                                <div className="flex items-center gap-2 mb-0.5">
-                                                                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${t.bg} ${t.text}`}>
-                                                                        {t.label}
-                                                                    </span>
-                                                                </div>
-                                                                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                                                    {log.description && (
-                                                                        <span className="text-xs text-slate-600 font-medium truncate max-w-[160px]">
-                                                                            {log.description}
-                                                                        </span>
-                                                                    )}
-                                                                    {log.location && (
-                                                                        <span className="flex items-center gap-1 text-xs text-slate-400 truncate max-w-[100px]">
-                                                                            <MapPin className="h-3 w-3 shrink-0" />{log.location}
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex items-center gap-2 shrink-0 ml-2">
-                                                                <span className={`text-base font-black ${t.text}`}>{fmt(log.amount)}</span>
-                                                                {isExpanded ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
-                                                            </div>
-                                                        </button>
+                                                    <button
+                                                        onClick={() => setExpandedId(isExpanded ? null : log.id)}
+                                                        className="flex w-full items-center p-3 text-left relative"
+                                                    >
+                                                        {/* Left border indicator */}
+                                                        <div className={`absolute left-0 top-3 bottom-3 w-1 rounded-r-full ${t.accentBar}`} />
 
-                                                        {isExpanded && (
-                                                            <div className="mt-3 space-y-3 border-t border-slate-100 pt-3">
+                                                        {/* Icon */}
+                                                        <div className={`flex items-center justify-center p-2.5 rounded-xl ml-2 ${t.bg}`}>
+                                                            {t.label === 'Gửi xe' ? <MapPin className={`h-4 w-4 ${t.text}`} />
+                                                                : t.label === 'Rửa xe' ? <Activity className={`h-4 w-4 ${t.text}`} />
+                                                                    : <Receipt className={`h-4 w-4 ${t.text}`} />}
+                                                        </div>
+
+                                                        {/* Info */}
+                                                        <div className="ml-3 flex-1 min-w-0">
+                                                            <div className="flex items-center gap-2 mb-0.5">
+                                                                <span className="text-sm font-bold text-slate-800">{t.label}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                                                                {log.description ? (
+                                                                    <span className="truncate max-w-[140px]">{log.description}</span>
+                                                                ) : (
+                                                                    <span>Tùy chọn khác</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Amount */}
+                                                        <div className="flex flex-col items-end shrink-0 ml-2">
+                                                            <span className={`text-sm font-black ${t.text}`}>{fmt(log.amount)}</span>
+                                                            {isExpanded
+                                                                ? <span className="text-[10px] text-slate-400 mt-1 uppercase tracking-wide flex items-center gap-1">Đóng <ChevronUp className="h-3 w-3" /></span>
+                                                                : <span className="text-[10px] text-slate-400 mt-1 uppercase tracking-wide flex items-center gap-1">Chi tiết <ChevronDown className="h-3 w-3" /></span>}
+                                                        </div>
+                                                    </button>
+
+                                                    {isExpanded && (
+                                                        <div className="px-3 pb-3 pt-0">
+                                                            <div className="rounded-xl bg-slate-50 p-3 space-y-2.5">
                                                                 {log.description && (
-                                                                    <div className="flex items-start gap-2 rounded-xl bg-slate-50 px-3 py-2.5">
-                                                                        <FileText className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
-                                                                        <p className="text-sm text-slate-700">{log.description}</p>
+                                                                    <div className="flex items-start gap-2">
+                                                                        <FileText className="h-3.5 w-3.5 text-slate-400 mt-0.5 shrink-0" />
+                                                                        <p className="text-xs font-medium text-slate-700">{log.description}</p>
                                                                     </div>
                                                                 )}
                                                                 {log.location && (
-                                                                    <div className="flex items-center gap-2 text-xs text-slate-500">
-                                                                        <MapPin className="h-3.5 w-3.5 text-orange-400" />
-                                                                        <span>{log.location}</span>
+                                                                    <div className="flex items-start gap-2">
+                                                                        <MapPin className="h-3.5 w-3.5 text-blue-400 mt-0.5 shrink-0" />
+                                                                        <p className="text-xs font-medium text-slate-700">{log.location}</p>
                                                                     </div>
                                                                 )}
                                                                 {log.notes && (
-                                                                    <p className="text-xs text-slate-400 italic">"{log.notes}"</p>
+                                                                    <p className="text-xs text-slate-400 italic border-t border-slate-200/60 pt-2 mt-2">Ghi chú: {log.notes}</p>
                                                                 )}
 
-                                                                {/* Amount highlight */}
-                                                                <div className={`flex items-center justify-between rounded-xl px-3 py-2 ${t.bg}`}>
-                                                                    <span className={`text-xs font-medium ${t.text}`}>Số tiền</span>
-                                                                    <span className={`text-base font-black ${t.text}`}>{fmt(log.amount)}</span>
+                                                                <div className="flex justify-end pt-1 mt-1 border-t border-red-100/50">
+                                                                    <button
+                                                                        onClick={() => setDeleteConfirmId(log.id)}
+                                                                        className="flex items-center justify-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-red-500 hover:bg-red-50 hover:text-red-600 transition-all shadow-sm border border-red-100"
+                                                                    >
+                                                                        <Trash2 className="h-3.5 w-3.5" /> Xóa
+                                                                    </button>
                                                                 </div>
-
-                                                                <button
-                                                                    onClick={() => setDeleteConfirmId(log.id)}
-                                                                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 py-2 text-sm font-semibold text-red-600 hover:bg-red-100 transition-all"
-                                                                >
-                                                                    <Trash2 className="h-4 w-4" /> Xóa khoản chi
-                                                                </button>
                                                             </div>
-                                                        )}
-                                                    </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )
                                         })}
@@ -472,10 +401,20 @@ export default function VehicleExpenses() {
                     </div>
                 )}
 
-                <div className="h-[150px] w-full flex-shrink-0"></div>
+                <div className="h-[120px] w-full flex-shrink-0"></div>
             </main>
 
             <VehicleFooterNav onAddClick={() => setShowAddModal(true)} addLabel="Chi phí" isElectricVehicle={selectedVehicle?.fuel_type === 'electric'} />
+
+            {/* Filter Modal */}
+            <FilterModal
+                isOpen={showFilterModal}
+                onClose={() => setShowFilterModal(false)}
+                filterType={filterType}
+                setFilterType={setFilterType}
+                filterPeriod={filterPeriod}
+                setFilterPeriod={setFilterPeriod}
+            />
 
             {showAddModal && selectedVehicle && (
                 <AddExpenseModal
@@ -502,6 +441,89 @@ export default function VehicleExpenses() {
     )
 }
 
+// ─── Filter Modal ───────────────────────────────────────────────────────────
+function FilterModal({
+    isOpen, onClose,
+    filterType, setFilterType,
+    filterPeriod, setFilterPeriod
+}: {
+    isOpen: boolean
+    onClose: () => void
+    filterType: string
+    setFilterType: (v: string) => void
+    filterPeriod: FilterPeriod
+    setFilterPeriod: (v: FilterPeriod) => void
+}) {
+    if (!isOpen) return null
+
+    return (
+        <div className="fixed inset-0 z-50 flex flex-col justify-end bg-black/60 backdrop-blur-sm sm:items-center sm:justify-center">
+            <div className="animate-slide-up w-full rounded-t-3xl bg-white shadow-2xl sm:max-w-sm sm:rounded-3xl p-5 mb-0 sm:mb-8 safe-area-bottom">
+                <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-lg font-bold text-slate-800">Bộ lọc chi phí</h3>
+                    <button onClick={onClose} className="rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200">
+                        <X className="h-4 w-4" />
+                    </button>
+                </div>
+
+                <div className="space-y-5">
+                    {/* Period filters */}
+                    <div>
+                        <label className="mb-2.5 block text-xs font-bold text-slate-500 uppercase tracking-widest">Thời gian</label>
+                        <div className="flex flex-wrap gap-2">
+                            {PERIOD_TABS.map(tab => (
+                                <button key={tab.id} type="button"
+                                    onClick={() => setFilterPeriod(tab.id)}
+                                    className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all flex items-center gap-1.5 ${filterPeriod === tab.id
+                                        ? 'bg-blue-500 text-white shadow-md shadow-blue-200'
+                                        : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
+                                        }`}>
+                                    {filterPeriod === tab.id && <Check className="h-3.5 w-3.5" />}
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Type filters */}
+                    <div>
+                        <label className="mb-2.5 block text-xs font-bold text-slate-500 uppercase tracking-widest">Phân loại</label>
+                        <div className="flex flex-wrap gap-2">
+                            <button onClick={() => setFilterType('all')}
+                                className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all flex items-center gap-1.5 ${filterType === 'all'
+                                    ? 'bg-blue-500 text-white shadow-md shadow-blue-200'
+                                    : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'}`}>
+                                {filterType === 'all' && <Check className="h-3.5 w-3.5" />}
+                                Tất cả
+                            </button>
+                            {Object.entries(EXPENSE_TYPES).map(([key, t]) => (
+                                <button key={key} onClick={() => setFilterType(key)}
+                                    className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all flex items-center gap-1.5 ${filterType === key
+                                        ? `${t.bg} ${t.text} border-transparent ring-2 ring-current ring-opacity-20`
+                                        : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'}`}>
+                                    {filterType === key && <Check className="h-3.5 w-3.5" />}
+                                    {t.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-8 flex gap-3">
+                    <button onClick={() => { setFilterType('all'); setFilterPeriod('month'); }}
+                        className="flex-1 rounded-2xl border-2 border-slate-200 bg-white py-3.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all">
+                        Đặt lại bộ lọc
+                    </button>
+                    <button onClick={onClose}
+                        className="flex-1 rounded-2xl bg-blue-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all">
+                        Xem kết quả
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 // ─── Add Expense Modal ──────────────────────────────────────────────────────
 function AddExpenseModal({ vehicle, onClose, onSuccess }: {
     vehicle: VehicleRecord
@@ -510,6 +532,7 @@ function AddExpenseModal({ vehicle, onClose, onSuccess }: {
 }) {
     const { success, error: showError } = useNotification()
     const [loading, setLoading] = useState(false)
+    const [isNumberPadOpen, setIsNumberPadOpen] = useState(false)
     const [form, setForm] = useState({
         expense_date: new Date().toISOString().split('T')[0],
         expense_type: 'other' as keyof typeof EXPENSE_TYPES,
@@ -521,11 +544,10 @@ function AddExpenseModal({ vehicle, onClose, onSuccess }: {
 
     const selectedType = EXPENSE_TYPES[form.expense_type]
 
-    const handlePreset = (v: number) => setForm(f => ({ ...f, amount: String(v) }))
-
     const handleSubmit = async () => {
         if (!form.amount || parseFloat(form.amount) <= 0) {
-            showError('Vui lòng nhập số tiền')
+            showError('Vui lòng nhập số tiền hợp lệ')
+            setIsNumberPadOpen(true)
             return
         }
         setLoading(true)
@@ -534,12 +556,12 @@ function AddExpenseModal({ vehicle, onClose, onSuccess }: {
                 vehicle_id: vehicle.id,
                 expense_date: form.expense_date,
                 expense_type: form.expense_type as any,
-                amount: parseFloat(form.amount),
+                amount: parseFloat(form.amount.replace(/\./g, '')),
                 description: form.description || undefined,
                 location: form.location || undefined,
                 notes: form.notes || undefined,
             } as any)
-            success('Đã thêm chi phí!')
+            success('Đã thêm chi phí thành công!')
             onSuccess()
         } catch (err) {
             showError(err instanceof Error ? err.message : 'Không thể lưu')
@@ -548,132 +570,131 @@ function AddExpenseModal({ vehicle, onClose, onSuccess }: {
         }
     }
 
+    // Format tiền hiển thị
+    const displayAmount = form.amount ? fmt(parseFloat(form.amount.replace(/\./g, ''))) : '0 ₫'
+
     return (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] pointer-events-none">
-            <div className="w-full max-w-md max-h-[92vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl pointer-events-auto mt-12 sm:mt-0 safe-area-bottom overflow-hidden">
-                {/* Header */}
-                <div className="sticky top-0 z-10 bg-orange-500 px-5 pt-3 pb-4 text-white">
-                    {/* Mobile Handle */}
-                    <div className="flex w-full justify-center pb-3 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10">
-                        <div className="h-1.5 w-12 rounded-full bg-white/40" />
-                    </div>
-                    <div className="flex items-center justify-between mt-1">
-                        <div className="flex items-center gap-2">
-                            <div className="rounded-xl bg-white/20 p-1.5"><Receipt className="h-4 w-4" /></div>
-                            <h3 className="text-base font-bold">Thêm chi phí mới</h3>
-                        </div>
-                        <button onClick={onClose} className="rounded-full bg-white/20 p-1.5 hover:bg-white/30">
-                            <X className="h-4 w-4" />
-                        </button>
-                    </div>
-                    <p className="text-xs opacity-70 mt-1 ml-10">{vehicle.license_plate}</p>
-                </div>
+        <>
+            <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] pointer-events-none">
+                <div className="animate-slide-up w-full max-w-md max-h-[92vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl pointer-events-auto mt-12 sm:mt-0 safe-area-bottom overflow-hidden border border-slate-100/50">
+                    {/* Header */}
+                    <div className="bg-white px-5 pt-4 pb-3 border-b border-slate-100 relative">
+                        {/* Mobile Handle */}
+                        <div className="absolute top-2 left-1/2 -translate-x-1/2 h-1.5 w-12 rounded-full bg-slate-200 sm:hidden" />
 
-                <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
-                    {/* Date */}
-                    <div>
-                        <label className="mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wide">Ngày</label>
-                        <input type="date" value={form.expense_date}
-                            onChange={e => setForm({ ...form, expense_date: e.target.value })}
-                            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium focus:border-orange-400 focus:bg-white focus:outline-none" />
+                        <div className="flex items-center justify-between mt-2">
+                            <h3 className="text-lg font-black text-slate-800 tracking-tight">Thêm chi phí xe</h3>
+                            <button onClick={onClose} className="rounded-full bg-slate-100 p-2 hover:bg-slate-200 text-slate-500 transition-colors">
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+                        <p className="text-xs font-medium text-slate-500 mt-1 flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                            {selectedType.label} • {vehicle.license_plate}
+                        </p>
                     </div>
 
-                    {/* Expense type grid */}
-                    <div>
-                        <label className="mb-2 block text-xs font-bold text-slate-500 uppercase tracking-wide">Loại chi phí</label>
-                        <div className="grid grid-cols-4 gap-2">
-                            {Object.entries(EXPENSE_TYPES).map(([key, t]) => (
-                                <button key={key} onClick={() => setForm({ ...form, expense_type: key as any })}
-                                    className={`flex flex-col items-center gap-1 rounded-xl border py-2.5 px-1 text-center transition-all ${form.expense_type === key
-                                        ? `${t.bg} ${t.text} border-transparent shadow-md`
-                                        : 'border-slate-200 bg-slate-50 text-slate-500 hover:border-slate-300'}`}>
-                                    <span className="text-[10px] font-bold leading-tight">{t.label}</span>
-                                </button>
-                            ))}
+                    <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6">
+                        {/* Amount - READONLY with NumberPad */}
+                        <div>
+                            <label className="mb-2 block text-xs font-bold text-slate-400 uppercase tracking-widest">Số tiền</label>
+                            <button
+                                type="button"
+                                onClick={() => setIsNumberPadOpen(true)}
+                                className={`w-full relative flex items-center justify-between rounded-2xl border-2 px-4 py-4 text-left transition-all ${!form.amount ? 'border-orange-300 bg-orange-50/50' : 'border-blue-500 bg-blue-50'}`}
+                            >
+                                <span className={`text-2xl font-black tracking-tight ${!form.amount ? 'text-orange-500' : 'text-blue-600'}`}>
+                                    {displayAmount}
+                                </span>
+                                <div className={`flex items-center justify-center rounded-xl p-2 ${!form.amount ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}`}>
+                                    <DollarSign className="h-5 w-5" />
+                                </div>
+                            </button>
                         </div>
-                    </div>
 
-                    {/* Amount */}
-                    <div>
-                        <label className="mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wide">Số tiền</label>
-                        <div className="relative mb-2">
-                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                            <input type="number" value={form.amount}
-                                onChange={e => setForm({ ...form, amount: e.target.value })}
-                                placeholder="0"
-                                className={`w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-xl font-black focus:bg-white focus:outline-none ${selectedType.text} focus:border-orange-400`} />
-                        </div>
-                        {/* Preset amounts */}
-                        <div className="flex gap-2 flex-wrap">
-                            {AMOUNT_PRESETS.map(v => (
-                                <button key={v} onClick={() => handlePreset(v)}
-                                    className={`rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all ${parseFloat(form.amount) === v
-                                        ? 'border-orange-400 bg-orange-50 text-orange-700'
-                                        : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300'}`}>
-                                    {v >= 1_000_000 ? `${v / 1_000_000}M` : `${v / 1_000}K`}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Description */}
-                    <div>
-                        <label className="mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wide">Mô tả</label>
-                        <div className="relative">
-                            <FileText className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                            <input type="text" value={form.description}
-                                onChange={e => setForm({ ...form, description: e.target.value })}
-                                placeholder="VD: Vá lốp, nộp phạt nguội..."
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 py-2.5 text-sm focus:border-orange-400 focus:bg-white focus:outline-none" />
-                        </div>
-                    </div>
-
-                    {/* Location */}
-                    <div>
-                        <label className="mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wide">Địa điểm</label>
-                        <div className="relative">
-                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                            <input type="text" value={form.location}
-                                onChange={e => setForm({ ...form, location: e.target.value })}
-                                placeholder="Nơi phát sinh chi phí..."
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 py-2.5 text-sm focus:border-orange-400 focus:bg-white focus:outline-none" />
-                        </div>
-                    </div>
-
-                    {/* Summary preview */}
-                    {form.amount && parseFloat(form.amount) > 0 && (
-                        <div className={`flex items-center gap-3 rounded-2xl border p-3.5 ${selectedType.bg}`}>
-                            <TrendingUp className={`h-5 w-5 shrink-0 ${selectedType.text}`} />
-                            <div className="flex-1 min-w-0">
-                                <p className={`text-sm font-bold ${selectedType.text}`}>{selectedType.label}</p>
-                                {form.description && <p className="text-xs text-slate-500 truncate">{form.description}</p>}
+                        {/* Expense type grid (Scrollable horizontally) */}
+                        <div>
+                            <label className="mb-2 block text-xs font-bold text-slate-400 uppercase tracking-widest">Loại chi phí</label>
+                            <div className="flex gap-2.5 overflow-x-auto pt-1 pb-2 scrollbar-hide -mx-5 px-5">
+                                {Object.entries(EXPENSE_TYPES).map(([key, t]) => (
+                                    <button key={key} onClick={() => setForm({ ...form, expense_type: key as any })}
+                                        className={`shrink-0 flex items-center gap-1 rounded-2xl border px-3.5 py-2.5 transition-all ${form.expense_type === key
+                                            ? `${t.bg} ${t.text} border-transparent shadow-md ring-2 ring-current ring-opacity-20`
+                                            : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100'}`}>
+                                        <div className={`w-2 h-2 rounded-full ${t.accentBar}`}></div>
+                                        <span className="text-xs font-bold whitespace-nowrap">{t.label}</span>
+                                    </button>
+                                ))}
                             </div>
-                            <p className={`text-base font-black ${selectedType.text}`}>{fmt(parseFloat(form.amount))}</p>
                         </div>
-                    )}
 
-                    {/* Notes */}
-                    <div>
-                        <label className="mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wide">Ghi chú</label>
-                        <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })}
-                            rows={2} placeholder="Ghi chú thêm..."
-                            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm focus:border-orange-400 focus:bg-white focus:outline-none resize-none" />
+                        {/* Date */}
+                        <div>
+                            <label className="mb-2 block text-xs font-bold text-slate-400 uppercase tracking-widest">Ngày phát sinh</label>
+                            <div className="relative">
+                                <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                <input type="date" value={form.expense_date}
+                                    onChange={e => setForm({ ...form, expense_date: e.target.value })}
+                                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm font-semibold focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all" />
+                            </div>
+                        </div>
+
+                        {/* Details Grid */}
+                        <div className="grid grid-cols-2 gap-4">
+                            {/* Description */}
+                            <div>
+                                <label className="mb-2 block text-xs font-bold text-slate-400 uppercase tracking-widest">Mô tả</label>
+                                <div className="relative">
+                                    <FileText className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                    <input type="text" value={form.description}
+                                        onChange={e => setForm({ ...form, description: e.target.value })}
+                                        placeholder="Tên phí..."
+                                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 pl-9 pr-3 py-3 text-sm font-medium focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all" />
+                                </div>
+                            </div>
+
+                            {/* Location */}
+                            <div>
+                                <label className="mb-2 block text-xs font-bold text-slate-400 uppercase tracking-widest">Địa điểm</label>
+                                <div className="relative">
+                                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                    <input type="text" value={form.location}
+                                        onChange={e => setForm({ ...form, location: e.target.value })}
+                                        placeholder="Nơi trả..."
+                                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 pl-9 pr-3 py-3 text-sm font-medium focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Notes */}
+                        <div>
+                            <label className="mb-2 block text-xs font-bold text-slate-400 uppercase tracking-widest">Ghi chú thêm</label>
+                            <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })}
+                                rows={2} placeholder="Không bắt buộc..."
+                                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all resize-none" />
+                        </div>
+
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-3 pb-2">
-                        <button onClick={onClose}
-                            className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 py-3.5 text-sm font-semibold text-slate-600 hover:bg-slate-100">
-                            Hủy
-                        </button>
-                        <button onClick={handleSubmit} disabled={loading}
-                            className="flex-[2] flex items-center justify-center gap-2 rounded-2xl bg-orange-500 py-3.5 text-sm font-bold text-white shadow-lg shadow-orange-200 hover:bg-orange-600 disabled:opacity-50 active:scale-95 transition-all">
-                            {loading ? 'Đang lưu...' : <><Save className="h-4 w-4" /> Thêm chi phí</>}
+                    <div className="bg-white border-t border-slate-100 p-4">
+                        <button onClick={handleSubmit} disabled={loading || !form.amount}
+                            className={`w-full flex items-center justify-center gap-2 rounded-2xl py-4 text-sm font-black text-white shadow-xl transition-all shadow-blue-200 ${loading || !form.amount ? 'bg-slate-300 opacity-60 shadow-none' : 'bg-blue-600 hover:bg-blue-700 active:scale-[0.98]'}`}>
+                            {loading ? 'Đang lưu...' : <><Save className="h-5 w-5" /> Xác nhận lưu chi phí</>}
                         </button>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <LoadingOverlay isOpen={loading} />
+
+            <NumberPadModal
+                isOpen={isNumberPadOpen}
+                onClose={() => setIsNumberPadOpen(false)}
+                value={form.amount ? form.amount.replace(/\./g, '') : ''}
+                onChange={(val) => setForm(f => ({ ...f, amount: val }))}
+                onConfirm={() => setIsNumberPadOpen(false)}
+            />
+        </>
     )
 }
-

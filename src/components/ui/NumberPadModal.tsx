@@ -29,64 +29,28 @@ const NumberButton = ({
   const buttonRef = useRef<HTMLButtonElement>(null)
   const touchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+  const handleDown = useCallback(() => {
     if (!disabled && buttonRef.current) {
       buttonRef.current.classList.add('active-touch')
     }
   }, [disabled])
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-
+  const handleUp = useCallback(() => {
     if (touchTimeoutRef.current) {
       clearTimeout(touchTimeoutRef.current)
     }
-
-    if (!disabled) {
-      // Immediate execution for better responsiveness
-      onClick()
-    }
-
     // Delay removal for visual feedback
     touchTimeoutRef.current = setTimeout(() => {
       if (buttonRef.current) {
         buttonRef.current.classList.remove('active-touch')
       }
     }, 100)
-  }, [disabled, onClick])
+  }, [])
 
-  const handleTouchCancel = useCallback(() => {
+  const handleCancel = useCallback(() => {
     if (touchTimeoutRef.current) {
       clearTimeout(touchTimeoutRef.current)
     }
-    if (buttonRef.current) {
-      buttonRef.current.classList.remove('active-touch')
-    }
-  }, [])
-
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (!disabled && buttonRef.current) {
-      buttonRef.current.classList.add('active-touch')
-    }
-  }, [disabled])
-
-  const handleMouseUp = useCallback((e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (!disabled) {
-      onClick()
-    }
-    if (buttonRef.current) {
-      buttonRef.current.classList.remove('active-touch')
-    }
-  }, [disabled, onClick])
-
-  const handleMouseLeave = useCallback(() => {
     if (buttonRef.current) {
       buttonRef.current.classList.remove('active-touch')
     }
@@ -106,12 +70,16 @@ const NumberButton = ({
       ref={buttonRef}
       type="button"
       disabled={disabled}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onTouchCancel={handleTouchCancel}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseLeave}
+      onClick={(e) => {
+        e.stopPropagation()
+        if (!disabled) {
+          onClick()
+        }
+      }}
+      onPointerDown={handleDown}
+      onPointerUp={handleUp}
+      onPointerLeave={handleCancel}
+      onPointerCancel={handleCancel}
       className={`touch-manipulation select-none active:outline-none focus:outline-none ${className}`}
       style={{
         touchAction: 'manipulation',

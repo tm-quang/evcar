@@ -12,6 +12,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useVehicleStore } from '../../store/useVehicleStore'
 import { useNotification } from '../../contexts/notificationContext.helpers'
 import { DateTimePickerModal } from '../../components/ui/DateTimePickerModal'
+import { LoadingOverlay } from '../../components/ui/LoadingOverlay'
 import { getTripPricePerKm } from '../../lib/vehicles/tripPriceService'
 import { TripPriceModal } from '../../components/vehicles/TripPriceModal'
 import HeaderBar from '../../components/layout/HeaderBar'
@@ -1128,7 +1129,7 @@ function TripModal({
                             disabled={loading}
                             className={`flex-[2] rounded-xl ${accentBg} py-3 text-sm font-bold text-white shadow-lg transition-all hover:opacity-90 disabled:opacity-50 active:scale-95`}
                         >
-                            {loading ? 'Đang lưu...' : <span className="flex items-center justify-center gap-1.5"><Save className="h-4 w-4" /> Cập nhật lộ trình</span>}
+                            <span className="flex items-center justify-center gap-1.5"><Save className="h-4 w-4" /> Cập nhật lộ trình</span>
                         </button>
                     ) : (
                         <>
@@ -1139,7 +1140,7 @@ function TripModal({
                                 disabled={loading}
                                 className={`flex-[1.2] rounded-xl bg-orange-500 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-orange-600 disabled:opacity-50 active:scale-95`}
                             >
-                                {loading ? '...' : 'Lưu tạm'}
+                                Lưu tạm
                             </button>
                             <button
                                 type="submit"
@@ -1148,7 +1149,7 @@ function TripModal({
                                 disabled={loading}
                                 className={`flex-[1.8] rounded-xl bg-green-600 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-green-700 disabled:opacity-50 active:scale-95`}
                             >
-                                {loading ? '...' : 'Hoàn tất'}
+                                Hoàn tất
                             </button>
                         </>
                     )}
@@ -1171,6 +1172,8 @@ function TripModal({
                 initialTime={formData.trip_time}
                 showTime={true}
             />
+
+            <LoadingOverlay isOpen={loading} />
         </div>
     )
 }
@@ -1340,10 +1343,11 @@ function CheckpointTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
                     <button type="submit" form="checkpoint-form" disabled={loading}
                         className="flex-[2] flex items-center justify-center gap-2 rounded-xl bg-cyan-500 py-3 text-sm font-bold text-white shadow-lg hover:bg-cyan-600 disabled:opacity-50 active:scale-95 transition-all">
                         <MapPin className="h-4 w-4" />
-                        {loading ? 'Đang lưu...' : 'Lưu điểm dừng'}
+                        Lưu điểm dừng
                     </button>
                 </div>
             </div>
+            <LoadingOverlay isOpen={loading} />
         </div>
     )
 }
@@ -1494,11 +1498,11 @@ function CompleteTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
                     <button type="submit" form="complete-trip-form" disabled={loading}
                         className="flex-[2] flex items-center justify-center gap-2 rounded-xl bg-green-500 py-3 text-sm font-bold text-white shadow-lg hover:bg-green-600 disabled:opacity-50 active:scale-95 transition-all">
                         <CheckCircle2 className="h-4 w-4" />
-                        {loading ? 'Đang lưu...' : 'Hoàn tất lộ trình'}
+                        Hoàn tất lộ trình
                     </button>
                 </div>
             </div>
+            <LoadingOverlay isOpen={loading} />
         </div>
     )
 }
-

@@ -13,6 +13,7 @@ import HeaderBar from '../../components/layout/HeaderBar'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { VehicleFooterNav } from '../../components/vehicles/VehicleFooterNav'
 import { useVehicleStore } from '../../store/useVehicleStore'
+import { LoadingOverlay } from '../../components/ui/LoadingOverlay'
 
 const fmt = (v: number) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(v)
@@ -763,11 +764,12 @@ function AddMaintenanceModal({ vehicle, onClose, onSuccess }: {
                         </button>
                         <button onClick={handleSubmit} disabled={loading}
                             className="flex-[2] flex items-center justify-center gap-2 rounded-2xl bg-gray-500 py-3.5 text-sm font-bold text-white shadow-lg shadow-gray-200 hover:bg-gray-600 disabled:opacity-50 active:scale-95 transition-all">
-                            {loading ? 'Đang lưu...' : <><Save className="h-4 w-4" /> Lưu bảo dưỡng</>}
+                            <Save className="h-4 w-4" /> Lưu bảo dưỡng
                         </button>
                     </div>
                 </div>
             </div>
+            <LoadingOverlay isOpen={loading} />
         </div>
     )
 }
@@ -848,10 +850,11 @@ function MaintenanceSettingsModal({ vehicle, onClose, onSuccess }: {
 
                     <button onClick={handleSave} disabled={loading}
                         className="w-full mt-2 rounded-2xl bg-gray-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-gray-200 hover:bg-gray-700 disabled:opacity-50 transition-all">
-                        {loading ? 'Đang lưu...' : 'Lưu thiết lập'}
+                        Lưu thiết lập
                     </button>
                 </div>
             </div>
+            <LoadingOverlay isOpen={loading} />
         </div>
     )
 }

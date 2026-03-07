@@ -11,6 +11,7 @@ import { CategoryPickerModal } from '../components/categories/CategoryPickerModa
 import { FavoriteCategoriesModal } from '../components/categories/FavoriteCategoriesModal'
 import { DateTimePickerModal } from '../components/ui/DateTimePickerModal'
 import { ModalFooterButtons } from '../components/ui/ModalFooterButtons'
+import { LoadingOverlay } from '../components/ui/LoadingOverlay'
 import { fetchCategories, fetchCategoriesHierarchical, type CategoryRecord, type CategoryType, type CategoryWithChildren } from '../lib/categoryService'
 import { getFavoriteCategories, initializeDefaultFavorites } from '../lib/favoriteCategoriesService'
 import { CategoryIcon } from '../components/ui/CategoryIcon'
@@ -1449,6 +1450,11 @@ export const AddTransactionPage = () => {
         confirmButtonType="submit"
         formId="transaction-form"
         fixed={true}
+      />
+
+      {/* Loading Overlay */}
+      <LoadingOverlay
+        isOpen={isSubmitting || isUploadingImages}
       />
 
       {/* Number Pad Modal */}

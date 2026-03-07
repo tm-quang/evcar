@@ -22,6 +22,7 @@ import { fetchIcons, type IconRecord } from '../lib/iconService'
 import { IconPicker } from '../components/categories/IconPicker'
 import { ModalFooterButtons } from '../components/ui/ModalFooterButtons'
 import { SearchableSelect } from '../components/ui/SearchableSelect'
+import { LoadingOverlay } from '../components/ui/LoadingOverlay'
 import {
     createCategory,
     deleteCategory as deleteCategoryFromDb,
@@ -858,11 +859,7 @@ export const CategoriesPage = () => {
                                     form.requestSubmit()
                                 }
                             }}
-                            confirmText={isSubmitting
-                                ? 'Đang lưu...'
-                                : editingId
-                                    ? 'Lưu thay đổi'
-                                    : 'Thêm hạng mục'}
+                            confirmText={editingId ? 'Lưu thay đổi' : 'Thêm hạng mục'}
                             isSubmitting={isSubmitting}
                             disabled={isSubmitting || isDeleting}
                             confirmButtonType="button"
@@ -871,6 +868,8 @@ export const CategoriesPage = () => {
                     </form>
                 </div>
             )}
+
+            <LoadingOverlay isOpen={isSubmitting || isDeleting} />
 
             {/* Icon Picker Component */}
             <IconPicker

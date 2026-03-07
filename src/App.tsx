@@ -42,6 +42,7 @@ const VehicleMaintenancePage = lazy(() => import('./pages/vehicles/VehicleMainte
 const VehicleExpensesPage = lazy(() => import('./pages/vehicles/VehicleExpenses'))
 const VehicleReportsPage = lazy(() => import('./pages/vehicles/VehicleReports'))
 const VehicleChargingHistoryPage = lazy(() => import('./pages/vehicles/VehicleChargingHistory'))
+const EVCalculatorPage = lazy(() => import('./pages/vehicles/EVCalculator'))
 const ArchiveDashboardPage = lazy(() => import('./pages/Archive2025'))
 
 const PageFallback = () => {
@@ -364,6 +365,14 @@ function AppContent() {
               element={
                 <ProtectedRoute>
                   <VehicleChargingHistoryPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/vehicles/calculator"
+              element={
+                <ProtectedRoute>
+                  <EVCalculatorPage />
                 </ProtectedRoute>
               }
             />
