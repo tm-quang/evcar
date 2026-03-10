@@ -10,7 +10,7 @@ export const reverseGeocode = async (lat: number, lng: number): Promise<string |
   try {
     // Use Nominatim API (OpenStreetMap) - free, no API key needed
     const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=vi,en`
-    
+
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'BOFin-App/1.0', // Required by Nominatim
@@ -28,12 +28,24 @@ export const reverseGeocode = async (lat: number, lng: number): Promise<string |
       const address = data.address
       const addressParts: string[] = []
 
-      // Road/Street
+      // House number & Road/Street
+      const streetPart: string[] = []
+      if (address.house_number) {
+        streetPart.push(address.house_number)
+      }
       if (address.road || address.pedestrian || address.footway) {
-        addressParts.push(address.road || address.pedestrian || address.footway)
+        streetPart.push(address.road || address.pedestrian || address.footway)
+      }
+      if (streetPart.length > 0) {
+        addressParts.push(streetPart.join(' '))
       }
 
-      // Suburb/Neighborhood
+      // Quarter / Residential / Hamlet
+      if (address.quarter || address.residential || address.hamlet) {
+        addressParts.push(address.quarter || address.residential || address.hamlet)
+      }
+
+      // Suburb/Neighborhood (Often Ward in VN)
       if (address.suburb || address.neighbourhood) {
         addressParts.push(address.suburb || address.neighbourhood)
       }
@@ -77,6 +89,45 @@ export const reverseGeocode = async (lat: number, lng: number): Promise<string |
     console.error('Reverse geocoding error:', error)
     // Return coordinates as fallback
     return `${lat.toFixed(6)}, ${lng.toFixed(6)}`
+  }
+}
+
+/**
+ * Forward geocoding: Convert address string to coordinates (lat, lng)
+ * Uses OpenStreetMap Nominatim API (free, no API key required)
+ */
+export const forwardGeocode = async (address: string): Promise<{ lat: number; lng: number } | null> => {
+  if (!address || address.trim() === '') return null;
+
+  try {
+    const params = new URLSearchParams({
+      q: address,
+      format: 'json',
+      limit: '1'
+    });
+    const url = `https://nominatim.openstreetmap.org/search?${params}`;
+
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'BOFin-App/1.0',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Forward geocoding API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data && data.length > 0) {
+      return {
+        lat: parseFloat(data[0].lat),
+        lng: parseFloat(data[0].lon)
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error('Forward geocoding error:', error);
+    return null;
   }
 }
 

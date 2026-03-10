@@ -20,6 +20,7 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { SimpleLocationInput, type SimpleLocationData } from '../../components/vehicles/SimpleLocationInput'
 import { TripGPSDisplay, getTripCleanNotes } from '../../components/vehicles/TripGPSDisplay'
 import { VehicleFooterNav } from '../../components/vehicles/VehicleFooterNav'
+import { forwardGeocode, reverseGeocode, parseCoordinates } from '../../utils/geocoding'
 
 // ─── Trip Type Config ─────────────────────────────────────────────────────────
 const TRIP_TYPES = {
@@ -277,6 +278,29 @@ function getTripUXStatus(trip: TripRecord) {
     }
 }
 
+function LocationDisplay({ locationStr, fallback }: { locationStr: string | undefined, fallback: string }) {
+    const [display, setDisplay] = useState(locationStr || fallback)
+
+    useEffect(() => {
+        if (!locationStr) {
+            setDisplay(fallback)
+            return
+        }
+        const coords = parseCoordinates(locationStr)
+        if (coords) {
+            reverseGeocode(coords.lat, coords.lng).then(addr => {
+                if (addr && !/^-?\d+\.?\d*,\s*-?\d+\.?\d*$/.test(addr)) {
+                    setDisplay(addr)
+                }
+            }).catch(console.error)
+        } else {
+            setDisplay(locationStr)
+        }
+    }, [locationStr, fallback])
+
+    return <span className="truncate max-w-[110px]" title={display}>{display}</span>
+}
+
 // ─── Trip Card ────────────────────────────────────────────────────────────────────
 function TripCard({
     trip, pricePerKm, onEdit, onDelete, onComplete, onCheckpoint, onTogglePin
@@ -320,10 +344,10 @@ function TripCard({
                             <div className="flex items-center gap-1.5 text-[11px] text-slate-600 font-medium my-1.5 flex-wrap">
                                 <div className="flex items-center gap-1.5">
                                     <Navigation className="h-3 w-3 text-blue-500 shrink-0" />
-                                    <span className="truncate max-w-[110px]">{trip.start_location || '?'}</span>
+                                    <LocationDisplay locationStr={trip.start_location} fallback="?" />
                                     <ArrowRight className="h-3 w-3 text-slate-300 shrink-0" />
                                     <Flag className="h-3 w-3 text-green-500 shrink-0" />
-                                    <span className="truncate max-w-[110px]">{trip.end_location || (inProgress ? '...' : '?')}</span>
+                                    <LocationDisplay locationStr={trip.end_location} fallback={inProgress ? '...' : '?'} />
                                 </div>
                                 {!inProgress && (
                                     <span className="ml-1 font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded text-[10px]">
@@ -1220,26 +1244,48 @@ function CheckpointTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
 
     // Auto-calculate distance for waypoint
     useEffect(() => {
-        if (waypointLocData) {
-            // Find last point from notes, or fallback to start point
+        let isSubscribed = true;
+        const autoCalculate = async () => {
+            if (!waypointLocData) return;
+
             let lastLat = 0, lastLng = 0
             const matches = [...(trip.notes || '').matchAll(/\[(?:Start|Waypoint|End)\]\s*([\d.-]+),\s*([\d.-]+)/g)]
             if (matches.length > 0) {
                 const last = matches[matches.length - 1]
                 lastLat = parseFloat(last[1])
                 lastLng = parseFloat(last[2])
+            } else {
+                // Determine fallback location string
+                const fallbackAddress = trip.end_location || trip.start_location;
+                if (!fallbackAddress) return;
+
+                // Try simple coordinate parsing
+                const fallbackCoords = parseManualCoords(fallbackAddress);
+                if (fallbackCoords) {
+                    lastLat = fallbackCoords.lat;
+                    lastLng = fallbackCoords.lng;
+                } else {
+                    // Try forward geocoding using Nominatim
+                    const geocoded = await forwardGeocode(fallbackAddress)
+                    if (geocoded && isSubscribed) {
+                        lastLat = geocoded.lat;
+                        lastLng = geocoded.lng;
+                    }
+                }
             }
-            if (lastLat && lastLng) {
-                calculateDistanceOSRM(lastLat, lastLng, waypointLocData.lat, waypointLocData.lng)
-                    .then(distanceKm => {
-                        if (distanceKm >= 0) {
-                            const expectedEndKm = Math.round((trip.end_km || trip.start_km) + distanceKm)
-                            setForm(prev => ({ ...prev, end_km: expectedEndKm.toString() }))
-                            success(`Đã tự động tính quãng đường dừng: ${distanceKm.toFixed(1)} km`)
-                        }
-                    })
+
+            if (lastLat && lastLng && isSubscribed) {
+                const distanceKm = await calculateDistanceOSRM(lastLat, lastLng, waypointLocData.lat, waypointLocData.lng)
+                if (distanceKm >= 0 && isSubscribed) {
+                    const expectedEndKm = Math.round((trip.end_km || trip.start_km) + distanceKm)
+                    setForm(prev => ({ ...prev, end_km: expectedEndKm.toString() }))
+                    success(`Đã tự động tính quãng đường dừng: ${distanceKm.toFixed(1)} km`)
+                }
             }
         }
+
+        autoCalculate()
+        return () => { isSubscribed = false }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [waypointLocData])
 
@@ -1372,27 +1418,49 @@ function CompleteTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
     })
 
     useEffect(() => {
-        const endLoc = endLocData || parseManualCoords(form.end_location)
-        if (endLoc && trip.start_km !== undefined) {
-            // Check for last waypoint or start point
+        let isSubscribed = true;
+        const autoCalculate = async () => {
+            const endLoc = endLocData || parseManualCoords(form.end_location)
+            if (!endLoc || trip.start_km === undefined) return;
+
             let lastLat = 0, lastLng = 0
             const matches = [...(trip.notes || '').matchAll(/\[(?:Start|Waypoint|End)\]\s*([\d.-]+),\s*([\d.-]+)/g)]
             if (matches.length > 0) {
                 const last = matches[matches.length - 1]
                 lastLat = parseFloat(last[1])
                 lastLng = parseFloat(last[2])
+            } else {
+                // Determine fallback location string
+                const fallbackAddress = trip.end_location || trip.start_location;
+                if (!fallbackAddress) return;
+
+                // Try simple coordinate parsing
+                const fallbackCoords = parseManualCoords(fallbackAddress);
+                if (fallbackCoords) {
+                    lastLat = fallbackCoords.lat;
+                    lastLng = fallbackCoords.lng;
+                } else {
+                    // Try forward geocoding using Nominatim
+                    const geocoded = await forwardGeocode(fallbackAddress)
+                    if (geocoded && isSubscribed) {
+                        lastLat = geocoded.lat;
+                        lastLng = geocoded.lng;
+                    }
+                }
             }
-            if (lastLat && lastLng) {
-                calculateDistanceOSRM(lastLat, lastLng, endLoc.lat, endLoc.lng)
-                    .then(distanceKm => {
-                        if (distanceKm >= 0) {
-                            const expectedEndKm = Math.round((trip.end_km || trip.start_km) + distanceKm)
-                            setForm(prev => ({ ...prev, end_km: expectedEndKm.toString() }))
-                            success(`Đã tự động tính quãng đường: ${distanceKm.toFixed(1)} km`)
-                        }
-                    })
+
+            if (lastLat && lastLng && isSubscribed) {
+                const distanceKm = await calculateDistanceOSRM(lastLat, lastLng, endLoc.lat, endLoc.lng)
+                if (distanceKm >= 0 && isSubscribed) {
+                    const expectedEndKm = Math.round((trip.end_km || trip.start_km) + distanceKm)
+                    setForm(prev => ({ ...prev, end_km: expectedEndKm.toString() }))
+                    success(`Đã tự động tính quãng đường: ${distanceKm.toFixed(1)} km`)
+                }
             }
         }
+
+        autoCalculate()
+        return () => { isSubscribed = false }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [endLocData, form.end_location])
 

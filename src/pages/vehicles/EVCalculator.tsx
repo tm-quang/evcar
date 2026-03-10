@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import HeaderBar from '../../components/layout/HeaderBar'
 import {
     Calculator,
@@ -13,6 +13,8 @@ import {
     Coins,
     RefreshCw
 } from 'lucide-react'
+import { useVehicleStore } from '../../store/useVehicleStore'
+import { useVehicle, useVehicleFuel } from '../../lib/vehicles/useVehicleQueries'
 
 export default function EVCalculator() {
     // 1. Cài đặt thông số xe (Global)
@@ -27,6 +29,32 @@ export default function EVCalculator() {
     const [startSoc, setStartSoc] = useState<number | ''>('')
     const [endSoc, setEndSoc] = useState<number | ''>('')
     const [actualKwh, setActualKwh] = useState<number | ''>('')
+
+    // --- AUTO FETCH LẤY TỪ HỆ THỐNG ---
+    const { selectedVehicleId } = useVehicleStore()
+    const { data: vehicle } = useVehicle(selectedVehicleId || undefined)
+    const { data: fuelLogs } = useVehicleFuel(selectedVehicleId || undefined)
+
+    const syncAutoData = () => {
+        if (vehicle) {
+            setOdoKm(vehicle.current_odometer || 0)
+        }
+        if (fuelLogs) {
+            const electricLogs = fuelLogs.filter(log => log.fuel_type === 'electric' || log.fuel_category === 'electric')
+            let sumKwh: number | '' = electricLogs.length > 0 ? electricLogs.reduce((sum, l) => sum + (l.kwh || 0), 0) : ''
+            if (typeof sumKwh === 'number') {
+                sumKwh = Number(sumKwh.toFixed(1))
+            }
+            setTotalKwh(sumKwh)
+        }
+    }
+
+    // Auto sync on mount / data load if empty
+    useEffect(() => {
+        if (odoKm === '' && totalKwh === '') {
+            syncAutoData()
+        }
+    }, [vehicle, fuelLogs])
 
 
     // --- LOGIC TÍNH TOÁN ---
@@ -63,7 +91,7 @@ export default function EVCalculator() {
             maximumFractionDigits: frac
         })
 
-    const resetTrip = () => { setOdoKm(''); setTotalKwh(''); }
+    const resetTrip = () => { syncAutoData(); }
     const resetCharge = () => { setStartSoc(''); setEndSoc(''); setActualKwh(''); }
 
     return (
@@ -152,7 +180,7 @@ export default function EVCalculator() {
                                             type="number"
                                             value={odoKm}
                                             onChange={e => setOdoKm(e.target.value === '' ? '' : parseFloat(e.target.value))}
-                                            placeholder="3741"
+                                            placeholder="Nhập số km"
                                             className="w-full bg-transparent px-2 py-2 text-2xl font-black text-slate-800 placeholder:text-slate-200 focus:outline-none"
                                         />
                                         <span className="absolute right-2 bottom-3 text-[10px] font-bold text-slate-300">KM</span>
@@ -165,7 +193,7 @@ export default function EVCalculator() {
                                             type="number"
                                             value={totalKwh}
                                             onChange={e => setTotalKwh(e.target.value === '' ? '' : parseFloat(e.target.value))}
-                                            placeholder="535"
+                                            placeholder="Nhập số KWH"
                                             className="w-full bg-transparent px-2 py-2 text-2xl font-black text-slate-800 placeholder:text-slate-200 focus:outline-none"
                                         />
                                         <span className="absolute right-2 bottom-3 text-[10px] font-bold text-slate-300">KWH</span>
