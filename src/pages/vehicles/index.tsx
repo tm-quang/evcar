@@ -334,7 +334,7 @@ export default function VehicleManagement() {
                                     {isMoto ? <Bike className={`h-4 w-4 ${accentColor.text}`} /> : isElectric ? <Zap className={`h-4 w-4 ${accentColor.text}`} /> : <Car className={`h-4 w-4 ${accentColor.text}`} />}
                                 </div>
                                 <h2 className="text-sm font-black text-slate-700 uppercase tracking-wide">
-                                    {isMoto ? 'Thống kê xe máy' : isElectric ? 'Thống kê xe điện' : 'Thống kê ô tô'}
+                                    {isMoto ? 'Thống kê xe máy' : isElectric ? 'Thống kê xe điện (EV)' : 'Thống kê ô tô'}
                                 </h2>
                             </div>
                         </div>
@@ -349,7 +349,7 @@ export default function VehicleManagement() {
                         ) : stats ? (
                             <div className={`grid ${isElectric ? 'grid-cols-2' : 'grid-cols-3'} gap-3`}>
                                 {/* km đã đi */}
-                                <div className="flex flex-col rounded-2xl bg-white border border-slate-100 shadow-[0_4px_16px_rgba(0,0,0,0.08)] p-4 overflow-hidden relative">
+                                <div className="flex flex-col rounded-2xl bg-white border border-slate-200 shadow-md p-4 overflow-hidden relative">
                                     <div className={`absolute -bottom-3 -right-3 h-14 w-14 rounded-full opacity-8 ${isMoto ? 'bg-orange-200' : 'bg-blue-100'}`} />
                                     <div className={`mb-2 w-fit rounded-xl p-1.5 ${isMoto ? 'bg-orange-50' : 'bg-blue-50'}`}>
                                         <Navigation className={`h-3.5 w-3.5 ${isMoto ? 'text-orange-500' : 'text-blue-500'}`} />
@@ -359,7 +359,7 @@ export default function VehicleManagement() {
                                 </div>
 
                                 {/* Chuyến đi */}
-                                <div className="flex flex-col rounded-2xl bg-white border border-slate-100 shadow-[0_4px_16px_rgba(0,0,0,0.08)] p-4 overflow-hidden relative">
+                                <div className="flex flex-col rounded-2xl bg-white border border-slate-200 shadow-md p-4 overflow-hidden relative">
                                     <div className="absolute -bottom-3 -right-3 h-14 w-14 rounded-full bg-indigo-100 opacity-8" />
                                     <div className="mb-2 w-fit rounded-xl bg-indigo-50 p-1.5">
                                         <Route className="h-3.5 w-3.5 text-indigo-500" />
@@ -368,21 +368,34 @@ export default function VehicleManagement() {
                                     <p className="text-[10px] text-slate-400 font-semibold mt-1 uppercase tracking-wide">chuyến đi</p>
                                 </div>
 
-                                {/* đ/km */}
-                                <div className="flex flex-col rounded-2xl bg-white border border-slate-100 shadow-[0_4px_16px_rgba(0,0,0,0.08)] p-4 overflow-hidden relative">
-                                    <div className="absolute -bottom-3 -right-3 h-14 w-14 rounded-full bg-green-100 opacity-8" />
-                                    <div className="mb-2 w-fit rounded-xl bg-green-50 p-1.5">
-                                        <TrendingUp className="h-3.5 w-3.5 text-green-500" />
+                                {/* đ/km (hoặc Lần sạc cho xe điện) */}
+                                {isElectric ? (
+                                    <div className="flex flex-col rounded-2xl bg-white border border-slate-200 shadow-md p-4 overflow-hidden relative">
+                                        <div className="absolute -bottom-3 -right-3 h-14 w-14 rounded-full bg-green-100 opacity-8" />
+                                        <div className="mb-2 w-fit rounded-xl bg-green-50 p-1.5">
+                                            <BatteryCharging className="h-3.5 w-3.5 text-green-500" />
+                                        </div>
+                                        <p className="text-lg font-black text-slate-800 leading-none">
+                                            {stats.totalChargeSessions || 0}
+                                        </p>
+                                        <p className="text-[10px] text-slate-400 font-semibold mt-1 uppercase tracking-wide">Lần sạc</p>
                                     </div>
-                                    <p className="text-lg font-black text-slate-800 leading-none">
-                                        {stats.costPerKm > 0 ? Math.round(stats.costPerKm).toLocaleString() : '—'}
-                                    </p>
-                                    <p className="text-[10px] text-slate-400 font-semibold mt-1 uppercase tracking-wide">đ/km</p>
-                                </div>
+                                ) : (
+                                    <div className="flex flex-col rounded-2xl bg-white border border-slate-200 shadow-md p-4 overflow-hidden relative">
+                                        <div className="absolute -bottom-3 -right-3 h-14 w-14 rounded-full bg-green-100 opacity-8" />
+                                        <div className="mb-2 w-fit rounded-xl bg-green-50 p-1.5">
+                                            <TrendingUp className="h-3.5 w-3.5 text-green-500" />
+                                        </div>
+                                        <p className="text-lg font-black text-slate-800 leading-none">
+                                            {stats.costPerKm > 0 ? Math.round(stats.costPerKm).toLocaleString() : '—'}
+                                        </p>
+                                        <p className="text-[10px] text-slate-400 font-semibold mt-1 uppercase tracking-wide">đ/km</p>
+                                    </div>
+                                )}
 
                                 {/* kWh đã sạc – chỉ EV */}
                                 {isElectric && (
-                                    <div className="flex flex-col rounded-2xl bg-white border border-slate-100 shadow-[0_4px_16px_rgba(0,0,0,0.08)] p-4 overflow-hidden relative">
+                                    <div className="flex flex-col rounded-2xl bg-white border border-slate-200 shadow-md p-4 overflow-hidden relative">
                                         <div className="absolute -bottom-3 -right-3 h-14 w-14 rounded-full bg-amber-100 opacity-8" />
                                         <div className="mb-2 w-fit rounded-xl bg-amber-50 p-1.5">
                                             <Zap className="h-3.5 w-3.5 text-amber-500" />
@@ -402,14 +415,14 @@ export default function VehicleManagement() {
                     CHI PHÍ THÁNG NÀY
                 ══════════════════════════════════════════════ */}
                 {selectedVehicle && stats && !isLoadingStats && (
-                    <section className="bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.09)] border border-slate-100 overflow-hidden">
+                    <section className="bg-white rounded-3xl shadow-md border border-slate-200 overflow-hidden">
                         <div className="flex items-center gap-2.5 px-5 py-4 border-b border-slate-50">
                             <div className="rounded-xl bg-blue-50 p-2">
                                 <Calendar className="h-4 w-4 text-blue-500" />
                             </div>
                             <div className="flex-1">
                                 <p className="text-sm font-black text-slate-800">Chi phí tháng này</p>
-                                <p className="text-[10px] text-slate-400">Tổng hợp từ tất cả hạng mục</p>
+                                <p className="text-[10px] text-slate-400">Tổng hợp từ tất cả các mục</p>
                             </div>
                             <span className="text-base font-black text-blue-600">
                                 {formatCurrency(stats.totalFuelCost + stats.totalMaintenanceCost + stats.totalOtherExpenses)}
@@ -492,9 +505,9 @@ export default function VehicleManagement() {
                 {selectedVehicle && (maintProgress || maintDateProgress || selectedVehicle.insurance_expiry_date || selectedVehicle.inspection_expiry_date) && (
                     <section>
                         <div className="flex items-center justify-between mb-3 px-1">
-                            <h2 className="text-sm font-black text-slate-700 uppercase tracking-wide">Giấy tờ & Bảo dưỡng</h2>
+                            <h2 className="text-sm font-black text-slate-700 uppercase tracking-wide">Mốc bảo dưỡng & Giấy tờ</h2>
                         </div>
-                        <div className="bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.09)] border border-slate-100 overflow-hidden divide-y divide-slate-50">
+                        <div className="bg-white rounded-3xl shadow-md border border-slate-200 overflow-hidden divide-y divide-slate-50">
 
                             {/* Maintenance km */}
                             {maintProgress && (
@@ -626,9 +639,9 @@ export default function VehicleManagement() {
                 {selectedVehicle && (
                     <section>
                         <div className="flex items-center justify-between mb-3 px-1">
-                            <h2 className="text-sm font-black text-slate-700 uppercase tracking-wide">Chức năng</h2>
+                            <h2 className="text-sm font-black text-slate-700 uppercase tracking-wide">Chức năng thêm</h2>
                             <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                                {isMoto ? 'Xe máy' : isElectric ? 'Xe điện' : 'Ô tô'}
+                                {isMoto ? 'Xe máy' : isElectric ? 'Xe điện (EV)' : 'Ô tô'}
                             </span>
                         </div>
 
@@ -636,7 +649,7 @@ export default function VehicleManagement() {
                             {/* Hành trình */}
                             <button
                                 onClick={() => navigate('/vehicles/trips')}
-                                className="group flex items-center gap-3 rounded-2xl bg-white border border-slate-100 shadow-[0_4px_16px_rgba(0,0,0,0.08)] p-4 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] active:scale-95"
+                                className="group flex items-center gap-3 rounded-2xl bg-white border border-slate-200 shadow-md p-4 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] active:scale-95"
                             >
                                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-green-50">
                                     <Route className="h-5 w-5 text-green-600" />
@@ -650,7 +663,7 @@ export default function VehicleManagement() {
                             {/* Nhiên liệu / Sạc */}
                             <button
                                 onClick={() => navigate('/vehicles/fuel')}
-                                className="group flex items-center gap-3 rounded-2xl bg-white border border-slate-100 shadow-[0_4px_16px_rgba(0,0,0,0.08)] p-4 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] active:scale-95"
+                                className="group flex items-center gap-3 rounded-2xl bg-white border border-slate-200 shadow-md p-4 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] active:scale-95"
                             >
                                 <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${isElectric ? 'bg-emerald-50' : 'bg-orange-50'}`}>
                                     {isElectric
@@ -666,7 +679,7 @@ export default function VehicleManagement() {
                             {/* Bảo dưỡng */}
                             <button
                                 onClick={() => navigate('/vehicles/maintenance')}
-                                className="group flex items-center gap-3 rounded-2xl bg-white border border-slate-100 shadow-[0_4px_16px_rgba(0,0,0,0.08)] p-4 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] active:scale-95"
+                                className="group flex items-center gap-3 rounded-2xl bg-white border border-slate-200 shadow-md p-4 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] active:scale-95"
                             >
                                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100">
                                     <Wrench className="h-5 w-5 text-slate-600" />
@@ -680,7 +693,7 @@ export default function VehicleManagement() {
                             {/* Chi phí khác */}
                             <button
                                 onClick={() => navigate('/vehicles/expenses')}
-                                className="group flex items-center gap-3 rounded-2xl bg-white border border-slate-100 shadow-[0_4px_16px_rgba(0,0,0,0.08)] p-4 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] active:scale-95"
+                                className="group flex items-center gap-3 rounded-2xl bg-white border border-slate-200 shadow-md p-4 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] active:scale-95"
                             >
                                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-50">
                                     <Receipt className="h-5 w-5 text-red-500" />
@@ -694,7 +707,7 @@ export default function VehicleManagement() {
                             {/* Báo cáo */}
                             <button
                                 onClick={() => navigate('/vehicles/reports')}
-                                className="group flex items-center gap-3 rounded-2xl bg-white border border-slate-100 shadow-[0_4px_16px_rgba(0,0,0,0.08)] p-4 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] active:scale-95"
+                                className="group flex items-center gap-3 rounded-2xl bg-white border border-slate-200 shadow-md p-4 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] active:scale-95"
                             >
                                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-50">
                                     <BarChart3 className="h-5 w-5 text-indigo-600" />
@@ -709,7 +722,7 @@ export default function VehicleManagement() {
                             {isElectric && (
                                 <button
                                     onClick={() => navigate('/vehicles/calculator')}
-                                    className="group flex items-center gap-3 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 shadow-[0_4px_16px_rgba(20,184,166,0.35)] p-4 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(20,184,166,0.45)] active:scale-95 col-span-1"
+                                    className="group flex items-center gap-3 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 border border-orange-500 shadow-md p-4 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(20,184,166,0.45)] active:scale-95 col-span-1"
                                 >
                                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/20">
                                         <Calculator className="h-5 w-5 text-white" />
@@ -757,7 +770,7 @@ export default function VehicleManagement() {
 
                         {/* Body */}
                         <div className="px-5 py-6 space-y-5">
-                            <div className="flex flex-col items-center rounded-2xl bg-slate-50 border border-slate-100 py-4">
+                            <div className="flex flex-col items-center rounded-2xl bg-slate-50 border border-slate-200 py-4">
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Hiện tại</p>
                                 <div className="flex items-baseline gap-1">
                                     <span className="text-3xl font-black text-slate-800">{selectedVehicle.current_odometer.toLocaleString()}</span>

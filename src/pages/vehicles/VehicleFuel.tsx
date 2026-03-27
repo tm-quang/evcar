@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import {
     Plus, Calendar, Trash2, MapPin, Settings, Zap, Droplet,
     BatteryCharging, Activity, TrendingUp, Clock, ChevronDown, ChevronUp,
-    Bolt, Check, Gift, DollarSign, Image, Loader2,
+    Check, Gift, DollarSign, Image, Loader2,
     Fuel, CreditCard, ScanLine, X, CheckSquare, Square, Save,
     ChevronLeft, ChevronRight, Edit, Search
 } from 'lucide-react'
@@ -62,7 +62,6 @@ function ElectricStatsCard({ logs }: { logs: FuelLogRecord[] }) {
     const navigate = useNavigate()
     const totalKwh = logs.reduce((sum, log) => sum + (log.kwh || log.liters || 0), 0)
     const totalCost = logs.reduce((sum, log) => sum + (log.total_cost || log.total_amount || 0), 0)
-    const avgPricePerKwh = totalKwh > 0 ? totalCost / totalKwh : 0
     const sessions = logs.length
 
     // Cost per session average
@@ -110,12 +109,12 @@ function ElectricStatsCard({ logs }: { logs: FuelLogRecord[] }) {
             <div className="grid grid-cols-3 gap-2">
                 <div className="flex flex-col items-center rounded-2xl bg-white p-3 shadow-md">
                     <div className="mb-1 rounded-lg bg-amber-100 p-1.5">
-                        <Bolt className="h-4 w-4 text-amber-600" />
+                        <BatteryCharging className="h-4 w-4 text-amber-600" />
                     </div>
                     <p className="text-sm font-bold text-slate-800">
-                        {avgPricePerKwh > 0 ? `${Math.round(avgPricePerKwh).toLocaleString('vi-VN')}đ` : '--'}
+                        {sessions}
                     </p>
-                    <p className="text-center text-[10px] leading-tight text-slate-500">TB/kWh</p>
+                    <p className="text-center text-[10px] leading-tight text-slate-500">Lần sạc</p>
                 </div>
                 <div className="flex flex-col items-center rounded-2xl bg-white p-3 shadow-md">
                     <div className="mb-1 rounded-lg bg-blue-100 p-1.5">
