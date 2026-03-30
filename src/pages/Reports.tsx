@@ -18,7 +18,7 @@ import { DonutChartWithLegend } from '../components/charts/DonutChartWithLegend'
 import { DateRangeFilter } from '../components/reports/DateRangeFilter'
 import { ReportFilterModal } from '../components/reports/ReportFilterModal'
 import { ExportExcelModal } from '../components/reports/ExportExcelModal'
-import { CategoryDetailModal } from '../components/reports/CategoryDetailModal'
+import { InlineCategoryTransactionList } from '../components/reports/InlineCategoryTransactionList'
 import { exportTransactionsToExcel, type ExportOptions } from '../utils/exportExcel'
 import { fetchWallets, type WalletRecord } from '../lib/walletService'
 import { useNotification } from '../contexts/notificationContext.helpers'
@@ -138,7 +138,6 @@ const ReportPage = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
-  const [isCategoryDetailModalOpen, setIsCategoryDetailModalOpen] = useState(false)
   const [selectedCategoryForDetail, setSelectedCategoryForDetail] = useState<CategoryRecord | CategoryWithChildren | null>(null)
 
   // Filter State
@@ -147,6 +146,9 @@ const ReportPage = () => {
   const [customStartDate, setCustomStartDate] = useState<string>('')
   const [customEndDate, setCustomEndDate] = useState<string>('')
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([])
+  const [selectedWalletIds, setSelectedWalletIds] = useState<string[]>([])
+  const [minAmount, setMinAmount] = useState<string>('')
+  const [maxAmount, setMaxAmount] = useState<string>('')
 
   const dateRange = useMemo(
     () => getDateRange(rangeType, customStartDate, customEndDate),
@@ -267,6 +269,24 @@ const ReportPage = () => {
       result = result.filter((t) => expandedCategoryIds.has(t.category_id))
     }
 
+    if (selectedWalletIds.length > 0) {
+      result = result.filter((t) => selectedWalletIds.includes(t.wallet_id))
+    }
+
+    if (minAmount.trim() !== '') {
+      const min = Number(minAmount)
+      if (!isNaN(min)) {
+        result = result.filter((t) => Number(t.amount) >= min)
+      }
+    }
+
+    if (maxAmount.trim() !== '') {
+      const max = Number(maxAmount)
+      if (!isNaN(max)) {
+        result = result.filter((t) => Number(t.amount) <= max)
+      }
+    }
+
     if (searchTerm.trim()) {
       const normalizedSearch = searchTerm.trim().toLowerCase()
       result = result.filter((t) => {
@@ -280,7 +300,7 @@ const ReportPage = () => {
     }
 
     return result.sort((a, b) => new Date(b.transaction_date).getTime() - new Date(a.transaction_date).getTime())
-  }, [transactions, typeFilter, selectedCategoryIds, searchTerm, categories])
+  }, [transactions, typeFilter, selectedCategoryIds, selectedWalletIds, minAmount, maxAmount, searchTerm, categories])
 
   // Calculate statistics
   const stats = useMemo(() => {
@@ -422,6 +442,9 @@ const ReportPage = () => {
     setCustomEndDate('')
     setTypeFilter('all')
     setSelectedCategoryIds([])
+    setSelectedWalletIds([])
+    setMinAmount('')
+    setMaxAmount('')
     setSearchTerm('')
   }
 
@@ -509,7 +532,7 @@ const ReportPage = () => {
                   </div>
                   <button
                     onClick={() => setIsFilterModalOpen(true)}
-                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-3xl border transition ${selectedCategoryIds.length > 0 || typeFilter !== 'all'
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-3xl border transition ${selectedCategoryIds.length > 0 || typeFilter !== 'all' || selectedWalletIds.length > 0 || minAmount !== '' || maxAmount !== ''
                       ? 'bg-blue-50 border-blue-200 text-blue-600'
                       : 'bg-white border-slate-200 text-slate-500'
                       }`}
@@ -566,7 +589,10 @@ const ReportPage = () => {
                 {(['overview', 'income', 'expense'] as const).map((tab) => (
                   <button
                     key={tab}
-                    onClick={() => setActiveTab(tab)}
+                    onClick={() => {
+                      setActiveTab(tab)
+                      setSelectedCategoryForDetail(null)
+                    }}
                     className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${activeTab === tab
                       ? 'bg-white text-slate-900 shadow-sm'
                       : 'text-slate-500 hover:text-slate-700'
@@ -602,8 +628,29 @@ const ReportPage = () => {
                         categories={categories}
                         parentCategories={parentCategories}
                         totalAmount={stats.income}
+                        onCategoryClick={(id) => {
+                          const category = parentCategories.find((c) => c.id === id) || categories.find((c) => c.id === id)
+                          if (category) {
+                            setSelectedCategoryForDetail(category)
+                          }
+                        }}
                       />
                     </section>
+
+                    {selectedCategoryForDetail && activeTab === 'income' && (
+                      <InlineCategoryTransactionList
+                        category={selectedCategoryForDetail}
+                        transactions={filteredTransactions}
+                        wallets={wallets}
+                        dateRange={{
+                          start: dateRange.start,
+                          end: dateRange.end,
+                          type: rangeType,
+                        }}
+                        allCategories={categories}
+                        onClose={() => setSelectedCategoryForDetail(null)}
+                      />
+                    )}
 
                     <section className="space-y-3">
                       <h3 className="font-bold text-slate-900 px-1">Top nguồn thu</h3>
@@ -612,7 +659,6 @@ const ReportPage = () => {
                           key={item.category!.id}
                           onClick={() => {
                             setSelectedCategoryForDetail(item.category!)
-                            setIsCategoryDetailModalOpen(true)
                           }}
                           className="w-full flex items-center justify-between rounded-3xl bg-white p-3 shadow-lg border border-slate-100 hover:shadow-xl transition-all active:scale-95"
                         >
@@ -641,8 +687,29 @@ const ReportPage = () => {
                         categories={categories}
                         parentCategories={parentCategories}
                         totalAmount={stats.expense}
+                        onCategoryClick={(id) => {
+                          const category = parentCategories.find((c) => c.id === id) || categories.find((c) => c.id === id)
+                          if (category) {
+                            setSelectedCategoryForDetail(category)
+                          }
+                        }}
                       />
                     </section>
+
+                    {selectedCategoryForDetail && activeTab === 'expense' && (
+                      <InlineCategoryTransactionList
+                        category={selectedCategoryForDetail}
+                        transactions={filteredTransactions}
+                        wallets={wallets}
+                        dateRange={{
+                          start: dateRange.start,
+                          end: dateRange.end,
+                          type: rangeType,
+                        }}
+                        allCategories={categories}
+                        onClose={() => setSelectedCategoryForDetail(null)}
+                      />
+                    )}
 
                     <section className="space-y-3">
                       <h3 className="font-bold text-slate-900 px-1">Top chi tiêu</h3>
@@ -651,7 +718,6 @@ const ReportPage = () => {
                           key={item.category!.id}
                           onClick={() => {
                             setSelectedCategoryForDetail(item.category!)
-                            setIsCategoryDetailModalOpen(true)
                           }}
                           className="w-full flex items-center justify-between rounded-3xl bg-white p-3 shadow-lg border border-slate-100 hover:shadow-xl transition-all active:scale-95"
                         >
@@ -729,8 +795,20 @@ const ReportPage = () => {
 
         onCategoryClick={(category) => {
           setSelectedCategoryForDetail(category)
-          setIsCategoryDetailModalOpen(true)
           setIsFilterModalOpen(false)
+        }}
+        wallets={wallets}
+        selectedWalletIds={selectedWalletIds}
+        onWalletToggle={(id) => {
+          setSelectedWalletIds(prev => 
+            prev.includes(id) ? prev.filter(wId => wId !== id) : [...prev, id]
+          )
+        }}
+        minAmount={minAmount}
+        maxAmount={maxAmount}
+        onAmountChange={(min, max) => {
+          setMinAmount(min)
+          setMaxAmount(max)
         }}
       />
 
@@ -747,22 +825,7 @@ const ReportPage = () => {
         categoryIds={selectedCategoryIds}
       />
 
-      <CategoryDetailModal
-        isOpen={isCategoryDetailModalOpen}
-        onClose={() => {
-          setIsCategoryDetailModalOpen(false)
-          setSelectedCategoryForDetail(null)
-        }}
-        category={selectedCategoryForDetail}
-        transactions={allTransactions}
-        wallets={wallets}
-        dateRange={{
-          start: dateRange.start,
-          end: dateRange.end,
-          type: rangeType,
-        }}
-        allCategories={categories}
-      />
+      {/* Inline list is now used inside Tab sections */}
     </div>
   )
 }

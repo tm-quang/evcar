@@ -457,16 +457,16 @@ function FilterModal({
     if (!isOpen) return null
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end bg-black/60 backdrop-blur-sm sm:items-center sm:justify-center">
-            <div className="animate-slide-up w-full rounded-t-3xl bg-white shadow-2xl sm:max-w-sm sm:rounded-3xl p-5 mb-0 sm:mb-8 safe-area-bottom">
-                <div className="mb-4 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex flex-col justify-end bg-black/60 backdrop-blur-[3px] transition-all duration-300 animate-in fade-in sm:items-center sm:justify-center" onClick={onClose}>
+            <div className="w-full rounded-t-3xl bg-white shadow-2xl sm:max-w-md max-h-[80vh] flex flex-col sm:rounded-3xl p-5 mb-0 sm:mb-8 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300" onClick={e => e.stopPropagation()}>
+                <div className="mb-4 flex items-center justify-between shrink-0">
                     <h3 className="text-lg font-bold text-slate-800">Bộ lọc chi phí</h3>
                     <button onClick={onClose} className="rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200">
                         <X className="h-4 w-4" />
                     </button>
                 </div>
 
-                <div className="space-y-5">
+                <div className="space-y-5 overflow-y-auto pr-1">
                     {/* Period filters */}
                     <div>
                         <label className="mb-2.5 block text-xs font-bold text-slate-500 uppercase tracking-widest">Thời gian</label>
@@ -509,7 +509,7 @@ function FilterModal({
                     </div>
                 </div>
 
-                <div className="mt-8 flex gap-3">
+                <div className="mt-8 flex gap-3 shrink-0">
                     <button onClick={() => { setFilterType('all'); setFilterPeriod('month'); }}
                         className="flex-1 rounded-2xl border-2 border-slate-200 bg-white py-3.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all">
                         Đặt lại bộ lọc
@@ -575,8 +575,8 @@ function AddExpenseModal({ vehicle, onClose, onSuccess }: {
 
     return (
         <>
-            <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] pointer-events-none">
-                <div className="animate-slide-up w-full max-w-md max-h-[92vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl pointer-events-auto mt-12 sm:mt-0 safe-area-bottom overflow-hidden border border-slate-100/50">
+            <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] transition-all duration-300 animate-in fade-in" onClick={onClose}>
+                <div className="w-full max-w-md max-h-[80vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl mt-12 sm:mt-0 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300 border border-slate-100/50" onClick={e => e.stopPropagation()}>
                     {/* Header */}
                     <div className="bg-white px-5 pt-4 pb-3 border-b border-slate-100 relative">
                         {/* Mobile Handle */}

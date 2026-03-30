@@ -50,8 +50,8 @@ export function TripPriceModal({
     }
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4 backdrop-blur-sm animate-in fade-in duration-200 pointer-events-none">
-            <div className="w-full max-w-md overflow-hidden rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl animate-in zoom-in-95 duration-200 mt-12 sm:mt-0 max-h-[calc(100vh-3rem)] sm:max-h-[85vh] overflow-y-auto safe-area-bottom pointer-events-auto">
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] transition-all duration-300 animate-in fade-in" onClick={onClose}>
+            <div className="w-full max-w-md flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl overflow-hidden animate-in slide-in-from-bottom-full duration-300 mt-12 sm:mt-0 max-h-[80vh] overflow-y-auto safe-area-bottom" onClick={e => e.stopPropagation()}>
                 <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-5 pt-3 pb-4 text-white">
                     {/* Mobile Handle */}
                     <div className="flex w-full justify-center pb-3 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10 w-full">

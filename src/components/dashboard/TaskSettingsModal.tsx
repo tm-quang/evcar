@@ -143,8 +143,8 @@ export const TaskSettingsModal = ({
 
   return (
     <>
-      <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 backdrop-blur-sm bg-slate-950/50 animate-in fade-in duration-200 pointer-events-none">
-        <div className="relative w-full max-w-md transform overflow-hidden rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl ring-1 ring-slate-200/50 animate-in zoom-in-95 fade-in duration-300 mt-12 sm:mt-0 max-h-[calc(100vh-3rem)] sm:max-h-[85vh] overflow-y-auto safe-area-bottom pointer-events-auto">
+      <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] transition-all duration-300 animate-in fade-in" onClick={onClose}>
+        <div className="relative w-full max-w-md flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl overflow-hidden animate-in slide-in-from-bottom-full duration-300 mt-12 sm:mt-0 max-h-[80vh] safe-area-bottom" onClick={e => e.stopPropagation()}>
         {/* Mobile Handle */}
         <div className="flex w-full justify-center pt-3 pb-2 flex-shrink-0 bg-transparent sm:hidden scroll-none pointer-events-none sticky top-0 z-10 w-full mb-1">
           <div className="h-1.5 w-12 rounded-full bg-slate-300/80" />

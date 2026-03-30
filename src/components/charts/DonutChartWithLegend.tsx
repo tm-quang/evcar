@@ -15,6 +15,7 @@ type DonutChartWithLegendProps = {
   categories: CategoryRecord[]
   parentCategories: CategoryWithChildren[]
   totalAmount: number
+  onCategoryClick?: (categoryId: string) => void
 }
 
 // Colors matching the image: yellow, red, teal, purple, etc.
@@ -36,6 +37,7 @@ export const DonutChartWithLegend = ({
   categories,
   parentCategories,
   totalAmount,
+  onCategoryClick,
 }: DonutChartWithLegendProps) => {
   const chartData = useMemo(() => {
     if (transactions.length === 0 || totalAmount === 0 || parentCategories.length === 0) {
@@ -209,7 +211,8 @@ export const DonutChartWithLegend = ({
                 fill={item.color}
                 stroke="white"
                 strokeWidth="2"
-                className="transition-all hover:opacity-90"
+                className="transition-all hover:opacity-80 cursor-pointer"
+                onClick={() => onCategoryClick?.(item.parent_category_id)}
               />
             )
           })}
@@ -223,7 +226,11 @@ export const DonutChartWithLegend = ({
           const formattedPercentage = item.percentage.toFixed(2).replace('.', ',')
           
           return (
-            <div key={item.parent_category_id} className="flex items-center gap-3">
+            <button
+              key={item.parent_category_id}
+              onClick={() => onCategoryClick?.(item.parent_category_id)}
+              className="w-full flex items-center gap-3 hover:bg-slate-50 p-1.5 rounded-lg transition-colors active:scale-95 text-left"
+            >
               <div
                 className="h-4 w-4 shrink-0 rounded"
                 style={{ backgroundColor: item.color }}
@@ -234,7 +241,7 @@ export const DonutChartWithLegend = ({
               <span className="shrink-0 text-sm font-semibold text-slate-900 whitespace-nowrap">
                 {formattedPercentage} %
               </span>
-            </div>
+            </button>
           )
         })}
       </div>

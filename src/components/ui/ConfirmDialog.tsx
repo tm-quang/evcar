@@ -114,18 +114,12 @@ export const ConfirmDialog = ({
   }
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center sm:p-4 pointer-events-none">
-      {/* Backdrop */}
-      <div
-        className={`absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity ${isOpen ? 'opacity-100' : 'opacity-0'
-          } pointer-events-auto`}
-        onClick={!isLoading ? handleCancel : undefined}
-      />
-
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] transition-all duration-300 animate-in fade-in" onClick={!isLoading ? handleCancel : undefined}>
       {/* Dialog */}
       <div
-        className={`relative w-full max-w-md transform rounded-t-3xl sm:rounded-3xl bg-white shadow-[0_20px_60px_rgba(0,0,0,0.3)] ring-1 ring-slate-200 transition-all duration-300 pointer-events-auto safe-area-bottom mt-12 sm:mt-0 ${isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+        className={`w-full max-w-md flex flex-col transform rounded-t-3xl sm:rounded-3xl bg-white shadow-[0_20px_60px_rgba(0,0,0,0.3)] ring-1 ring-slate-200 transition-all duration-300 max-h-[80vh] overflow-hidden safe-area-bottom mt-12 sm:mt-0 ${isOpen ? 'scale-100 opacity-100 slide-in-from-bottom-full' : 'scale-95 opacity-0'
           }`}
+        onClick={e => e.stopPropagation()}
       >
         {/* Mobile Handle */}
         <div className="flex w-full justify-center pt-3 pb-2 flex-shrink-0 bg-transparent sm:hidden scroll-none pointer-events-none sticky top-0 z-10 w-full mb-1">
@@ -143,7 +137,7 @@ export const ConfirmDialog = ({
         )}
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto">
           {/* Icon and Title */}
           <div className="mb-5 flex items-start gap-4">
             <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${config.iconBg} shadow-lg`}>

@@ -106,15 +106,8 @@ export const PlanDayModal = ({
 
   return (
     <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm animate-in fade-in duration-200"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
       {/* Modal with arrow indicator */}
-      <div className="fixed inset-x-0 bottom-0 sm:inset-0 z-50 flex items-end sm:items-start justify-center p-0 sm:p-4 pointer-events-none" style={{ paddingTop: anchorPosition ? `${anchorPosition.top}px` : '10%' }}>
+      <div className="fixed inset-x-0 bottom-0 sm:inset-0 z-50 flex items-end sm:items-start justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] transition-all duration-300 animate-in fade-in" onClick={onClose} style={{ paddingTop: anchorPosition ? `${anchorPosition.top}px` : '10%' }}>
         {/* Arrow pointing up */}
         {anchorPosition && (
           <div
@@ -130,7 +123,7 @@ export const PlanDayModal = ({
         )}
 
         <div
-          className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl max-w-md w-full max-h-[85vh] flex flex-col pointer-events-auto animate-in zoom-in-95 duration-200 border border-slate-200/50 safe-area-bottom mt-12 sm:mt-0"
+          className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl max-w-md w-full max-h-[80vh] flex flex-col animate-in slide-in-from-bottom-full duration-300 border border-slate-200/50 safe-area-bottom mt-12 sm:mt-0"
           onClick={(e) => e.stopPropagation()}
           style={{ marginTop: anchorPosition ? '8px' : '0' }}
         >

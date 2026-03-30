@@ -217,8 +217,8 @@ export function SimpleLocationInput({
 
             {/* Location Pickup Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] pointer-events-none animate-in fade-in duration-200">
-                    <div className="w-full max-w-md max-h-[92vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-slate-50 shadow-2xl pointer-events-auto mt-12 sm:mt-0 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300">
+                <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] transition-all duration-300 animate-in fade-in" onClick={() => setIsModalOpen(false)}>
+                    <div className="w-full max-w-md max-h-[80vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-slate-50 shadow-2xl mt-12 sm:mt-0 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300" onClick={e => e.stopPropagation()}>
                         {/* Header with Handle */}
                         <div className="sticky top-0 z-10 bg-white border-b border-slate-100 flex-shrink-0">
                             {/* Mobile Handle */}

@@ -745,15 +745,21 @@ export default function VehicleManagement() {
 
             {/* ══ ODO Modal ══ */}
             {showOdoModal && selectedVehicle && (
-                <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200">
-                    <div className="w-full max-w-sm overflow-hidden rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-300">
+                <div 
+                    className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200"
+                    onClick={() => setShowOdoModal(false)}
+                >
+                    <div 
+                        className="w-full max-w-md flex flex-col max-h-[80vh] overflow-hidden rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-300"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         {/* Handle */}
-                        <div className="flex justify-center pt-3 pb-1 sm:hidden">
+                        <div className="flex justify-center pt-3 pb-1 sm:hidden shrink-0">
                             <div className="h-1.5 w-10 rounded-full bg-slate-200" />
                         </div>
 
                         {/* Header */}
-                        <div className={`px-5 py-5 text-white flex items-center justify-between ${isMoto ? 'bg-orange-500' : isElectric ? 'bg-emerald-500' : 'bg-blue-600'}`}>
+                        <div className={`px-5 py-5 text-white flex items-center justify-between shrink-0 ${isMoto ? 'bg-orange-500' : isElectric ? 'bg-emerald-500' : 'bg-blue-600'}`}>
                             <div className="flex items-center gap-3">
                                 <div className="rounded-2xl bg-white/20 p-2.5">
                                     <Gauge className="h-5 w-5" />
@@ -769,7 +775,7 @@ export default function VehicleManagement() {
                         </div>
 
                         {/* Body */}
-                        <div className="px-5 py-6 space-y-5">
+                        <div className="px-5 py-6 space-y-5 overflow-y-auto">
                             <div className="flex flex-col items-center rounded-2xl bg-slate-50 border border-slate-200 py-4">
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Hiện tại</p>
                                 <div className="flex items-baseline gap-1">
@@ -800,7 +806,7 @@ export default function VehicleManagement() {
                         </div>
 
                         {/* Footer */}
-                        <div className="flex gap-3 px-5 pb-6">
+                        <div className="flex gap-3 px-5 pb-6 shrink-0 pt-2 border-t border-slate-100">
                             <button onClick={() => setShowOdoModal(false)}
                                 className="flex-1 rounded-2xl bg-slate-100 py-3.5 text-sm font-bold text-slate-600 hover:bg-slate-200 transition-all active:scale-95">
                                 Hủy

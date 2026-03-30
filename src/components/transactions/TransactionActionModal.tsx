@@ -18,17 +18,11 @@ export const TransactionActionModal = ({
   if (!isOpen) return null
 
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] transition-all duration-300 animate-in fade-in" onClick={onClose}>
       {/* Modal - Always centered */}
-      <div className="fixed inset-x-0 bottom-0 sm:left-1/2 sm:top-1/2 mt-12 sm:mt-0 z-[70] flex w-full max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 flex-col gap-2 rounded-t-3xl sm:rounded-2xl bg-white p-2 shadow-[0_10px_40px_rgba(0,0,0,0.2)] ring-1 ring-slate-200 max-h-[calc(100vh-3rem)] sm:max-h-[85vh] overflow-y-auto safe-area-bottom pointer-events-auto shadow-[0_-10px_40px_rgba(0,0,0,0.1)] sm:shadow-2xl">
+      <div className="w-full max-w-md flex flex-col gap-2 rounded-t-3xl sm:rounded-2xl bg-white p-2 shadow-[0_10px_40px_rgba(0,0,0,0.2)] ring-1 ring-slate-200 max-h-[80vh] overflow-y-auto safe-area-bottom mt-12 sm:mt-0 animate-in slide-in-from-bottom-full duration-300" onClick={e => e.stopPropagation()}>
         {/* Mobile Handle */}
-        <div className="flex w-full justify-center pt-3 pb-2 flex-shrink-0 bg-transparent sm:hidden pointer-events-none sticky top-0 z-10 w-full mb-1">
+        <div className="flex w-full justify-center pt-3 pb-2 flex-shrink-0 bg-transparent sm:hidden scroll-none pointer-events-none sticky top-0 z-10 w-full mb-1">
           <div className="h-1.5 w-12 rounded-full bg-slate-300/80" />
         </div>
 
@@ -84,7 +78,7 @@ export const TransactionActionModal = ({
           </button>
         </div>
       </div>
-    </>
+    </div>
   )
 }
 

@@ -552,8 +552,8 @@ export default function VehicleChargingHistory() {
 
             {/* Details & Edit Modal */}
             {editingLog && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] pointer-events-none transition-all duration-300" onClick={() => setEditingLog(null)}>
-                    <div className="w-full max-w-md max-h-[92vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl pointer-events-auto mt-12 sm:mt-0 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] transition-all duration-300 animate-in fade-in" onClick={() => setEditingLog(null)}>
+                    <div className="w-full max-w-md max-h-[80vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl mt-12 sm:mt-0 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300" onClick={e => e.stopPropagation()}>
                         <div className="bg-blue-600 px-5 pt-3 pb-5 text-white shrink-0">
                             {/* Mobile Handle */}
                             <div className="flex w-full justify-center pb-3 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10">
@@ -694,8 +694,8 @@ export default function VehicleChargingHistory() {
 
             {/* Filter Modal */}
             {isFilterModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] pointer-events-none transition-all duration-300" onClick={() => setIsFilterModalOpen(false)}>
-                    <div className="w-full max-w-md max-h-[92vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl pointer-events-auto mt-12 sm:mt-0 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] transition-all duration-300 animate-in fade-in" onClick={() => setIsFilterModalOpen(false)}>
+                    <div className="w-full max-w-md max-h-[80vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl mt-12 sm:mt-0 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300" onClick={e => e.stopPropagation()}>
                         {/* Mobile Handle */}
                         <div className="flex w-full justify-center pt-3 pb-1 flex-shrink-0 bg-white sm:hidden scroll-none pointer-events-none sticky top-0 z-10">
                             <div className="h-1.5 w-12 rounded-full bg-slate-200" />
@@ -707,7 +707,7 @@ export default function VehicleChargingHistory() {
                             </button>
                         </div>
 
-                        <div className="p-5 space-y-6">
+                        <div className="p-5 space-y-6 overflow-y-auto">
                             <div>
                                 <label className="mb-2 block text-sm font-semibold text-slate-700">Từ khóa tìm kiếm</label>
                                 <div className="relative">

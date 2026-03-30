@@ -235,15 +235,9 @@ export const DateTimePickerModal = ({
 
   return (
     <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md animate-in fade-in duration-300"
-        onClick={onClose}
-      />
-
       {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 pointer-events-none">
-        <div className="relative w-full max-w-md max-h-[85vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-[0_25px_80px_rgba(0,0,0,0.5)] ring-1 ring-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-300 mt-12 sm:mt-0 pointer-events-auto">
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] transition-all duration-300 animate-in fade-in" onClick={onClose}>
+        <div className="w-full max-w-md flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-[0_25px_80px_rgba(0,0,0,0.5)] ring-1 ring-slate-200 overflow-hidden animate-in slide-in-from-bottom-full duration-300 mt-12 sm:mt-0 max-h-[80vh] safe-area-bottom" onClick={e => e.stopPropagation()}>
           {/* Header with Handle */}
           <div className="sticky top-0 z-10 bg-white border-b border-slate-200 shrink-0">
             {/* Mobile Handle */}

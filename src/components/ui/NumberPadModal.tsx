@@ -201,14 +201,10 @@ export const NumberPadModal = ({ isOpen, onClose, value, onChange, onConfirm }: 
         }
       `}</style>
       <div
-        className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 backdrop-blur-sm bg-slate-950/50 pointer-events-none"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) {
-            onClose()
-          }
-        }}
+        className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] transition-all duration-300 animate-in fade-in"
+        onClick={onClose}
       >
-        <div className="flex w-full max-w-md mx-auto max-h-[85vh] flex-col rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden pointer-events-auto mt-12 sm:mt-0 safe-area-bottom" style={{ backgroundColor: '#F2F4F7' }}>
+        <div className="flex w-full max-w-md flex-col rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden mt-12 sm:mt-0 max-h-[80vh] safe-area-bottom animate-in slide-in-from-bottom-full duration-300" style={{ backgroundColor: '#F2F4F7' }} onClick={e => e.stopPropagation()}>
           {/* Mobile Handle */}
           <div className="flex w-full justify-center pt-3 pb-2 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10 w-full mb-1" style={{ backgroundColor: '#F2F4F7' }}>
             <div className="h-1.5 w-12 rounded-full bg-slate-300" />
