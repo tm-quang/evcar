@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { FaBell, FaArrowLeft, FaRedoAlt } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import { ProfileModal } from './ProfileModal'
+import { useArchiveStore } from '../../store/useArchiveStore'
 
 type HeaderBarProps =
   | {
@@ -31,7 +32,7 @@ const HeaderBar = (props: HeaderBarProps) => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
-  const isArchiveMode = false
+  const isArchiveMode = useArchiveStore((state) => state.isArchiveMode)
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true)

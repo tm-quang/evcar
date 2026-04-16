@@ -10,22 +10,52 @@ interface AuthState {
   initialized: boolean
 }
 
+// ── Module-level singleton ──────────────────────────────────────────────────
+// Keeps auth state alive across route changes so ProtectedRoute never
+// incorrectly redirects to /login while the session is being re-checked.
+let _cachedAuthState: AuthState = {
+  user: null,
+  session: null,
+  loading: true,
+  initialized: false,
+}
+let _listeners: Array<(s: AuthState) => void> = []
+let _bootstrapped = false  // only run the Supabase init once
+
+const setGlobalAuth = (state: AuthState) => {
+  _cachedAuthState = state
+  _listeners.forEach(fn => fn(state))
+}
+
+/** Call this right after signInWithPassword succeeds to update auth state before navigate() */
+export const setAuthStateOnLogin = (user: User, session: Session) => {
+  setGlobalAuth({ user, session, loading: false, initialized: true })
+}
+
 /**
  * Hook to monitor authentication state and automatically restore session
  * This ensures users stay logged in across page refreshes and browser sessions
  */
 export const useAuthState = () => {
-  const [authState, setAuthState] = useState<AuthState>({
-    user: null,
-    session: null,
-    loading: true,
-    initialized: false,
-  })
+  // Start from cached state so ProtectedRoute never flashes /login
+  // while the session is being re-validated on remount
+  const [authState, setAuthState] = useState<AuthState>(() => _cachedAuthState)
   const navigate = useNavigate()
 
   useEffect(() => {
+    // Subscribe to global auth state updates
+    const listener = (s: AuthState) => setAuthState(s)
+    _listeners.push(listener)
+
+    // Only one instance boots the Supabase listener
+    if (_bootstrapped) {
+      return () => {
+        _listeners = _listeners.filter(l => l !== listener)
+      }
+    }
+    _bootstrapped = true
+
     const supabase = getSupabaseClient()
-    let mounted = true
 
     // Get initial session
     const initializeAuth = async () => {
@@ -37,72 +67,50 @@ export const useAuthState = () => {
           // Don't throw, just set to null
         }
 
-        if (mounted) {
-          // Populate user cache ngay khi có session (kể cả khi refresh page)
-          if (session?.user) {
-            const { setCachedUser } = await import('../lib/userCache')
-            setCachedUser(session.user)
-          }
+        // Populate user cache ngay khi có session
+        if (session?.user) {
+          const { setCachedUser } = await import('../lib/userCache')
+          setCachedUser(session.user)
+        }
 
-          setAuthState({
-            user: session?.user ?? null,
-            session,
-            loading: false,
-            initialized: true,
-          })
+        setGlobalAuth({
+          user: session?.user ?? null,
+          session,
+          loading: false,
+          initialized: true,
+        })
 
-          // If we have a session, try to refresh it to ensure it's valid
-          if (session) {
-            const { data: { session: refreshedSession }, error: refreshError } =
-              await supabase.auth.refreshSession()
+        // Try to refresh the session to ensure it's valid
+        if (session) {
+          const { data: { session: refreshedSession }, error: refreshError } =
+            await supabase.auth.refreshSession()
 
-            if (refreshError) {
-              console.warn('Session refresh failed:', refreshError)
-              // If refresh fails, clear the session
-              if (mounted) {
-                setAuthState({
-                  user: null,
-                  session: null,
-                  loading: false,
-                  initialized: true,
-                })
-              }
-            } else if (mounted && refreshedSession) {
-              // Populate user cache với refreshed session
-              if (refreshedSession?.user) {
-                const { setCachedUser } = await import('../lib/userCache')
-                setCachedUser(refreshedSession.user)
-              }
-
-              setAuthState({
-                user: refreshedSession.user,
-                session: refreshedSession,
-                loading: false,
-                initialized: true,
-              })
+          if (refreshError) {
+            console.warn('Session refresh failed:', refreshError)
+            setGlobalAuth({ user: null, session: null, loading: false, initialized: true })
+          } else if (refreshedSession) {
+            if (refreshedSession?.user) {
+              const { setCachedUser } = await import('../lib/userCache')
+              setCachedUser(refreshedSession.user)
             }
+            setGlobalAuth({
+              user: refreshedSession.user,
+              session: refreshedSession,
+              loading: false,
+              initialized: true,
+            })
           }
         }
       } catch (error) {
         console.error('Error initializing auth:', error)
-        if (mounted) {
-          setAuthState({
-            user: null,
-            session: null,
-            loading: false,
-            initialized: true,
-          })
-        }
+        setGlobalAuth({ user: null, session: null, loading: false, initialized: true })
       }
     }
 
     initializeAuth()
 
     // Listen for auth state changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!mounted) return
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
 
       console.log('Auth state changed:', event, session?.user?.email)
 
@@ -115,7 +123,7 @@ export const useAuthState = () => {
           console.log('✅ User cache populated immediately on SIGNED_IN')
         }
 
-        setAuthState({
+        setGlobalAuth({
           user: session?.user ?? null,
           session,
           loading: false,
@@ -154,7 +162,7 @@ export const useAuthState = () => {
           }
         }
       } else if (event === 'SIGNED_OUT') {
-        setAuthState({
+        setGlobalAuth({
           user: null,
           session: null,
           loading: false,
@@ -163,11 +171,9 @@ export const useAuthState = () => {
         // Clear all caches on sign out
         try {
           const { clearUserCache } = await import('../lib/userCache')
-          const { clearPreloadTimestamp } = await import('../lib/dataPreloader')
           const { queryClient } = await import('../lib/react-query')
 
           clearUserCache()
-          await clearPreloadTimestamp()
           queryClient.clear()
         } catch (e) {
           console.warn('Error clearing cache on sign out:', e)
@@ -183,7 +189,7 @@ export const useAuthState = () => {
     })
 
     return () => {
-      mounted = false
+      _listeners = _listeners.filter(l => l !== listener)
       subscription.unsubscribe()
     }
   }, [navigate])

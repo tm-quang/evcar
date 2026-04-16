@@ -3,8 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import type { IconType } from 'react-icons'
 import {
   LuHouse,
-  LuZap,
-  LuReceipt,
+  LuCar,
+  LuChartLine,
   LuSettings,
   LuClipboardPen,
 } from 'react-icons/lu'
@@ -22,10 +22,10 @@ type TabItem = {
 }
 
 const tabs: TabItem[] = [
-  { id: 'home', label: 'Trang chủ', icon: LuHouse, path: '/ev' },
-  { id: 'fuel', label: 'Sạc điện', icon: LuZap, path: '/ev/charging' },
+  { id: 'home', label: 'Tổng quan', icon: LuHouse, path: '/dashboard' },
+  { id: 'vehicles', label: 'Phương tiện', icon: LuCar, path: '/vehicles' },
   { id: 'add', label: '', icon: LuClipboardPen, prominent: true },
-  { id: 'expenses', label: 'Chi phí', icon: LuReceipt, path: '/ev/expenses' },
+  { id: 'reports', label: 'Báo cáo', icon: LuChartLine, path: '/reports' },
   { id: 'settings', label: 'Cài đặt', icon: LuSettings, path: '/settings' },
 ]
 
@@ -37,9 +37,8 @@ export const FooterNav = ({ onAddClick }: FooterNavProps) => {
   const isActive = (path?: string) => {
     if (!path) return false
     const pathname = location.pathname
-    // Exact match for root paths to avoid /ev matching /ev/charging etc
-    if (path === '/ev' || path === '/settings') return pathname === path
-    return pathname === path || pathname.startsWith(path + '/')
+    const cleanPath = path.split('?')[0]
+    return pathname === cleanPath || pathname.startsWith(cleanPath)
   }
 
   // Check for animation trigger from navigation state

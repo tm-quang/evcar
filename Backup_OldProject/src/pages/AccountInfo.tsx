@@ -121,7 +121,7 @@ const AccountInfoPage = () => {
       setError(null)
       try {
         const compressedFile = await compressImageForAvatar(file, 200, 200, 250, 0.8)
-
+        
         if (!isFileSizeAcceptable(compressedFile, 250)) {
           setError('Không thể nén ảnh xuống dưới 250KB. Vui lòng chọn ảnh khác')
           if (fileInputRef.current) {
@@ -277,24 +277,26 @@ const AccountInfoPage = () => {
       <main className="flex-1 overflow-y-auto overscroll-contain pb-24">
         <div className="mx-auto flex w-full max-w-md flex-col gap-3 px-4 pt-2 pb-4 sm:pt-2 sm:pb-4">
           {/* Tab Selector */}
-          <div className="flex gap-2 rounded-xl bg-white p-1 shadow-md border border-slate-300">
+          <div className="flex gap-2 rounded-xl bg-white p-1 shadow-lg ring-1 ring-slate-100">
             <button
               type="button"
               onClick={() => setActiveTab('info')}
-              className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition ${activeTab === 'info'
-                ? 'bg-sky-500 text-white shadow-md'
-                : 'text-slate-600 hover:text-slate-900'
-                }`}
+              className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
+                activeTab === 'info'
+                  ? 'bg-sky-500 text-white shadow-md'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
               Thông tin cá nhân
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('password')}
-              className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition ${activeTab === 'password'
-                ? 'bg-sky-500 text-white shadow-md'
-                : 'text-slate-600 hover:text-slate-900'
-                }`}
+              className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
+                activeTab === 'password'
+                  ? 'bg-sky-500 text-white shadow-md'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
               Đổi mật khẩu
             </button>
@@ -309,7 +311,7 @@ const AccountInfoPage = () => {
           {isLoading ? (
             <AccountInfoSkeleton />
           ) : activeTab === 'info' ? (
-            <form onSubmit={handleSubmitInfo} id="account-form" className="space-y-4 rounded-3xl bg-white p-5 shadow-md sm:p-6 border border-slate-300">
+            <form onSubmit={handleSubmitInfo} id="account-form" className="space-y-4 rounded-3xl bg-white p-5 shadow-lg ring-1 ring-slate-100 sm:p-6">
               {/* Avatar */}
               <div className="flex flex-col items-center gap-4">
                 <div className="relative">
@@ -381,7 +383,7 @@ const AccountInfoPage = () => {
                   value={formData.full_name}
                   onChange={(e) => setFormData((prev) => ({ ...prev, full_name: e.target.value }))}
                   placeholder="Nhập họ và tên"
-                  className="w-full rounded-2xl border-2 border-slate-200 bg-white p-3.5 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
+                  className="w-full rounded-xl border-2 border-slate-200 bg-white p-3.5 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
                 />
               </div>
 
@@ -396,7 +398,7 @@ const AccountInfoPage = () => {
                   id="email"
                   value={userEmail}
                   disabled
-                  className="w-full rounded-2xl border-2 border-slate-200 bg-slate-50 p-3.5 text-sm text-slate-500 sm:p-4"
+                  className="w-full rounded-xl border-2 border-slate-200 bg-slate-50 p-3.5 text-sm text-slate-500 sm:p-4"
                 />
                 <p className="mt-1 text-xs text-slate-400">Email không thể thay đổi</p>
               </div>
@@ -413,7 +415,7 @@ const AccountInfoPage = () => {
                   value={formData.phone}
                   onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
                   placeholder="Nhập số điện thoại"
-                  className="w-full rounded-2xl border-2 border-slate-200 bg-white p-3.5 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
+                  className="w-full rounded-xl border-2 border-slate-200 bg-white p-3.5 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
                 />
               </div>
 
@@ -427,13 +429,13 @@ const AccountInfoPage = () => {
                   id="date_of_birth"
                   value={formData.date_of_birth}
                   onChange={(e) => setFormData((prev) => ({ ...prev, date_of_birth: e.target.value }))}
-                  className="w-full rounded-2xl border-2 border-slate-200 bg-white p-3.5 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
+                  className="w-full rounded-xl border-2 border-slate-200 bg-white p-3.5 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
                 />
               </div>
 
             </form>
           ) : (
-            <form onSubmit={handleSubmitPassword} id="password-form" className="space-y-4 rounded-3xl bg-white p-5 shadow-md sm:p-6 border border-slate-300">
+            <form onSubmit={handleSubmitPassword} id="password-form" className="space-y-4 rounded-3xl bg-white p-5 shadow-lg ring-1 ring-slate-100 sm:p-6">
               {/* Current Password */}
               <div>
                 <label htmlFor="currentPassword" className="mb-2 block text-xs font-semibold text-slate-700 sm:text-sm">
@@ -447,7 +449,7 @@ const AccountInfoPage = () => {
                     value={passwordData.currentPassword}
                     onChange={(e) => setPasswordData((prev) => ({ ...prev, currentPassword: e.target.value }))}
                     placeholder="Nhập mật khẩu hiện tại"
-                    className="w-full rounded-2xl border-2 border-slate-200 bg-white p-3.5 pr-12 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
+                    className="w-full rounded-xl border-2 border-slate-200 bg-white p-3.5 pr-12 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
                     required
                   />
                   <button
@@ -472,7 +474,7 @@ const AccountInfoPage = () => {
                     value={passwordData.newPassword}
                     onChange={(e) => setPasswordData((prev) => ({ ...prev, newPassword: e.target.value }))}
                     placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)"
-                    className="w-full rounded-2xl border-2 border-slate-200 bg-white p-3.5 pr-12 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
+                    className="w-full rounded-xl border-2 border-slate-200 bg-white p-3.5 pr-12 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
                     required
                     minLength={6}
                   />
@@ -498,7 +500,7 @@ const AccountInfoPage = () => {
                     value={passwordData.confirmPassword}
                     onChange={(e) => setPasswordData((prev) => ({ ...prev, confirmPassword: e.target.value }))}
                     placeholder="Nhập lại mật khẩu mới"
-                    className="w-full rounded-2xl border-2 border-slate-200 bg-white p-3.5 pr-12 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
+                    className="w-full rounded-xl border-2 border-slate-200 bg-white p-3.5 pr-12 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
                     required
                     minLength={6}
                   />
@@ -521,7 +523,7 @@ const AccountInfoPage = () => {
       {activeTab === 'info' ? (
         <ModalFooterButtons
           onCancel={() => navigate('/settings')}
-          onConfirm={() => { }}
+          onConfirm={() => {}}
           confirmText={isSubmitting ? (isAvatarUploading ? 'Đang tải ảnh...' : 'Đang lưu...') : 'Lưu thay đổi'}
           isSubmitting={isSubmitting}
           disabled={isSubmitting || isLoading || isAvatarProcessing}
@@ -532,7 +534,7 @@ const AccountInfoPage = () => {
       ) : (
         <ModalFooterButtons
           onCancel={() => navigate('/settings')}
-          onConfirm={() => { }}
+          onConfirm={() => {}}
           confirmText={isSubmitting ? 'Đang đổi...' : 'Đổi mật khẩu'}
           isSubmitting={isSubmitting}
           disabled={isSubmitting}

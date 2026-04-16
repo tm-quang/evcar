@@ -155,7 +155,7 @@ export default defineConfig({
   server: process.env.NODE_ENV === 'development' ? (() => {
     const baseConfig = {
       host: '192.168.1.200',
-      port: 3200,
+      port: 3100,
     }
 
     // Enable HTTPS only if VITE_USE_HTTPS is set to 'true'

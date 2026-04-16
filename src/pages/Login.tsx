@@ -10,14 +10,14 @@ export const LoginPage = () => {
   const { refresh } = useSupabaseHealth()
   const navigate = useNavigate()
   const location = useLocation()
-  
+
   // Get the page user was trying to access before login
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard'
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/ev'
 
   return (
     <AuroraBackground>
       <div className="flex min-h-full w-full flex-col items-center justify-between gap-3">
-        <div className="flex w-full flex-shrink-0 flex-col items-center gap-4 sm:gap-6 pt-20 sm:pt-16 md:pt-20">
+        <div className="flex w-full flex-shrink-0 flex-col items-center gap-4 sm:gap-6 pt-14 sm:pt-16 md:pt-20">
           <BrandBadge />
 
           <div className="text-center mt-2 sm:mt-4">

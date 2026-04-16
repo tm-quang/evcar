@@ -16,38 +16,38 @@ type NotificationPreference = {
   enabled: boolean
 }
 
-const STORAGE_KEY = 'ev_notification_preferences'
+const STORAGE_KEY = 'bofin_notification_preferences'
 
 const defaultPreferences: Record<string, boolean> = {
-  vehicleUpdates: true,
-  maintenance: true,
-  expenses: true,
-  charging: true,
+  push: true,
+  dailyDigest: false,
+  budgetAlert: true,
+  reminder: true,
 }
 
 const notificationSettings: Omit<NotificationPreference, 'enabled'>[] = [
   {
-    id: 'vehicleUpdates',
-    title: 'Cập nhật xe',
-    description: 'Nhận thông báo khi thêm, sửa hoặc xóa thông tin phương tiện.',
+    id: 'push',
+    title: 'Thông báo đẩy',
+    description: 'Nhận nhắc nhở thu chi, cảnh báo hạn mức khi vượt mức.',
     icon: <FaBell className="h-5 w-5" />,
   },
   {
-    id: 'maintenance',
-    title: 'Nhắc nhở bảo dưỡng',
-    description: 'Thông báo khi đến kỳ bảo dưỡng định kỳ theo số km hoặc ngày.',
+    id: 'dailyDigest',
+    title: 'Email tổng kết hàng ngày',
+    description: 'Tổng hợp thu chi, hạn mức còn lại gửi về email lúc 20:00.',
     icon: <FaMobileAlt className="h-5 w-5" />,
   },
   {
-    id: 'expenses',
-    title: 'Ghi nhận chi phí',
-    description: 'Thông báo xác nhận sau khi thêm các chi phí phát sinh cho xe.',
+    id: 'budgetAlert',
+    title: 'Cảnh báo vượt hạn mức',
+    description: 'Nhận thông báo khi chi tiêu gần đạt hoặc vượt hạn mức.',
     icon: <FaExclamationCircle className="h-5 w-5" />,
   },
   {
-    id: 'charging',
-    title: 'Cập nhật sạc điện',
-    description: 'Thông báo kết quả sau mỗi phiên sạc hoặc nạp nhiên liệu.',
+    id: 'reminder',
+    title: 'Nhắc nhở giao dịch định kỳ',
+    description: 'Nhắc nhở các khoản thu chi định kỳ (hóa đơn, lương, v.v.).',
     icon: <FaBell className="h-5 w-5" />,
   },
 ]

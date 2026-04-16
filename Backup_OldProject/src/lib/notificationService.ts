@@ -435,8 +435,8 @@ const sendNotificationViaSW = async (
   }
 
   await registration.showNotification(title, {
-    icon: '/EVGo-Logo.png',
-    badge: '/EVGo-Logo.png',
+    icon: '/bogin-logo.png',
+    badge: '/bogin-logo.png',
     ...options,
   })
 }
@@ -464,8 +464,8 @@ export const sendNotification = async (
     const swRegistration = getServiceWorkerRegistration()
     if (swRegistration && swRegistration.active) {
       await sendNotificationViaSW(title, {
-        icon: '/EVGo-Logo.png',
-        badge: '/EVGo-Logo.png',
+        icon: '/bogin-logo.png',
+        badge: '/bogin-logo.png',
         tag: 'reminder',
         requireInteraction: false,
         silent: false,
@@ -476,8 +476,8 @@ export const sendNotification = async (
 
     // Fallback to regular notification
     const notification = new Notification(title, {
-      icon: '/EVGo-Logo.png',
-      badge: '/EVGo-Logo.png',
+      icon: '/bogin-logo.png',
+      badge: '/bogin-logo.png',
       tag: 'reminder',
       requireInteraction: false,
       silent: false,
@@ -523,8 +523,8 @@ export const sendReminderNotification = async (
 
   await sendNotification(notificationTitle, {
     body: notificationBody,
-    icon: '/EVGo-Logo.png',
-    badge: '/EVGo-Logo.png',
+    icon: '/bogin-logo.png',
+    badge: '/bogin-logo.png',
   })
 }
 
@@ -534,8 +534,8 @@ export const sendReminderNotification = async (
 export const sendNoteNotification = async (title: string): Promise<void> => {
   await sendNotification('📝 Ghi chú', {
     body: title,
-    icon: '/EVGo-Logo.png',
-    badge: '/EVGo-Logo.png',
+    icon: '/bogin-logo.png',
+    badge: '/bogin-logo.png',
   })
 }
 

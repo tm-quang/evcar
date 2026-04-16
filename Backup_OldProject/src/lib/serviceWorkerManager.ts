@@ -117,6 +117,33 @@ export const checkRemindersAndNotify = async (): Promise<void> => {
   if (!serviceWorkerRegistration) {
     return
   }
+
+  try {
+    // Import reminder service
+    const { fetchReminders } = await import('./reminderService')
+    const reminders = await fetchReminders({
+      status: 'pending',
+      is_active: true,
+    })
+
+    // Send reminders to service worker for immediate check and storage
+    const activeWorker = serviceWorkerRegistration.active || await navigator.serviceWorker.ready.then(reg => reg.active)
+    if (activeWorker) {
+      // Store reminders for background checking
+      activeWorker.postMessage({
+        type: 'STORE_REMINDERS',
+        reminders,
+      })
+      
+      // Also check immediately
+      activeWorker.postMessage({
+        type: 'CHECK_REMINDERS',
+        reminders,
+      })
+    }
+  } catch (error) {
+    console.error('Error checking reminders:', error)
+  }
 }
 
 /**

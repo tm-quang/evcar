@@ -34,9 +34,9 @@ export const ProtectedRoute = ({
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
-  // If user is logged in but trying to access login/register, redirect to vehicles
+  // If user is logged in but trying to access login/register, redirect to dashboard
   if (user && (location.pathname === '/login' || location.pathname === '/register')) {
-    return <Navigate to="/ev" replace />
+    return <Navigate to="/dashboard" replace />
   }
 
   return <>{children}</>

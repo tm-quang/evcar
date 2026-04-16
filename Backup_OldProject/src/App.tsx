@@ -15,27 +15,40 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { queryClient, persister } from './lib/react-query'
 
-const DashboardPage = lazy(() => import('./pages/ev'))
+const DashboardPage = lazy(() => import('./pages/Dashboard'))
+const CategoriesPage = lazy(() => import('./pages/Categories'))
+const ReportsPage = lazy(() => import('./pages/Reports'))
 const SettingsPage = lazy(() => import('./pages/Settings'))
+const WalletsPage = lazy(() => import('./pages/Wallets'))
+const TransactionsPage = lazy(() => import('./pages/Transactions'))
+const BudgetsPage = lazy(() => import('./pages/Budgets'))
 const NotificationsPage = lazy(() => import('./pages/Notifications'))
+const NotesPlansPage = lazy(() => import('./pages/NotesPlans'))
+const ShoppingListPage = lazy(() => import('./pages/ShoppingList'))
+const AddTransactionPage = lazy(() => import('./pages/AddTransaction'))
+const VoiceToTextPage = lazy(() => import('./pages/VoiceToText'))
+const AddBudgetPage = lazy(() => import('./pages/AddBudget'))
 const LoginPage = lazy(() => import('./pages/Login'))
 const RegisterPage = lazy(() => import('./pages/Register'))
 const AccountInfoPage = lazy(() => import('./pages/AccountInfo'))
-const VehicleManagementPage = lazy(() => import('./pages/ev'))
-const AddEVPage = lazy(() => import('./pages/ev/AddEV'))
-const EditEVPage = lazy(() => import('./pages/ev/EditEV'))
-const VehicleListPage = lazy(() => import('./pages/ev/VehicleList'))
-const VehicleTripsPage = lazy(() => import('./pages/ev/VehicleTrips'))
-const VehicleChargingPage = lazy(() => import('./pages/ev/VehicleCharging'))
-const VehicleMaintenancePage = lazy(() => import('./pages/ev/VehicleMaintenance'))
-const VehicleExpensesPage = lazy(() => import('./pages/ev/VehicleExpenses'))
-const VehicleReportsPage = lazy(() => import('./pages/ev/VehicleReports'))
-const VehicleChargingHistoryPage = lazy(() => import('./pages/ev/VehicleChargingHistory'))
-const EVCalculatorPage = lazy(() => import('./pages/ev/EVCalculator'))
-
+const QRResultPage = lazy(() => import('./pages/QRResult'))
+const DebtManagerPage = lazy(() => import('./pages/DebtManager'))
+const VehicleManagementPage = lazy(() => import('./pages/vehicles'))
+const AddVehiclePage = lazy(() => import('./pages/vehicles/AddVehicle'))
+const EditVehiclePage = lazy(() => import('./pages/vehicles/EditVehicle'))
+const VehicleTripsPage = lazy(() => import('./pages/vehicles/VehicleTrips'))
+const VehicleFuelPage = lazy(() => import('./pages/vehicles/VehicleFuel'))
+const VehicleMaintenancePage = lazy(() => import('./pages/vehicles/VehicleMaintenance'))
+const VehicleExpensesPage = lazy(() => import('./pages/vehicles/VehicleExpenses'))
+const VehicleReportsPage = lazy(() => import('./pages/vehicles/VehicleReports'))
+const VehicleChargingHistoryPage = lazy(() => import('./pages/vehicles/VehicleChargingHistory'))
+const EVCalculatorPage = lazy(() => import('./pages/vehicles/EVCalculator'))
+const ArchiveDashboardPage = lazy(() => import('./pages/Archive2025'))
+const SpendingJarsPage = lazy(() => import('./pages/SpendingJars'))
+const SpendingJarsReportPage = lazy(() => import('./pages/SpendingJarsReport'))
 
 const PageFallback = () => {
-  const { value: splashLogo } = useSystemSetting('app_splash_logo', '/EVGo-Logo.png')
+  const { value: splashLogo } = useSystemSetting('app_splash_logo', '/logo-nontext.png')
 
   return (
     <div className="flex h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 px-6">
@@ -53,8 +66,8 @@ const PageFallback = () => {
             style={{ animationDelay: '0.3s' }}
           />
           <img
-            src={splashLogo || '/EVGo-Logo.png'}
-            alt="EVGo logo"
+            src={splashLogo || '/logo-nontext.png'}
+            alt="BO.fin logo"
             className="relative h-32 w-32 animate-[scalePulse_3s_ease-in-out_infinite]"
           />
         </div>
@@ -142,10 +155,90 @@ function AppContent() {
               }
             />
             <Route
+              path="/categories"
+              element={
+                <ProtectedRoute>
+                  <CategoriesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports"
+              element={
+                <ProtectedRoute>
+                  <ReportsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/settings"
               element={
                 <ProtectedRoute>
                   <SettingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/archive"
+              element={
+                <ProtectedRoute>
+                  <ArchiveDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/wallets"
+              element={
+                <ProtectedRoute>
+                  <WalletsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/transactions"
+              element={
+                <ProtectedRoute>
+                  <TransactionsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/budgets"
+              element={
+                <ProtectedRoute>
+                  <BudgetsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reminders"
+              element={
+                <ProtectedRoute>
+                  <NotesPlansPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/notes-plans"
+              element={
+                <ProtectedRoute>
+                  <NotesPlansPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/shopping-list"
+              element={
+                <ProtectedRoute>
+                  <ShoppingListPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/debts"
+              element={
+                <ProtectedRoute>
+                  <DebtManagerPage />
                 </ProtectedRoute>
               }
             />
@@ -157,7 +250,46 @@ function AppContent() {
                 </ProtectedRoute>
               }
             />
-
+            <Route
+              path="/tasks"
+              element={
+                <ProtectedRoute>
+                  <NotesPlansPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/add-transaction"
+              element={
+                <ProtectedRoute>
+                  <AddTransactionPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/add-budget"
+              element={
+                <ProtectedRoute>
+                  <AddBudgetPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/qr-result"
+              element={
+                <ProtectedRoute>
+                  <QRResultPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/voice-to-text"
+              element={
+                <ProtectedRoute>
+                  <VoiceToTextPage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/account-info"
               element={
@@ -167,7 +299,7 @@ function AppContent() {
               }
             />
             <Route
-              path="/ev"
+              path="/vehicles"
               element={
                 <ProtectedRoute>
                   <VehicleManagementPage />
@@ -175,31 +307,23 @@ function AppContent() {
               }
             />
             <Route
-              path="/ev/list"
+              path="/vehicles/add"
               element={
                 <ProtectedRoute>
-                  <VehicleListPage />
+                  <AddVehiclePage />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/ev/add"
+              path="/vehicles/edit/:id"
               element={
                 <ProtectedRoute>
-                  <AddEVPage />
+                  <EditVehiclePage />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/ev/edit/:id"
-              element={
-                <ProtectedRoute>
-                  <EditEVPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ev/trips"
+              path="/vehicles/trips"
               element={
                 <ProtectedRoute>
                   <VehicleTripsPage />
@@ -207,15 +331,15 @@ function AppContent() {
               }
             />
             <Route
-              path="/ev/charging"
+              path="/vehicles/fuel"
               element={
                 <ProtectedRoute>
-                  <VehicleChargingPage />
+                  <VehicleFuelPage />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/ev/maintenance"
+              path="/vehicles/maintenance"
               element={
                 <ProtectedRoute>
                   <VehicleMaintenancePage />
@@ -223,7 +347,7 @@ function AppContent() {
               }
             />
             <Route
-              path="/ev/expenses"
+              path="/vehicles/expenses"
               element={
                 <ProtectedRoute>
                   <VehicleExpensesPage />
@@ -231,7 +355,7 @@ function AppContent() {
               }
             />
             <Route
-              path="/ev/reports"
+              path="/vehicles/reports"
               element={
                 <ProtectedRoute>
                   <VehicleReportsPage />
@@ -239,7 +363,7 @@ function AppContent() {
               }
             />
             <Route
-              path="/ev/history"
+              path="/vehicles/charging-history"
               element={
                 <ProtectedRoute>
                   <VehicleChargingHistoryPage />
@@ -247,14 +371,29 @@ function AppContent() {
               }
             />
             <Route
-              path="/ev/calculator"
+              path="/vehicles/calculator"
               element={
                 <ProtectedRoute>
                   <EVCalculatorPage />
                 </ProtectedRoute>
               }
             />
-
+            <Route
+              path="/spending-jars"
+              element={
+                <ProtectedRoute>
+                  <SpendingJarsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/spending-jars/report"
+              element={
+                <ProtectedRoute>
+                  <SpendingJarsReportPage />
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </Suspense>

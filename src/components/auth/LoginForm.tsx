@@ -4,6 +4,7 @@ import { FaEye, FaEyeSlash, FaLock, FaEnvelope } from 'react-icons/fa'
 import { getSupabaseClient } from '../../lib/supabaseClient'
 import { useNotification } from '../../contexts/notificationContext.helpers'
 import { translateAuthError } from '../../utils/authErrorTranslator'
+import { setAuthStateOnLogin } from '../../hooks/useAuthState'
 
 type LoginFormProps = {
   onSuccess?: (email: string) => void
@@ -70,6 +71,13 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
         throw new Error('Đăng nhập thất bại. Không nhận được session.')
       }
 
+      // Update auth singleton TRƯỚC KHI navigate để ProtectedRoute thấy user ngay
+      setAuthStateOnLogin(data.session.user, data.session)
+
+      // Populate user cache
+      const { setCachedUser } = await import('../../lib/userCache')
+      setCachedUser(data.session.user)
+
       // Save or remove email based on remember me checkbox
       if (rememberMe) {
         localStorage.setItem(REMEMBER_EMAIL_KEY, formData.email)
@@ -77,11 +85,8 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
         localStorage.removeItem(REMEMBER_EMAIL_KEY)
       }
 
-      // Set flag để đánh dấu đây là login mới (không phải refresh)
-      // useAuthState sẽ xử lý clear cache khi nhận được SIGNED_IN event
+      // Set flags
       sessionStorage.setItem('bofin_just_logged_in', 'true')
-
-      // Set flag to show welcome modal after navigation
       sessionStorage.setItem('showWelcomeModal', 'true')
 
       success('Đăng nhập thành công!')

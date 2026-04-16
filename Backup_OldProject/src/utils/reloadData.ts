@@ -5,7 +5,7 @@
 
 
 import { clearUserCache } from '../lib/userCache'
-
+import { clearPreloadTimestamp } from '../lib/dataPreloader'
 import { resetSupabaseClient } from '../lib/supabaseClient'
 
 /**
@@ -33,7 +33,8 @@ export const clearAllCacheAndState = async (
       clearUserCache()
     }
 
-
+    // 3. Clear preload timestamp
+    await clearPreloadTimestamp()
 
     // 4. Reset Supabase client - CHỈ khi được yêu cầu (thường là khi logout hoặc debug)
     if (shouldResetClient) {
