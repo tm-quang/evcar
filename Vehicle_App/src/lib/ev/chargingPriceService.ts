@@ -17,7 +17,7 @@ const DEFAULT_PRICES: Record<FuelType, number> = {
     petrol_a95: 25000,
     petrol_e5: 23000,
     diesel: 21000,
-    electric: 3000,
+    electric: 3858, // Default EV price
 }
 
 /**
@@ -191,11 +191,13 @@ export async function initializeDefaultPrices(): Promise<void> {
         throw new Error('Bạn cần đăng nhập.')
     }
 
-    const records = Object.entries(DEFAULT_PRICES).map(([fuelType, price]) => ({
-        user_id: user.id,
-        fuel_type: fuelType as FuelType,
-        price: price,
-    }))
+    const records = [
+        {
+            user_id: user.id,
+            fuel_type: 'electric' as FuelType,
+            price: DEFAULT_PRICES.electric,
+        }
+    ]
 
     const { error } = await supabase
         .from('fuel_price_settings')

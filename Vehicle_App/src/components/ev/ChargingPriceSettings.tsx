@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { X, Save, DollarSign } from 'lucide-react'
-import { getAllFuelPrices, updateAllFuelPrices, type FuelType, getElectricDiscountSettings, setElectricDiscountSettings } from '../../lib/ev/chargingPriceService'
+import { X, Save, DollarSign, Gift } from 'lucide-react'
+import { getAllFuelPrices, updateFuelPrice, type FuelType, getElectricDiscountSettings, setElectricDiscountSettings } from '../../lib/ev/chargingPriceService'
 import { useNotification } from '../../contexts/notificationContext.helpers'
 
 interface ChargingPriceSettingsProps {
@@ -27,10 +27,7 @@ export function ChargingPriceSettings({ isOpen, onClose, onSave }: ChargingPrice
     const { success, error: showError } = useNotification()
     const [loading, setLoading] = useState(false)
     const [prices, setPrices] = useState<Record<FuelType, number>>({
-        petrol_a95: 25000,
-        petrol_e5: 23000,
-        diesel: 21000,
-        electric: 3000,
+        electric: 3858,
     })
     const [discountMode, setDiscountMode] = useState<'pct' | 'vnd'>('vnd')
     const [discountValue, setDiscountValue] = useState('')
@@ -72,13 +69,13 @@ export function ChargingPriceSettings({ isOpen, onClose, onSave }: ChargingPrice
         try {
             // Only update electricity price to database
             await updateFuelPrice('electric', prices.electric)
-            
+
             // Save discount settings
-            setElectricDiscountSettings({ 
-                mode: discountMode, 
-                value: discountValue.replace(/[^\d]/g, '') 
+            setElectricDiscountSettings({
+                mode: discountMode,
+                value: discountValue.replace(/[^\d]/g, '')
             })
-            
+
             success('Đã cập nhật cài đặt thành công!')
             onSave()
             onClose()
@@ -115,23 +112,29 @@ export function ChargingPriceSettings({ isOpen, onClose, onSave }: ChargingPrice
 
                     {/* Điện Section */}
                     <div>
-                        <h4 className="text-sm font-semibold text-blue-600 mb-3">Đơn giá điện</h4>
-                        <div className="flex items-center gap-3">
-                            <label className="flex-1 text-sm font-medium text-slate-700">
-                                {FUEL_TYPE_LABELS.electric}
-                            </label>
-                            <div className="relative flex-1">
-                                <input
-                                    type="number"
-                                    value={prices.electric}
-                                    onChange={(e) => handlePriceChange('electric', e.target.value)}
-                                    className="w-full rounded-lg border border-slate-300 px-3 py-2 pr-16 text-sm text-right"
-                                    min="0"
-                                    step="100"
-                                />
-                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">
-                                    {FUEL_TYPE_UNITS.electric}
-                                </span>
+                        <div className="flex items-center justify-between mb-3">
+                            <h4 className="text-sm font-semibold text-blue-600">Đơn giá điện năng</h4>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Thiết lập chung</span>
+                        </div>
+                        <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-sm transition-all hover:bg-white hover:border-blue-200">
+                            <div className="flex-1">
+                                <label className="text-xs font-bold text-slate-500 mb-1 block">
+                                    Đơn giá (VNĐ)
+                                </label>
+                                <div className="relative group">
+                                    <input
+                                        type="number"
+                                        value={prices.electric}
+                                        onChange={(e) => handlePriceChange('electric', e.target.value)}
+                                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-16 text-lg font-black text-slate-800 transition-all focus:border-blue-400 focus:outline-none focus:ring-4 focus:ring-blue-50"
+                                        min="0"
+                                        step="100"
+                                        placeholder="0"
+                                    />
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
+                                        đ/kWh
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -145,21 +148,27 @@ export function ChargingPriceSettings({ isOpen, onClose, onSave }: ChargingPrice
                 </div>
 
                 {/* Electric Discount Section */}
-                <div className="mb-6 border-t border-slate-100 pt-5">
-                    <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-sm font-semibold text-red-600">Ưu đãi giảm giá mặc định</h4>
-                        <div className="flex rounded-lg overflow-hidden border border-red-200">
+                <div className="mb-8 border-t border-slate-100 pt-6">
+                    <div className="mb-4 flex items-center justify-between">
+                        <div className="flex-1">
+                            <h4 className="text-sm font-bold text-red-600">Giảm giá & Ưu đãi mặc định</h4>
+                            <p className="text-[10px] text-slate-400 leading-tight mt-0.5 font-medium">Tự động áp dụng cho tất cả lần sạc mới</p>
+                        </div>
+                        <div className="flex rounded-xl overflow-hidden border-2 border-red-50 p-1 bg-red-50/50">
                             <button
                                 onClick={() => { setDiscountMode('pct'); setDiscountValue('') }}
-                                className={`px-2.5 py-1 text-xs font-bold transition-colors ${discountMode === 'pct' ? 'bg-red-500 text-white' : 'bg-white text-slate-500 hover:bg-red-50'
+                                className={`px-4 py-1.5 text-xs font-black rounded-lg transition-all duration-300 ${discountMode === 'pct' ? 'bg-red-500 text-white shadow-md' : 'text-slate-500 hover:text-red-500'
                                     }`}>%</button>
                             <button
                                 onClick={() => { setDiscountMode('vnd'); setDiscountValue('') }}
-                                className={`px-2.5 py-1 text-xs font-bold transition-colors ${discountMode === 'vnd' ? 'bg-red-500 text-white' : 'bg-white text-slate-500 hover:bg-red-50'
-                                    }`}>đ</button>
+                                className={`px-4 py-1.5 text-xs font-black rounded-lg transition-all duration-300 ${discountMode === 'vnd' ? 'bg-red-500 text-white shadow-md' : 'text-slate-500 hover:text-red-500'
+                                    }`}>VNĐ</button>
                         </div>
                     </div>
-                    <div className="relative">
+                    <div className="relative group">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-red-500">
+                            <Gift className="h-4 w-4" />
+                        </div>
                         <input
                             type="text"
                             value={discountMode === 'vnd'
@@ -174,11 +183,11 @@ export function ChargingPriceSettings({ isOpen, onClose, onSave }: ChargingPrice
                                     setDiscountValue(raw)
                                 }
                             }}
-                            className="w-full rounded-lg border border-red-200 px-3 py-2.5 pr-10 text-sm font-medium focus:border-red-400 outline-none"
-                            placeholder={discountMode === 'pct' ? 'Nhập % khuyến mãi mặc định (VD: 50)' : 'Số tiền giảm mặc định'}
+                            className="w-full rounded-2xl border-2 border-red-50 bg-red-50/20 px-4 py-3.5 pl-10 pr-12 text-lg font-black text-red-600 transition-all focus:border-red-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-red-50"
+                            placeholder={discountMode === 'pct' ? 'Ví dụ: 50' : 'Số tiền mặc định'}
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-red-500">
-                            {discountMode === 'pct' ? '%' : 'đ'}
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-black text-red-400">
+                            {discountMode === 'pct' ? '%' : 'VNĐ'}
                         </span>
                     </div>
                 </div>
