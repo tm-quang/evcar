@@ -149,7 +149,7 @@ export const WelcomeModal = ({ isOpen, onClose }: WelcomeModalProps) => {
               <div className="absolute inset-0 animate-ping rounded-full bg-sky-400/20" />
               <img
                 src="/bogin-logo.png"
-                alt="BO.fin Logo"
+                alt="Drivo Logo"
                 className="relative h-20 w-20 object-contain drop-shadow-lg sm:h-24 sm:w-24"
               />
             </div>
@@ -161,7 +161,7 @@ export const WelcomeModal = ({ isOpen, onClose }: WelcomeModalProps) => {
             <div className="mb-2 flex items-center justify-center gap-2">
               <FaStar className="h-5 w-5 text-amber-400" />
               <h2 className="text-2xl font-bold bg-gradient-to-r from-sky-600 to-indigo-600 bg-clip-text text-transparent sm:text-3xl">
-                Chào mừng đến với BO.fin
+                Chào mừng đến với Drivo
               </h2>
               <FaStar className="h-5 w-5 text-amber-400" />
             </div>
@@ -174,7 +174,7 @@ export const WelcomeModal = ({ isOpen, onClose }: WelcomeModalProps) => {
           <div className={`mb-6 w-full text-center transition-all duration-500 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
             }`}>
             <p className="text-sm leading-relaxed text-slate-600">
-              Hãy để BO.fin giúp bạn theo dõi chi tiệu một cách hiệu quả nhất.
+              Hãy để Drivo giúp bạn quản lý chi tiêu một cách hiệu quả nhất.
             </p>
           </div>
 

@@ -1,0 +1,228 @@
+import { getSupabaseClient } from '../supabaseClient'
+import { getCachedUser } from '../userCache'
+
+export type FuelType = 'petrol_a95' | 'petrol_e5' | 'diesel' | 'electric'
+
+export type FuelPriceSetting = {
+    id: string
+    user_id: string
+    fuel_type: FuelType
+    price: number
+    created_at: string
+    updated_at: string
+}
+
+// Default prices when no settings found
+const DEFAULT_PRICES: Record<FuelType, number> = {
+    petrol_a95: 25000,
+    petrol_e5: 23000,
+    diesel: 21000,
+    electric: 3000,
+}
+
+/**
+ * Get fuel price for a specific fuel type
+ * Returns user's saved price or default price
+ */
+export async function getFuelPrice(fuelType: FuelType): Promise<number> {
+    try {
+        const supabase = getSupabaseClient()
+        const user = await getCachedUser()
+
+        if (!user) {
+            return DEFAULT_PRICES[fuelType]
+        }
+
+        const { data, error } = await supabase
+            .from('fuel_price_settings')
+            .select('price')
+            .eq('user_id', user.id)
+            .eq('fuel_type', fuelType)
+            .maybeSingle() // Use maybeSingle instead of single to avoid 406
+
+        if (error) {
+            console.error('Error fetching fuel price:', error)
+            return DEFAULT_PRICES[fuelType]
+        }
+
+        // Return saved price or default
+        return data?.price || DEFAULT_PRICES[fuelType]
+    } catch (error) {
+        console.error('Error getting fuel price:', error)
+        return DEFAULT_PRICES[fuelType]
+    }
+}
+
+/**
+ * Get all fuel prices for current user
+ * Returns object with all fuel types and their prices
+ */
+export async function getAllFuelPrices(): Promise<Record<FuelType, number>> {
+    try {
+        const supabase = getSupabaseClient()
+        const user = await getCachedUser()
+
+        if (!user) {
+            return DEFAULT_PRICES
+        }
+
+        const { data, error } = await supabase
+            .from('fuel_price_settings')
+            .select('fuel_type, price')
+            .eq('user_id', user.id)
+
+        if (error || !data) {
+            return DEFAULT_PRICES
+        }
+
+        // Merge with defaults (in case some types are missing)
+        const prices = { ...DEFAULT_PRICES }
+        data.forEach((item) => {
+            prices[item.fuel_type as FuelType] = item.price
+        })
+
+        return prices
+    } catch (error) {
+        console.error('Error getting all fuel prices:', error)
+        return DEFAULT_PRICES
+    }
+}
+
+/**
+ * Update fuel price for a specific fuel type
+ * Uses UPSERT to insert or update
+ */
+export async function updateFuelPrice(
+    fuelType: FuelType,
+    price: number
+): Promise<void> {
+    const supabase = getSupabaseClient()
+    const user = await getCachedUser()
+
+    if (!user) {
+        throw new Error('Bạn cần đăng nhập để cập nhật giá.')
+    }
+
+    if (price <= 0) {
+        throw new Error('Giá phải lớn hơn 0.')
+    }
+
+    const { error } = await supabase
+        .from('fuel_price_settings')
+        .upsert(
+            {
+                user_id: user.id,
+                fuel_type: fuelType,
+                price: price,
+                updated_at: new Date().toISOString(),
+            },
+            {
+                onConflict: 'user_id,fuel_type',
+            }
+        )
+
+    if (error) {
+        console.error('Error updating fuel price:', error)
+        throw new Error('Không thể cập nhật giá. Vui lòng thử lại.')
+    }
+}
+
+/**
+ * Update multiple fuel prices at once
+ */
+export async function updateAllFuelPrices(
+    prices: Partial<Record<FuelType, number>>
+): Promise<void> {
+    const supabase = getSupabaseClient()
+    const user = await getCachedUser()
+
+    if (!user) {
+        throw new Error('Bạn cần đăng nhập để cập nhật giá.')
+    }
+
+    // Validate all prices
+    Object.entries(prices).forEach(([type, price]) => {
+        if (price !== undefined && price <= 0) {
+            throw new Error(`Giá ${type} phải lớn hơn 0.`)
+        }
+    })
+
+    // Create upsert records
+    const records = Object.entries(prices)
+        .filter(([, price]) => price !== undefined)
+        .map(([fuelType, price]) => ({
+            user_id: user.id,
+            fuel_type: fuelType as FuelType,
+            price: price!,
+            updated_at: new Date().toISOString(),
+        }))
+
+    if (records.length === 0) {
+        return
+    }
+
+    const { error } = await supabase
+        .from('fuel_price_settings')
+        .upsert(records, {
+            onConflict: 'user_id,fuel_type',
+        })
+
+    if (error) {
+        console.error('Error updating fuel prices:', error)
+        throw new Error('Không thể cập nhật giá. Vui lòng thử lại.')
+    }
+}
+
+/**
+ * Get default price for a fuel type
+ */
+export function getDefaultPrice(fuelType: FuelType): number {
+    return DEFAULT_PRICES[fuelType]
+}
+
+/**
+ * Initialize default prices for a new user
+ */
+export async function initializeDefaultPrices(): Promise<void> {
+    const supabase = getSupabaseClient()
+    const user = await getCachedUser()
+
+    if (!user) {
+        throw new Error('Bạn cần đăng nhập.')
+    }
+
+    const records = Object.entries(DEFAULT_PRICES).map(([fuelType, price]) => ({
+        user_id: user.id,
+        fuel_type: fuelType as FuelType,
+        price: price,
+    }))
+
+    const { error } = await supabase
+        .from('fuel_price_settings')
+        .upsert(records, {
+            onConflict: 'user_id,fuel_type',
+            ignoreDuplicates: true,
+        })
+
+    if (error) {
+        console.error('Error initializing default prices:', error)
+        throw new Error('Không thể khởi tạo giá mặc định.')
+    }
+}
+
+/**
+ * Get and set electric default discount settings in Local Storage
+ */
+export function getElectricDiscountSettings(): { mode: 'pct' | 'vnd'; value: string } {
+    try {
+        const stored = localStorage.getItem('BOFIN_ELECTRIC_DISCOUNT_PREFS')
+        return stored ? JSON.parse(stored) : { mode: 'vnd', value: '' }
+    } catch {
+        return { mode: 'vnd', value: '' }
+    }
+}
+
+export function setElectricDiscountSettings(prefs: { mode: 'pct' | 'vnd'; value: string }): void {
+    localStorage.setItem('BOFIN_ELECTRIC_DISCOUNT_PREFS', JSON.stringify(prefs))
+}
+

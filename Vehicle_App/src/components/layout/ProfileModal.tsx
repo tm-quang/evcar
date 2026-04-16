@@ -1,0 +1,177 @@
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
+import { useNavigate } from 'react-router-dom'
+import { FaTimes, FaCog, FaEyeSlash, FaMoon, FaSignOutAlt, FaShieldAlt } from 'react-icons/fa'
+import { getSupabaseClient } from '../../lib/supabaseClient'
+import { clearUserCache } from '../../lib/userCache'
+import { queryClient } from '../../lib/react-query'
+
+type ProfileModalProps = {
+    isOpen: boolean
+    onClose: () => void
+    userName: string
+    avatarUrl?: string
+    avatarText: string
+}
+
+export const ProfileModal = ({ isOpen, onClose, userName, avatarUrl, avatarText }: ProfileModalProps) => {
+    const navigate = useNavigate()
+    const [isLoggingOut, setIsLoggingOut] = useState(false)
+    const [hideBalance, setHideBalance] = useState(false)
+    const [darkMode, setDarkMode] = useState(false)
+
+    // Initialization from localStorage or other global states can be added here
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden'
+            return () => {
+                document.body.style.overflow = ''
+            }
+        }
+    }, [isOpen])
+
+    if (!isOpen) return null
+
+    const handleLogout = async () => {
+        setIsLoggingOut(true)
+        try {
+            const supabase = getSupabaseClient()
+            await supabase.auth.signOut({ scope: 'local' })
+            clearUserCache()
+            queryClient.clear()
+            window.location.href = '/login'
+        } catch (error) {
+            console.error('Error logging out:', error)
+            setIsLoggingOut(false)
+        }
+    }
+
+    const toggleHideBalance = () => {
+        setHideBalance(!hideBalance)
+        // Here we can save to local storage: localStorage.setItem('hideBalance', String(!hideBalance))
+    }
+
+    const toggleDarkMode = () => {
+        setDarkMode(!darkMode)
+        // Dark mode state handling
+    }
+
+    const modalContent = (
+        <>
+            <div
+                className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm transition-opacity animate-in fade-in duration-300 touch-none"
+                onClick={onClose}
+            />
+            <div className="fixed inset-x-0 bottom-0 z-[100] flex flex-col bg-white rounded-t-3xl shadow-2xl animate-in slide-in-from-bottom duration-300 pointer-events-auto max-h-[90vh]">
+                {/* Handle bar for dragging (visual only) */}
+                <div className="flex shrink-0 justify-center pt-3 pb-1" onClick={onClose}>
+                    <div className="h-1.5 w-12 rounded-full bg-slate-200" />
+                </div>
+
+                <div className="px-6 pb-8 pt-4 overflow-y-auto overscroll-contain flex-1 min-h-0">
+                    <div className="flex items-start justify-between mb-8 shrink-0">
+                        <div className="flex items-center gap-4">
+                            {avatarUrl ? (
+                                <img
+                                    src={avatarUrl}
+                                    alt={userName}
+                                    className="h-16 w-16 rounded-full object-cover ring-4 ring-sky-50 shadow-lg"
+                                />
+                            ) : (
+                                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-blue-600 text-2xl font-bold text-white shadow-lg ring-4 ring-sky-50">
+                                    {avatarText}
+                                </div>
+                            )}
+                            <div>
+                                <h3 className="text-xl font-bold tracking-tight text-slate-800">{userName}</h3>
+                                <div className="flex items-center gap-1.5 mt-1">
+                                    <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-50 text-[10px] font-bold text-red-600 border border-red-100">
+                                        <FaShieldAlt className="h-2.5 w-2.5" /> Admin
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <button
+                            onClick={onClose}
+                            className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"
+                        >
+                            <FaTimes className="h-4 w-4" />
+                        </button>
+                    </div>
+
+                    <div className="space-y-2">
+                        <div className="mb-4">
+                            <p className="px-2 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tùy chọn</p>
+
+                            <button
+                                onClick={toggleHideBalance}
+                                className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-100 transition-all active:scale-[0.98]"
+                            >
+                                <div className="flex items-center gap-3 text-slate-700">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-500">
+                                        <FaEyeSlash className="h-5 w-5" />
+                                    </div>
+                                    <span className="font-semibold">Chế độ riêng tư</span>
+                                </div>
+                                <div className={`w-11 h-6 rounded-full transition-colors flex items-center px-1 ${hideBalance ? 'bg-orange-500' : 'bg-slate-200'}`}>
+                                    <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${hideBalance ? 'translate-x-5' : 'translate-x-0'}`} />
+                                </div>
+                            </button>
+
+                            <button
+                                onClick={toggleDarkMode}
+                                className="w-full flex items-center justify-between p-3.5 mt-2 rounded-2xl bg-white hover:bg-slate-50 border border-slate-100 transition-all active:scale-[0.98]"
+                            >
+                                <div className="flex items-center gap-3 text-slate-700">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-500">
+                                        <FaMoon className="h-5 w-5" />
+                                    </div>
+                                    <span className="font-semibold">Chế độ ban đêm</span>
+                                </div>
+                                <div className={`w-11 h-6 rounded-full transition-colors flex items-center px-1 ${darkMode ? 'bg-indigo-500' : 'bg-slate-200'}`}>
+                                    <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${darkMode ? 'translate-x-5' : 'translate-x-0'}`} />
+                                </div>
+                            </button>
+                        </div>
+
+                        <div className="mb-4">
+                            <p className="px-2 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Hệ thống</p>
+
+                            <button
+                                onClick={() => {
+                                    onClose()
+                                    navigate('/settings')
+                                }}
+                                className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-100 transition-all active:scale-[0.98] text-slate-700 font-semibold"
+                            >
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+                                    <FaCog className="h-5 w-5" />
+                                </div>
+                                Cài đặt ứng dụng
+                            </button>
+                        </div>
+
+                        <div className="pt-2">
+                            <button
+                                onClick={handleLogout}
+                                disabled={isLoggingOut}
+                                className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl border-2 border-red-100 bg-red-50 text-red-600 font-bold hover:bg-red-100 hover:border-red-200 transition-all active:scale-[0.98] disabled:opacity-50"
+                            >
+                                {isLoggingOut ? (
+                                    <span className="h-5 w-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                    <>
+                                        <FaSignOutAlt className="h-5 w-5" /> Đăng xuất khỏi thiết bị
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    )
+
+    return createPortal(modalContent, document.body)
+}
+
