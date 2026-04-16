@@ -9,26 +9,13 @@ interface ChargingPriceSettingsProps {
     onSave: () => void
 }
 
-const FUEL_TYPE_LABELS: Record<FuelType, string> = {
-    petrol_a95: 'Xăng A95',
-    petrol_e5: 'Xăng E5',
-    diesel: 'Dầu Diesel',
-    electric: 'Giá điện mặc định',
-}
-
-const FUEL_TYPE_UNITS: Record<FuelType, string> = {
-    petrol_a95: 'đ/lít',
-    petrol_e5: 'đ/lít',
-    diesel: 'đ/lít',
-    electric: 'đ/kWh',
-}
 
 export function ChargingPriceSettings({ isOpen, onClose, onSave }: ChargingPriceSettingsProps) {
     const { success, error: showError } = useNotification()
     const [loading, setLoading] = useState(false)
     const [prices, setPrices] = useState<Record<FuelType, number>>({
         electric: 3858,
-    })
+    } as Record<FuelType, number>)
     const [discountMode, setDiscountMode] = useState<'pct' | 'vnd'>('vnd')
     const [discountValue, setDiscountValue] = useState('')
 
