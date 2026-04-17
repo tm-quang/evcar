@@ -23,7 +23,7 @@ type TabItem = {
 
 const tabs: TabItem[] = [
   { id: 'home', label: 'Trang chủ', icon: LuHouse, path: '/ev' },
-  { id: 'fuel', label: 'Sạc điện', icon: LuZap, path: '/ev/charging' },
+  { id: 'fuel', label: 'Sạc pin', icon: LuZap, path: '/ev/charging' },
   { id: 'add', label: '', icon: LuClipboardPen, prominent: true },
   { id: 'expenses', label: 'Chi phí', icon: LuReceipt, path: '/ev/expenses' },
   { id: 'settings', label: 'Cài đặt', icon: LuSettings, path: '/settings' },

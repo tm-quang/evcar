@@ -417,66 +417,70 @@ export default function VehicleManagement() {
                                 <section>
                                     <div className="grid grid-cols-2 gap-3">
                                         {/* Total Range / Distance */}
-                                        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 shadow-md transition-all hover:shadow-md flex flex-col justify-between h-[150px] border border-slate-300">
-                                            <div className="absolute -left-6 -bottom-6 h-36 w-36 rounded-full bg-blue-500/30 blur-2xl" />
+                                        <div className="group relative overflow-hidden rounded-[36px] bg-gradient-to-br from-blue-600 to-indigo-700 p-5 shadow-xl shadow-blue-100 transition-all hover:scale-[1.02] flex flex-col justify-between h-[156px] border border-blue-400/20">
+                                            <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white opacity-10 blur-2xl" />
+                                            <div className="absolute -left-12 -bottom-12 h-40 w-40 rounded-full bg-blue-400 opacity-20 blur-3xl" />
+
                                             <div className="z-10 flex items-center gap-2">
-                                                <div className="rounded-3xl bg-blue-600 p-2 text-white">
+                                                <div className="rounded-2xl bg-white/20 backdrop-blur-md p-2 text-white border border-white/20">
                                                     <Gauge className="h-4 w-4" />
                                                 </div>
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Số Odo hiện tại</span>
+                                                <span className="text-[11px] font-black uppercase tracking-widest text-white/80">Odo hiện tại</span>
                                             </div>
                                             <div className="z-10 mt-2">
                                                 <div className="flex items-center gap-1">
-                                                    <p className="text-3xl font-black text-slate-800 leading-none">
+                                                    <p className="text-[32px] font-black text-white leading-none tracking-tighter">
                                                         {selectedVehicle.current_odometer.toLocaleString()}
                                                     </p>
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setNewOdo(''); setShowOdoModal(true) }}
-                                                        className="p-1 text-slate-400 hover:text-blue-600 transition-colors"
+                                                        className="p-1 text-white/50 hover:text-white transition-colors"
                                                     >
                                                         <Edit className="h-3 w-3" />
                                                     </button>
                                                 </div>
-                                                <p className="mt-1 text-xs font-bold text-blue-600 uppercase tracking-tighter">Tổng km</p>
+                                                <p className="mt-1 text-[11px] font-bold text-blue-100 uppercase tracking-widest">Km đã đi</p>
                                             </div>
                                         </div>
 
                                         {/* Energy Consumption / Charging */}
-                                        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 shadow-md transition-all hover:-translate-y-1 flex flex-col justify-between h-[150px] border border-slate-300">
-                                            <div className="absolute -left-6 -bottom-6 h-36 w-36 rounded-full bg-emerald-500/30 blur-2xl" />
+                                        <div className="group relative overflow-hidden rounded-[32px] bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 p-5 shadow-xl shadow-emerald-100 transition-all hover:scale-[1.02] flex flex-col justify-between h-[156px] border border-emerald-400/20">
+                                            <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white opacity-10 blur-2xl" />
+                                            <div className="absolute -left-12 -bottom-12 h-40 w-40 rounded-full bg-emerald-300 opacity-20 blur-3xl" />
+
                                             <div className="z-10 flex items-center gap-2">
-                                                <div className="rounded-3xl bg-emerald-500 p-2 text-white">
+                                                <div className="rounded-2xl bg-white/20 backdrop-blur-md p-2 text-white border border-white/20">
                                                     <Zap className="h-4 w-4" />
                                                 </div>
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">KWh tháng này</span>
+                                                <span className="text-[11px] font-black uppercase tracking-widest text-white/80">KWh tháng này</span>
                                             </div>
                                             <div className="z-10 mt-2">
-                                                <p className="text-3xl font-black text-slate-800 leading-none">
+                                                <p className="text-[32px] font-black text-white leading-none tracking-tighter">
                                                     {isLoadingStats ? '...' : (stats?.totalKwh ? stats.totalKwh.toFixed(1) : '0')}
                                                 </p>
-                                                <p className="mt-1 text-xs font-bold text-emerald-600">KWH</p>
+                                                <p className="mt-1 text-[11px] font-bold text-emerald-50 uppercase tracking-widest">KWH đã sạc</p>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Middle Stats Row */}
                                     <div className="mt-3 grid grid-cols-2 gap-3">
-                                        <div className="rounded-3xl bg-white p-5 shadow-md flex items-center gap-3 h-[100px] border border-slate-300">
-                                            <div className="rounded-3xl bg-blue-50 p-2">
-                                                <Route className="h-5 w-5 text-blue-500" />
+                                        <div className="rounded-[28px] bg-white p-4 shadow-md flex items-center gap-4 transition-all hover:shadow-lg border border-slate-300 group h-[96px]">
+                                            <div className="rounded-2xl bg-blue-50 p-3 group-hover:bg-blue-600 transition-all duration-300">
+                                                <Route className="h-6 w-6 text-blue-600 group-hover:text-white" />
                                             </div>
                                             <div>
-                                                <p className="text-md font-black text-slate-800 leading-none">{stats?.totalTrips || 0}</p>
-                                                <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Lộ trình</p>
+                                                <p className="text-xl font-black text-slate-800 leading-none">{stats?.totalTrips || 0}</p>
+                                                <p className="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-widest">Lộ trình</p>
                                             </div>
                                         </div>
-                                        <div className="rounded-3xl bg-white p-5 shadow-md flex items-center gap-3 h-[100px] border border-slate-300">
-                                            <div className="rounded-3xl bg-emerald-100 p-2">
-                                                <BatteryCharging className="h-5 w-5 text-emerald-600" />
+                                        <div className="rounded-[28px] bg-white p-4 shadow-md flex items-center gap-4 transition-all hover:shadow-lg border border-slate-300 group h-[96px]">
+                                            <div className="rounded-2xl bg-emerald-50 p-3 group-hover:bg-emerald-600 transition-all duration-300">
+                                                <BatteryCharging className="h-6 w-6 text-emerald-600 group-hover:text-white" />
                                             </div>
                                             <div>
-                                                <p className="text-md font-black text-slate-800 leading-none">{stats?.totalChargeSessions || 0}</p>
-                                                <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Lần sạc tháng này</p>
+                                                <p className="text-xl font-black text-slate-800 leading-none">{stats?.totalChargeSessions || 0}</p>
+                                                <p className="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-widest">Lần sạc</p>
                                             </div>
                                         </div>
                                     </div>
@@ -504,7 +508,7 @@ export default function VehicleManagement() {
 
                                     <div className="p-6 grid grid-cols-1 gap-4">
                                         {[
-                                            { label: 'Sạc điện (kWh)', val: stats.totalFuelCost, icon: <Zap className="h-4 w-4 text-emerald-500" />, bg: 'bg-emerald-50' },
+                                            { label: 'Sạc pin (kWh)', val: stats.totalFuelCost, icon: <Zap className="h-4 w-4 text-emerald-500" />, bg: 'bg-emerald-50' },
                                             { label: 'Bảo dưỡng xe', val: stats.totalMaintenanceCost, icon: <Wrench className="h-4 w-4 text-amber-500" />, bg: 'bg-amber-50' },
                                             { label: 'Chi phí khác', val: stats.totalOtherExpenses, icon: <Receipt className="h-4 w-4 text-rose-500" />, bg: 'bg-rose-50' },
                                         ].map((item, idx) => (
@@ -561,13 +565,13 @@ export default function VehicleManagement() {
                             {selectedVehicle && (maintProgress || maintDateProgress || selectedVehicle.insurance_expiry_date || selectedVehicle.inspection_expiry_date) && (
                                 <section>
                                     <div className="mb-4 flex items-center justify-between px-1">
-                                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Thông tin bảo dưỡng & Bảo hiểm</h2>
+                                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">bảo dưỡng, Bảo hiểm, đăng kiểm</h2>
                                     </div>
 
                                     <div className="space-y-4">
                                         {/* EV Maintenance Progress */}
                                         {maintProgress && (
-                                            <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-100 to-white p-5 border border-slate-300 shadow-md transition-all hover:border-emerald-200">
+                                            <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-200 to-white p-5 border border-slate-300 shadow-md transition-all hover:border-emerald-200">
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-3">
                                                         <div className={`rounded-3xl p-2 ${maintProgress.isOverdue ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}`}>
@@ -675,7 +679,7 @@ export default function VehicleManagement() {
                                                 <Zap className="h-5 w-5" />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-black text-slate-800">Sạc điện</p>
+                                                <p className="text-sm font-black text-slate-800">Sạc pin</p>
                                                 <p className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase">Quản lý Pin & Sạc</p>
                                             </div>
                                         </button>

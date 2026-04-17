@@ -62,7 +62,7 @@ const SettingsPage = () => {
   const [isCalculatorModalOpen, setIsCalculatorModalOpen] = useState(false)
   const { success } = useNotification()
 
-  const [systemToggles, setSystemToggles] = useState<Record<string, boolean>>({
+  const [systemToggles] = useState<Record<string, boolean>>({
     darkMode: false,
     notifications: true,
     hapticFeedback: true,
@@ -215,8 +215,12 @@ const SettingsPage = () => {
 
               {/* Privacy/Shield */}
               <button
-                className="group flex flex-col items-center justify-center gap-3 rounded-3xl bg-white p-4 text-center shadow-md border border-slate-300 transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95"
+                onClick={() => success('Tính năng đang trong giai đoạn phát triển, sắp ra mắt!')}
+                className="relative group flex flex-col items-center justify-center gap-3 rounded-3xl bg-white p-4 text-center shadow-md border border-slate-300 transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95"
               >
+                <div className="absolute top-2 right-2 flex items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest text-white">
+                  Đang phát triển
+                </div>
                 <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-sky-50 text-sky-600 shadow-inner group-hover:scale-110 transition-transform">
                   <LuShield className="h-6 w-6" />
                 </div>
@@ -242,8 +246,12 @@ const SettingsPage = () => {
 
               {/* Advanced UI Settings */}
               <button
-                className="group flex flex-col items-center justify-center gap-3 rounded-3xl bg-white p-4 text-center shadow-md border border-slate-300 transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95"
+                onClick={() => success('Tính năng đang trong giai đoạn phát triển, sắp ra mắt!')}
+                className="relative group flex flex-col items-center justify-center gap-3 rounded-3xl bg-white p-4 text-center shadow-md border border-slate-300 transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95"
               >
+                <div className="absolute top-2 right-2 flex items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest text-white">
+                  Đang phát triển
+                </div>
                 <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-amber-50 text-amber-600 shadow-inner group-hover:scale-110 transition-transform">
                   <LuSettings2 className="h-6 w-6" />
                 </div>
@@ -255,8 +263,12 @@ const SettingsPage = () => {
 
               {/* Export Data */}
               <button
-                className="group flex flex-col items-center justify-center gap-3 rounded-3xl bg-white p-4 text-center shadow-md border border-slate-300 transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95"
+                onClick={() => success('Tính năng đang trong giai đoạn phát triển, sắp ra mắt!')}
+                className="relative group flex flex-col items-center justify-center gap-3 rounded-3xl bg-white p-4 text-center shadow-md border border-slate-300 transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95"
               >
+                <div className="absolute top-2 right-2 flex items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest text-white">
+                  Đang phát triển
+                </div>
                 <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-teal-50 text-teal-600 shadow-inner group-hover:scale-110 transition-transform">
                   <LuDownload className="h-6 w-6" />
                 </div>
@@ -283,7 +295,10 @@ const SettingsPage = () => {
                       {item.icon}
                     </div>
                     <div>
-                      <p className="font-bold text-slate-800">{item.title}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-slate-800">{item.title}</p>
+                        <span className="bg-red-500 text-white text-[6.5px] font-black uppercase px-1.5 py-0.5 rounded-full tracking-wider">Đang phát triển</span>
+                      </div>
                       <p className="text-xs text-slate-500">{item.description}</p>
                     </div>
                   </div>
@@ -292,12 +307,9 @@ const SettingsPage = () => {
                     <input
                       type="checkbox"
                       checked={systemToggles[item.id]}
-                      onChange={() =>
-                        setSystemToggles((prev) => ({
-                          ...prev,
-                          [item.id]: !prev[item.id],
-                        }))
-                      }
+                      onChange={() => {
+                        success('Tính năng đang trong giai đoạn phát triển, sắp ra mắt!')
+                      }}
                       className="peer sr-only"
                     />
                     <div className="peer h-6 w-11 rounded-full bg-slate-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white"></div>

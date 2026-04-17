@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Home, Settings, Receipt, Zap } from 'lucide-react'
+import { Home, Settings, LayoutList, Zap } from 'lucide-react'
 import { LuClipboardPen } from 'react-icons/lu'
 
 type VehicleFooterNavProps = {
@@ -67,7 +67,7 @@ export function VehicleFooterNav({
         },
         {
             id: 'fuel',
-            label: 'Sạc điện',
+            label: 'Sạc pin',
             icon: Zap,
             path: '/ev/charging',
         },
@@ -80,7 +80,7 @@ export function VehicleFooterNav({
         {
             id: 'expenses',
             label: 'Chi phí',
-            icon: Receipt,
+            icon: LayoutList,
             path: '/ev/expenses',
         },
         {
