@@ -8,7 +8,8 @@ import {
     fetchFuelLogs,
     fetchMaintenance,
     fetchExpenses,
-    getVehicleById
+    getVehicleById,
+    getMonthlyStats
 } from './vehicleService'
 
 
@@ -105,6 +106,15 @@ export function useVehicleExpenses(vehicleId: string | undefined) {
         queryKey: vehicleKeys.expenses(vehicleId || ''),
         queryFn: () => fetchExpenses(vehicleId),
         enabled: !!vehicleId,
+    })
+}
+
+export function useVehicleMonthlyStats(vehicleId: string | undefined, months = 6) {
+    return useQuery({
+        queryKey: [...vehicleKeys.stats(vehicleId || ''), 'monthly', months],
+        queryFn: () => getMonthlyStats(vehicleId!, months),
+        enabled: !!vehicleId,
+        staleTime: 1000 * 60 * 5, // 5 minutes
     })
 }
 

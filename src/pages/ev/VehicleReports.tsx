@@ -1,458 +1,507 @@
-import { useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import {
-    BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
-    XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
-} from 'recharts'
-import {
-    TrendingUp, TrendingDown, Fuel, Wrench,
-    Receipt, Car, Bike, Zap,
-    BatteryCharging, Minus, Award
+    BarChart3,
+    TrendingUp,
+    Zap,
+    Wrench,
+    Calendar,
+    Settings,
+    ArrowUpRight,
+    ArrowDownRight,
+    ChevronRight,
+    Info,
+    LayoutList,
+    Route,
+    Gauge
 } from 'lucide-react'
 import {
-    useVehicles, useVehicleTrips, useVehicleCharging,
-    useVehicleMaintenance, useVehicleExpenses, vehicleKeys
-} from '../../lib/ev/useVehicleQueries'
-import { useQuery } from '@tanstack/react-query'
-import { getMonthlyStats } from '../../lib/ev/vehicleService'
-import type { TripRecord } from '../../lib/ev/vehicleService'
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    Cell,
+    AreaChart,
+    Area,
+    PieChart,
+    Pie
+} from 'recharts'
+import { useVehicles, useVehicleStats, useVehicleMonthlyStats } from '../../lib/ev/useVehicleQueries'
+import { useVehicleStore } from '../../store/useVehicleStore'
 import HeaderBar from '../../components/layout/HeaderBar'
 import { VehicleFooterNav } from '../../components/ev/VehicleFooterNav'
-import { useVehicleStore } from '../../store/useVehicleStore'
 
-// ─── Meta helpers ─────────────────────────────────────────────────────────────
-const META_RE = /^\[TRIPMETA:([^\]]+)\]\n?/
-function parseMeta(notes?: string): Record<string, string> {
-    if (!notes) return {}
-    const m = notes.match(META_RE)
-    if (!m) return {}
-    return Object.fromEntries(m[1].split(',').map(e => {
-        const i = e.indexOf('='); return [e.slice(0, i), e.slice(i + 1)]
-    }))
-}
-function isInProgress(trip: TripRecord) { return parseMeta(trip.notes).status === 'in_progress' }
 
-const fmt = (v: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(v)
-const fmtK = (v: number) => v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M` : v >= 1_000 ? `${(v / 1_000).toFixed(0)}K` : String(Math.round(v))
+const formatNumber = (value: number, decimals = 0) =>
+    new Intl.NumberFormat('vi-VN', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+    }).format(value)
 
-const TRIP_TYPE_LABELS: Record<string, string> = {
-    work: 'Đi làm', business: 'Công tác', service: 'Dịch vụ',
-    leisure: 'Đi chơi', hometown: 'Về quê', other: 'Khác',
-}
-const TRIP_TYPE_COLORS: Record<string, string> = {
-    work: '#3b82f6', business: '#8b5cf6', service: '#14b8a6',
-    leisure: '#22c55e', hometown: '#f97316', other: '#94a3b8',
-}
-const EXPENSE_TYPE_LABELS: Record<string, string> = {
-    toll: 'Phí cầu đường', parking: 'Đỗ xe', insurance: 'Bảo hiểm',
-    inspection: 'Đăng kiểm', wash: 'Rửa xe', fine: 'Phạt', other: 'Khác',
+const compactFormat = (value: number) => {
+    if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`
+    if (value >= 1000) return `${(value / 1000).toFixed(0)}k`
+    return value.toString()
 }
 
-// ─── Custom tooltip ────────────────────────────────────────────────────────────
-function CurrencyTooltip({ active, payload, label }: any) {
-    if (!active || !payload?.length) return null
-    return (
-        <div className="rounded-xl bg-white shadow-xl border border-slate-100 px-3 py-2.5 min-w-[140px]">
-            <p className="text-xs font-bold text-slate-600 mb-1.5">{label}</p>
-            {payload.map((p: any) => (
-                <div key={p.dataKey} className="flex items-center justify-between gap-3 text-xs">
-                    <span className="flex items-center gap-1">
-                        <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
-                        {p.name}
-                    </span>
-                    <span className="font-bold" style={{ color: p.color }}>{fmtK(p.value)}đ</span>
-                </div>
-            ))}
-        </div>
-    )
-}
-
-// ─── Stat card ─────────────────────────────────────────────────────────────────
-function StatCard({ icon: Icon, label, value, sub, color, trend }: {
-    icon: React.ElementType; label: string; value: string; sub?: string
-    color: string; trend?: 'up' | 'down' | 'flat'
-}) {
-    return (
-        <div className="flex flex-col gap-2 rounded-2xl bg-white border border-slate-100 shadow-md p-4">
-            <div className="flex items-center justify-between">
-                <div className={`rounded-xl p-2.5 ${color}`}>
-                    <Icon className="h-5 w-5" />
-                </div>
-                {trend && (
-                    <div className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${trend === 'up' ? 'bg-red-50 text-red-600' : trend === 'down' ? 'bg-green-50 text-green-600' : 'bg-slate-50 text-slate-500'}`}>
-                        {trend === 'up' ? <TrendingUp className="h-3 w-3" /> : trend === 'down' ? <TrendingDown className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
-                        {trend === 'up' ? 'Tăng' : trend === 'down' ? 'Giảm' : 'Bình thường'}
-                    </div>
-                )}
-            </div>
-            <div>
-                <p className="text-xl font-black text-slate-800 leading-tight">{value}</p>
-                <p className="text-xs text-slate-500 mt-0.5">{label}</p>
-                {sub && <p className="text-[11px] text-slate-400 mt-0.5">{sub}</p>}
-            </div>
-        </div>
-    )
-}
-
-// ─── Section header ────────────────────────────────────────────────────────────
-function SectionHeader({ title, sub }: { title: string; sub?: string }) {
-    return (
-        <div className="mb-3 flex items-end justify-between">
-            <div>
-                <h3 className="text-base font-bold text-slate-800">{title}</h3>
-                {sub && <p className="text-xs text-slate-400 mt-0.5">{sub}</p>}
-            </div>
-        </div>
-    )
-}
-
-// ─── Main Component ────────────────────────────────────────────────────────────
 export default function VehicleReports() {
-    const { data: vehicles = [] } = useVehicles()
     const { selectedVehicleId } = useVehicleStore()
-
-    const effectiveId = selectedVehicleId || vehicles.find(v => v.is_default)?.id || vehicles[0]?.id
-
-    const { data: trips = [] } = useVehicleTrips(effectiveId)
-    const { data: fuelLogs = [] } = useVehicleCharging(effectiveId)
-    const { data: maintenance = [] } = useVehicleMaintenance(effectiveId)
-    const { data: expenses = [] } = useVehicleExpenses(effectiveId)
-    const { data: monthly = [], isLoading: loadingMonthly } = useQuery({
-        queryKey: [...vehicleKeys.stats(effectiveId || ''), 'monthly'],
-        queryFn: () => getMonthlyStats(effectiveId!, 6),
-        enabled: !!effectiveId,
-    })
-
+    const { data: vehicles = [] } = useVehicles()
+    
+    // Fallback to default or first vehicle if none selected
+    const effectiveId = selectedVehicleId || vehicles.find(v => v.is_default)?.id || vehicles[0]?.id || ''
     const selectedVehicle = vehicles.find(v => v.id === effectiveId)
+
+    const [timeRange, setTimeRange] = useState<'6m' | '3m' | 'all'>('6m')
+    const [statsPeriod, setStatsPeriod] = useState<'week' | 'month' | 'quarter' | 'year' | 'all'>('month')
+    const [isPeriodMenuOpen, setIsPeriodMenuOpen] = useState(false)
+
+    // Calculate date range for stats period
+    const statsDateRange = useMemo(() => {
+        const now = new Date()
+        const start = new Date(now)
+        const end = now.toISOString().split('T')[0]
+
+        switch (statsPeriod) {
+            case 'week':
+                // Use Monday as start of week
+                const day = now.getDay()
+                const diff = now.getDate() - day + (day === 0 ? -6 : 1)
+                start.setDate(diff)
+                break
+            case 'month':
+                start.setDate(1)
+                break
+            case 'quarter':
+                const quarter = Math.floor(now.getMonth() / 3)
+                start.setMonth(quarter * 3)
+                start.setDate(1)
+                break
+            case 'year':
+                start.setMonth(0)
+                start.setDate(1)
+                break
+            case 'all':
+                return { start: undefined, end: undefined }
+        }
+        
+        start.setHours(0,0,0,0)
+        return { 
+            start: start.toISOString().split('T')[0], 
+            end 
+        }
+    }, [statsPeriod])
+
+    // Calculate PREVIOUS period date range for comparison
+    const prevStatsDateRange = useMemo(() => {
+        const now = new Date()
+        const start = new Date(now)
+        const end = new Date(now)
+
+        switch (statsPeriod) {
+            case 'week':
+                // Move back 7 days
+                const day = now.getDay()
+                const diff = now.getDate() - day + (day === 0 ? -6 : 1) - 7
+                start.setDate(diff)
+                end.setDate(diff + 6)
+                break
+            case 'month':
+                // Last month
+                start.setMonth(now.getMonth() - 1)
+                start.setDate(1)
+                end.setMonth(now.getMonth())
+                end.setDate(0)
+                break
+            case 'quarter':
+                // Last quarter
+                const currentQuarter = Math.floor(now.getMonth() / 3)
+                start.setMonth((currentQuarter - 1) * 3)
+                start.setDate(1)
+                end.setMonth(currentQuarter * 3)
+                end.setDate(0)
+                break
+            case 'year':
+                start.setFullYear(now.getFullYear() - 1)
+                start.setMonth(0)
+                start.setDate(1)
+                end.setFullYear(now.getFullYear() - 1)
+                end.setMonth(11)
+                end.setDate(31)
+                break
+            case 'all':
+                return { start: undefined, end: undefined }
+        }
+        
+        start.setHours(0,0,0,0)
+        end.setHours(23,59,59,999)
+        return { 
+            start: start.toISOString().split('T')[0], 
+            end: end.toISOString().split('T')[0]
+        }
+    }, [statsPeriod])
+
+    const { data: stats, isLoading: isLoadingStats } = useVehicleStats(
+        effectiveId || undefined, 
+        statsDateRange.start, 
+        statsDateRange.end
+    )
+
+    const { data: prevStats } = useVehicleStats(
+        effectiveId || undefined, 
+        prevStatsDateRange.start, 
+        prevStatsDateRange.end
+    )
+
+    const { data: monthlyStats = [], isLoading: isLoadingMonthly } = useVehicleMonthlyStats(
+        effectiveId || undefined, 
+        timeRange === 'all' ? 12 : timeRange === '3m' ? 3 : 6
+    )
+
     const isElectric = selectedVehicle?.fuel_type === 'electric'
-    const isMoto = selectedVehicle?.vehicle_type === 'motorcycle'
 
-    // ── Computed stats ─────────────────────────────────────────────────────────
-    const completedTrips = useMemo(() => trips.filter(t => !isInProgress(t)), [trips])
+    // Calculate total and percentages for Pie Chart
+    const pieData = useMemo(() => {
+        if (!stats) return []
+        return [
+            { name: 'Sạc pin', value: stats.totalFuelCost, color: '#10b981', icon: <Zap className="h-4 w-4" /> },
+            { name: 'Bảo dưỡng', value: stats.totalMaintenanceCost, color: '#f59e0b', icon: <Wrench className="h-4 w-4" /> },
+            { name: 'Chi phí khác', value: stats.totalOtherExpenses, color: '#f43f5e', icon: <LayoutList className="h-4 w-4" /> },
+        ].filter(item => item.value > 0)
+    }, [stats])
 
-    const totalDist = useMemo(() => completedTrips.reduce((s, t) => s + (t.distance_km || 0), 0), [completedTrips])
-    const totalFuel = useMemo(() => fuelLogs.reduce((s, l) => s + (l.total_amount || 0), 0), [fuelLogs])
-    const totalMaint = useMemo(() => maintenance.reduce((s, m) => s + (m.total_cost || 0), 0), [maintenance])
-    const totalExp = useMemo(() => expenses.reduce((s, e) => s + e.amount, 0), [expenses])
-    const totalCost = totalFuel + totalMaint + totalExp
-    const costPerKm = totalDist > 0 ? totalCost / totalDist : 0
-    const totalLiters = useMemo(() => fuelLogs.reduce((s, l) => s + (l.liters || 0), 0), [fuelLogs])
-    const avgConsumption = totalDist > 0 && totalLiters > 0 ? (totalLiters / totalDist) * 100 : 0
+    const totalCost = (stats?.totalFuelCost || 0) + (stats?.totalMaintenanceCost || 0) + (stats?.totalOtherExpenses || 0)
+    const prevTotalCost = (prevStats?.totalFuelCost || 0) + (prevStats?.totalMaintenanceCost || 0) + (prevStats?.totalOtherExpenses || 0)
 
-    // ── Trip type breakdown ────────────────────────────────────────────────────
-    const tripTypeData = useMemo(() => {
-        const map: Record<string, number> = {}
-        completedTrips.forEach(t => { map[t.trip_type] = (map[t.trip_type] || 0) + 1 })
-        return Object.entries(map)
-            .map(([key, count]) => ({
-                name: TRIP_TYPE_LABELS[key] || key,
-                value: count,
-                color: TRIP_TYPE_COLORS[key] || '#94a3b8',
-                pct: completedTrips.length > 0 ? Math.round((count / completedTrips.length) * 100) : 0,
-            }))
-            .sort((a, b) => b.value - a.value)
-    }, [completedTrips])
+    const costDiffPct = useMemo(() => {
+        if (!prevTotalCost || !totalCost) return 0
+        return ((totalCost - prevTotalCost) / prevTotalCost) * 100
+    }, [totalCost, prevTotalCost])
 
-    // ── Expense type breakdown ─────────────────────────────────────────────────
-    const expenseTypeData = useMemo(() => {
-        const map: Record<string, number> = {}
-        expenses.forEach(e => { map[e.expense_type] = (map[e.expense_type] || 0) + e.amount })
-        return Object.entries(map)
-            .map(([key, amt]) => ({ name: EXPENSE_TYPE_LABELS[key] || key, value: amt }))
-            .sort((a, b) => b.value - a.value)
-    }, [expenses])
-
-    // ── Compare last 2 months ──────────────────────────────────────────────────
-    const [curMonth, prevMonth] = monthly.slice(-2).reverse()
-    const monthTrend = curMonth && prevMonth
-        ? curMonth.total > prevMonth.total ? 'up' : curMonth.total < prevMonth.total ? 'down' : 'flat'
-        : undefined
-
-    // ── Top trips ─────────────────────────────────────────────────────────────
-    const topTrips = useMemo(() =>
-        [...completedTrips].sort((a, b) => (b.distance_km || 0) - (a.distance_km || 0)).slice(0, 5)
-        , [completedTrips])
-
-    // ── Fuel records ──────────────────────────────────────────────────────────
-    const recordFuelCost = useMemo(() => {
-        if (!fuelLogs.length) return null
-        return [...fuelLogs].sort((a, b) => (b.total_amount || 0) - (a.total_amount || 0))[0]
-    }, [fuelLogs])
-
-    const recordFuelVolume = useMemo(() => {
-        if (!fuelLogs.length) return null
-        return [...fuelLogs].sort((a, b) => {
-            const vA = (a.kwh || a.liters || 0)
-            const vB = (b.kwh || b.liters || 0)
-            return vB - vA
-        })[0]
-    }, [fuelLogs])
-
-    if (!selectedVehicle && !effectiveId) {
+    if (!effectiveId && !isLoadingStats) {
         return (
-            <div className="flex h-screen flex-col overflow-hidden bg-[#F7F9FC]">
-                <HeaderBar variant="page" title="Báo Cáo Phương Tiện" />
-                <div className="flex flex-1 items-center justify-center text-slate-400 text-sm">Chưa có xe nào</div>
+            <div className="flex h-screen flex-col items-center justify-center bg-[#F7F9FC] p-4 text-center">
+                <div className="mb-6 rounded-full bg-slate-100 p-6">
+                    <BarChart3 className="h-12 w-12 text-slate-400" />
+                </div>
+                <h3 className="text-lg font-black text-slate-800">Chưa có dữ liệu báo cáo</h3>
+                <p className="mt-2 text-sm text-slate-500">Vui lòng thêm phương tiện hoặc chọn một chiếc xe để xem báo cáo.</p>
             </div>
         )
     }
 
     return (
-        <div className="flex h-screen flex-col overflow-hidden bg-[#F7F9FC]">
-            <HeaderBar variant="page" title="Báo Cáo Phương Tiện" />
+        <div className="flex h-[100dvh] flex-col overflow-hidden bg-[#F7F9FC]">
+            <HeaderBar variant="page" title="Báo cáo chi tiết" />
 
-            <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 w-full max-w-md mx-auto px-4 pb-28 pt-4 space-y-5">
+            <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 w-full max-w-md mx-auto px-4 pb-28 pt-4">
+                
+                {/* ── Summary Hero Card ────────────────────────────────── */}
+                <section className="mb-6">
+                    <div className="relative overflow-hidden rounded-[40px] bg-slate-900 p-7 text-white shadow-2xl shadow-slate-900/20">
+                        {/* Background Deco */}
+                        <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-blue-600/20 blur-[80px]" />
+                        <div className="absolute -left-16 -bottom-16 h-64 w-64 rounded-full bg-emerald-600/10 blur-[80px]" />
+                        
+                        <div className="relative z-10">
+                            <div className="flex flex-col gap-4 mb-6">
+                                <div className="flex items-center justify-between relative">
+                                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Tổng chi phí vận hành</p>
+                                    
+                                    <div className="relative">
+                                        <button 
+                                            onClick={() => setIsPeriodMenuOpen(!isPeriodMenuOpen)}
+                                            className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 border border-white/20 backdrop-blur-md text-[10px] font-black uppercase text-white transition-all active:scale-95"
+                                        >
+                                            <Calendar className="h-3 w-3 text-blue-400" />
+                                            {statsPeriod === 'week' ? 'Tuần' : statsPeriod === 'month' ? 'Tháng' : statsPeriod === 'quarter' ? 'Quý' : statsPeriod === 'year' ? 'Năm' : 'Tất cả'}
+                                            <ChevronRight className={`h-3 w-3 text-white/40 transition-transform duration-300 ${isPeriodMenuOpen ? 'rotate-90' : ''}`} />
+                                        </button>
 
+                                        {isPeriodMenuOpen && (
+                                            <>
+                                                <div className="fixed inset-0 z-40" onClick={() => setIsPeriodMenuOpen(false)} />
+                                                <div className="absolute right-0 mt-2 w-36 overflow-hidden rounded-2xl bg-slate-800 border border-white/10 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200">
+                                                    {(['week', 'month', 'quarter', 'year', 'all'] as const).map(p => (
+                                                        <button
+                                                            key={p}
+                                                            onClick={() => { setStatsPeriod(p); setIsPeriodMenuOpen(false); }}
+                                                            className={`w-full px-4 py-2.5 text-left text-[10px] font-black uppercase transition-all flex items-center justify-between ${statsPeriod === p ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-white/5'}`}
+                                                        >
+                                                            {p === 'week' ? 'Tuần này' : p === 'month' ? 'Tháng này' : p === 'quarter' ? 'Quý này' : p === 'year' ? 'Năm nay' : 'Tất cả'}
+                                                            {statsPeriod === p && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                                <h2 className="text-4xl font-black tracking-tight">
+                                    {isLoadingStats ? '---' : formatNumber(totalCost)}
+                                    <span className="text-lg ml-1 font-bold opacity-50 uppercase">đ</span>
+                                </h2>
+                            </div>
 
-
-                {/* ── Hero Card ─────────────────────────────────────────── */}
-                <div className={`relative overflow-hidden rounded-2xl p-5 text-white shadow-lg ${isElectric ? 'bg-gradient-to-br from-green-500 to-green-700' : isMoto ? 'bg-gradient-to-br from-orange-500 to-red-700' : 'bg-gradient-to-br from-blue-600 to-indigo-800'}`}>
-                    <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
-                    <div className="absolute right-0 bottom-0 h-20 opacity-10">
-                        {isMoto ? <Bike className="h-full w-full" /> : <Car className="h-full w-full" />}
-                    </div>
-                    <div className="flex items-start justify-between mb-4">
-                        <div>
-                            <p className="text-xs font-medium opacity-75">Tổng chi phí vận hành</p>
-                            <p className="text-3xl font-black tracking-tight mt-0.5">{fmt(totalCost)}</p>
-                        </div>
-                        <div className="rounded-xl bg-white/20 p-2">
-                            <BatteryCharging className="h-5 w-5" />
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-3 border-t border-white/20 pt-3">
-                        <div>
-                            <p className="text-lg font-black">{completedTrips.length}</p>
-                            <p className="text-[10px] opacity-70">Chuyến đi</p>
-                        </div>
-                        <div>
-                            <p className="text-lg font-black">{totalDist.toLocaleString()} km</p>
-                            <p className="text-[10px] opacity-70">Quãng đường</p>
-                        </div>
-                        <div>
-                            <p className="text-lg font-black">{costPerKm > 0 ? `${Math.round(costPerKm).toLocaleString()}đ` : '—'}</p>
-                            <p className="text-[10px] opacity-70">Chi phí/km</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── 2×2 Stats Grid ───────────────────────────────────── */}
-                <div className="grid grid-cols-2 gap-3">
-                    <StatCard icon={Zap} label="Tổng sạc điện"
-                        value={fmt(totalFuel)} color="bg-green-100 text-green-600"
-                        trend={monthTrend} />
-                    <StatCard icon={Wrench} label="Tổng bảo dưỡng"
-                        value={fmt(totalMaint)} color="bg-purple-100 text-purple-600" />
-                    <StatCard icon={Receipt} label="Chi phí khác"
-                        value={fmt(totalExp)} color="bg-red-100 text-red-600" />
-                    <StatCard icon={Zap} label="Tiêu thụ trung bình"
-                        value={avgConsumption > 0 ? `${avgConsumption.toFixed(1)} kWh/100km` : '—'}
-                        color="bg-sky-100 text-sky-600"
-                        sub={totalLiters > 0 ? `${totalLiters.toFixed(1)} kWh tổng cộng` : undefined} />
-                </div>
-
-                {/* ── Chi phí 6 tháng — Bar Chart ──────────────────────── */}
-                <div>
-                    <SectionHeader title="Chi phí 6 tháng gần nhất" sub="Phân tích theo danh mục" />
-                    <div className="rounded-2xl bg-white border border-slate-100 shadow-md p-4">
-                        {loadingMonthly ? (
-                            <div className="h-48 animate-pulse rounded-xl bg-slate-100" />
-                        ) : (
-                            <ResponsiveContainer width="100%" height={200}>
-                                <BarChart data={monthly} margin={{ top: 4, right: 4, left: 0, bottom: 0 }} style={{ outline: 'none' }}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                                    <YAxis tickFormatter={fmtK} tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={36} />
-                                    <Tooltip content={<CurrencyTooltip />} cursor={{ fill: 'transparent' }} />
-                                    <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
-                                    <Bar dataKey="fuel" name="Sạc điện" fill="#22c55e" radius={[4, 4, 0, 0]} barSize={10} activeBar={false} style={{ outline: 'none' }} />
-                                    <Bar dataKey="maintenance" name="Bảo dưỡng" fill="#8b5cf6" radius={[4, 4, 0, 0]} barSize={10} activeBar={false} style={{ outline: 'none' }} />
-                                    <Bar dataKey="expenses" name="Chi phí khác" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={10} activeBar={false} style={{ outline: 'none' }} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        )}
-                    </div>
-                </div>
-
-                {/* ── Km di chuyển 6 tháng — Line Chart ────────────────── */}
-                <div>
-                    <SectionHeader title="Quãng đường theo tháng" sub={`Tổng: ${totalDist.toLocaleString()} km`} />
-                    <div className="rounded-2xl bg-white border border-slate-100 shadow-md p-4">
-                        {loadingMonthly ? (
-                            <div className="h-40 animate-pulse rounded-xl bg-slate-100" />
-                        ) : (
-                            <ResponsiveContainer width="100%" height={160}>
-                                <LineChart data={monthly} margin={{ top: 4, right: 4, left: 0, bottom: 0 }} style={{ outline: 'none' }}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                                    <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={30} />
-                                    <Tooltip formatter={(v) => [`${Number(v ?? 0).toLocaleString()} km`, 'Quãng đường']} labelStyle={{ fontWeight: 700 }} cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '3 3' }} />
-                                    <Line dataKey="distance" name="km" type="monotone"
-                                        stroke={isElectric ? '#22c55e' : isMoto ? '#f97316' : '#3b82f6'}
-                                        strokeWidth={2.5} dot={{ r: 4, fill: 'white', strokeWidth: 2.5 }}
-                                        activeDot={{ r: 6 }} />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        )}
-                    </div>
-                </div>
-
-                {/* ── Phân loại chuyến đi — Pie Chart ──────────────────── */}
-                {tripTypeData.length > 0 && (
-                    <div>
-                        <SectionHeader title="Phân loại lộ trình" sub={`${completedTrips.length} chuyến đi ghi nhận`} />
-                        <div className="rounded-2xl bg-white border border-slate-100 shadow-md p-4">
-                            <div className="flex items-center gap-4">
-                                <ResponsiveContainer width={120} height={120}>
-                                    <PieChart style={{ outline: 'none' }}>
-                                        <Pie data={tripTypeData} innerRadius={32} outerRadius={52} dataKey="value" paddingAngle={2} style={{ outline: 'none' }}>
-                                            {tripTypeData.map((entry, i) => <Cell key={i} fill={entry.color} style={{ outline: 'none' }} />)}
-                                        </Pie>
-                                    </PieChart>
-                                </ResponsiveContainer>
-                                <div className="flex-1 space-y-2">
-                                    {tripTypeData.map((item, i) => (
-                                        <div key={i} className="flex items-center justify-between text-xs">
-                                            <span className="flex items-center gap-1.5">
-                                                <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: item.color }} />
-                                                <span className="text-slate-700 font-medium">{item.name}</span>
-                                            </span>
-                                            <span className="font-bold text-slate-600">{item.value} <span className="text-slate-400 font-normal">({item.pct}%)</span></span>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="rounded-3xl bg-white/5 p-4 border border-white/10 backdrop-blur-sm">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className="rounded-lg bg-emerald-500/20 p-1.5 text-emerald-400">
+                                            <Gauge className="h-3.5 w-3.5" />
                                         </div>
-                                    ))}
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Quãng đường</span>
+                                    </div>
+                                    <p className="text-xl font-black">{formatNumber(stats?.totalDistance || 0)} <span className="text-xs font-medium opacity-50">km</span></p>
+                                </div>
+                                <div className="rounded-3xl bg-white/5 p-4 border border-white/10 backdrop-blur-sm">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className="rounded-lg bg-blue-500/20 p-1.5 text-blue-400">
+                                            <TrendingUp className="h-3.5 w-3.5" />
+                                        </div>
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Chi phí / Km</span>
+                                    </div>
+                                    <p className="text-xl font-black">{formatNumber(Math.round(stats?.costPerKm || 0))} <span className="text-xs font-medium opacity-50">đ</span></p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                )}
+                </section>
 
-                {/* ── Top 5 chuyến đi dài nhất ────────────────────────── */}
-                {topTrips.length > 0 && (
-                    <div>
-                        <SectionHeader title="Top 5 chuyến đi dài nhất" />
-                        <div className="rounded-2xl bg-white border border-slate-100 shadow-md overflow-hidden">
-                            {topTrips.map((trip, i) => (
-                                <div key={trip.id} className={`flex items-center gap-3 px-4 py-3 ${i < topTrips.length - 1 ? 'border-b border-slate-50' : ''}`}>
-                                    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black ${i === 0 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'}`}>
-                                        {i === 0 ? <Award className="h-4 w-4" /> : i + 1}
+                {/* ── Monthly Trend Chart ──────────────────────────────── */}
+                <section className="mb-6 space-y-4">
+                    <div className="flex items-center justify-between px-1">
+                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Biến động chi phí</h3>
+                        <div className="flex gap-1 bg-slate-100 p-1 rounded-xl">
+                            {(['3m', '6m', 'all'] as const).map(range => (
+                                <button
+                                    key={range}
+                                    onClick={() => setTimeRange(range)}
+                                    className={`px-3 py-1 text-[10px] font-black uppercase rounded-lg transition-all ${timeRange === range ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                >
+                                    {range === 'all' ? '1 Năm' : range}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="rounded-[32px] bg-white p-5 shadow-sm border border-slate-100">
+                        <div className="h-[240px] w-full">
+                            {isLoadingMonthly ? (
+                                <div className="flex h-full items-center justify-center animate-pulse">
+                                    <div className="h-32 w-full bg-slate-50 rounded-2xl" />
+                                </div>
+                            ) : monthlyStats.length > 0 ? (
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={monthlyStats} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                        <defs>
+                                            <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                        <XAxis 
+                                            dataKey="month" 
+                                            axisLine={false} 
+                                            tickLine={false} 
+                                            tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} 
+                                            dy={10}
+                                        />
+                                        <YAxis 
+                                            axisLine={false} 
+                                            tickLine={false} 
+                                            tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }}
+                                            tickFormatter={(val) => compactFormat(val)}
+                                        />
+                                        <Tooltip 
+                                            contentStyle={{ 
+                                                borderRadius: '16px', 
+                                                border: 'none', 
+                                                boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)',
+                                                fontWeight: 800,
+                                                fontSize: '12px'
+                                            }}
+                                            formatter={(value: any) => [formatNumber(value), 'Tổng']}
+                                        />
+                                        <Area 
+                                            type="monotone" 
+                                            dataKey="total" 
+                                            stroke="#3b82f6" 
+                                            strokeWidth={4}
+                                            fillOpacity={1} 
+                                            fill="url(#colorTotal)" 
+                                            animationDuration={1500}
+                                        />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            ) : (
+                                <div className="flex h-full items-center justify-center flex-col text-slate-300 gap-2">
+                                    <Info className="h-8 w-8" />
+                                    <p className="text-xs font-bold uppercase tracking-widest">Không có dữ liệu lịch sử</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </section>
+
+                {/* ── Category Breakdown ────────────────────────────────── */}
+                <section className="mb-6">
+                    <div className="mb-4 px-1">
+                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Phân loại chi phí</h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4">
+                        <div className="rounded-[32px] bg-white p-6 shadow-sm border border-slate-100 flex items-center gap-8">
+                            <div className="h-[120px] w-[120px] shrink-0">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={pieData}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={35}
+                                            outerRadius={55}
+                                            paddingAngle={8}
+                                            dataKey="value"
+                                            stroke="none"
+                                        >
+                                            {pieData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={entry.color} />
+                                            ))}
+                                        </Pie>
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                            
+                            <div className="flex-1 space-y-3">
+                                {pieData.map((item, idx) => (
+                                    <div key={idx} className="flex items-center justify-between group">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+                                            <span className="text-xs font-bold text-slate-600 truncate">{item.name}</span>
+                                        </div>
+                                        <span className="text-xs font-black text-slate-900">
+                                            {totalCost > 0 ? Math.round((item.value / totalCost) * 100) : 0}%
+                                        </span>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-xs font-semibold text-slate-700 truncate">
-                                            {trip.start_location || '?'} → {trip.end_location || '?'}
-                                        </p>
-                                        <p className="text-[10px] text-slate-400">
-                                            {new Date(trip.trip_date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: '2-digit' })}
-                                        </p>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* List Breakdown Card */}
+                        <div className="rounded-[32px] bg-white p-2 shadow-sm border border-slate-100">
+                            {[
+                                { label: 'Sạc pin & Nhiên liệu', value: stats?.totalFuelCost || 0, icon: <Zap />, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+                                { label: 'Bảo dưỡng & Sửa chữa', value: stats?.totalMaintenanceCost || 0, icon: <Wrench />, color: 'text-amber-500', bg: 'bg-amber-50' },
+                                { label: 'Phí cố định & Khác', value: stats?.totalOtherExpenses || 0, icon: <LayoutList />, color: 'text-rose-500', bg: 'bg-rose-50' },
+                            ].map((item, i) => (
+                                <div key={i} className={`flex items-center justify-between p-4 rounded-[24px] ${i !== 2 ? 'border-b border-slate-50' : ''}`}>
+                                    <div className="flex items-center gap-4">
+                                        <div className={`h-12 w-12 rounded-2xl ${item.bg} ${item.color} flex items-center justify-center shrink-0`}>
+                                            {item.icon}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-black text-slate-800">{item.label}</p>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                                                {totalCost > 0 ? ((item.value / totalCost) * 100).toFixed(1) : 0}% của tổng chi phí
+                                            </p>
+                                        </div>
                                     </div>
-                                    <span className={`text-sm font-black ${isMoto ? 'text-orange-600' : 'text-blue-600'}`}>
-                                        {(trip.distance_km || (trip.end_km - trip.start_km)).toLocaleString()} km
-                                    </span>
+                                    <div className="text-right">
+                                        <p className="text-sm font-black text-slate-900">{formatNumber(item.value)} đ</p>
+                                        <button className="text-[10px] font-bold text-blue-600 flex items-center gap-0.5 ml-auto mt-0.5">
+                                            Chi tiết <ChevronRight className="h-3 w-3" />
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
                     </div>
-                )}
+                </section>
 
-                {/* ── Kỷ lục Nhiên liệu / Sạc điện ────────────────────────── */}
-                {(recordFuelCost || recordFuelVolume) && (
-                    <div>
-                        <SectionHeader title="Kỷ lục sạc điện" />
-                        <div className="rounded-2xl bg-white border border-slate-100 shadow-md overflow-hidden flex flex-col">
-                            {recordFuelCost && (
-                                <div className={`flex items-center justify-between p-4 ${recordFuelVolume ? 'border-b border-slate-50' : ''}`}>
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500">
-                                            <Receipt className="h-5 w-5" />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-slate-500 font-medium">Chi phí cao nhất</p>
-                                            <p className="text-sm font-bold text-slate-800">{new Date(recordFuelCost.refuel_date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
-                                        </div>
+                {/* ── Efficiency Stats ───────────────────────────────────── */}
+                <section className="mb-6">
+                    <div className="mb-4 px-1">
+                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Hiệu suất vận hành</h3>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="rounded-[32px] bg-white p-5 border border-slate-100 shadow-sm">
+                            <div className="mb-4 h-10 w-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+                                <Route className="h-5 w-5" />
+                            </div>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Số lộ trình</p>
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-2xl font-black text-slate-900">{formatNumber(stats?.totalTrips || 0)}</span>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase">Chuyến</span>
+                            </div>
+                        </div>
+
+                        <div className="rounded-[32px] bg-white p-5 border border-slate-100 shadow-sm">
+                            <div className="mb-4 h-10 w-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                                <Zap className="h-5 w-5" />
+                            </div>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tiêu thụ TB</p>
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-2xl font-black text-slate-900">
+                                    {formatNumber(stats?.averageFuelConsumption || 0, 1)}
+                                </span>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase">{isElectric ? 'kWh/100km' : 'L/100km'}</span>
+                            </div>
+                        </div>
+                        
+                        <div className="col-span-2 rounded-[32px] bg-white p-6 border border-slate-100 shadow-sm">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="h-12 w-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                                        <TrendingUp className="h-6 w-6" />
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-base font-black text-red-600">{fmt(recordFuelCost.total_amount || 0)}</p>
+                                    <div>
+                                        <p className="text-sm font-black text-slate-800">So sánh & Dự báo</p>
+                                        <p className="text-xs text-slate-400">So với {
+                                            statsPeriod === 'week' ? 'tuần trước' : 
+                                            statsPeriod === 'month' ? 'tháng trước' : 
+                                            statsPeriod === 'quarter' ? 'quý trước' : 
+                                            'năm ngoái'
+                                        }</p>
                                     </div>
                                 </div>
-                            )}
+                                <button className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-all">
+                                    <Settings className="h-5 w-5" />
+                                </button>
+                            </div>
 
-                            {recordFuelVolume && (
-                                <div className="flex items-center justify-between p-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-500">
-                                            {isElectric ? <Zap className="h-5 w-5" /> : <Fuel className="h-5 w-5" />}
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-slate-500 font-medium">{isElectric ? 'Sạc nhiều điện nhất' : 'Đổ nhiều nhiên liệu nhất'}</p>
-                                            <p className="text-sm font-bold text-slate-800">{new Date(recordFuelVolume.refuel_date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-base font-black text-blue-600">
-                                            {`${(recordFuelVolume.kwh || recordFuelVolume.liters || 0).toFixed(1)} kWh`}
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                {/* ── Chi phí khác theo danh mục ───────────────────────── */}
-                {expenseTypeData.length > 0 && (
-                    <div>
-                        <SectionHeader title="Chi tiết phí khác" />
-                        <div className="rounded-2xl bg-white border border-slate-100 shadow-md overflow-hidden">
-                            {expenseTypeData.map((item, i) => {
-                                const pct = totalExp > 0 ? (item.value / totalExp) * 100 : 0
-                                return (
-                                    <div key={i} className={`px-4 py-3 ${i < expenseTypeData.length - 1 ? 'border-b border-slate-50' : ''}`}>
-                                        <div className="flex items-center justify-between mb-1.5">
-                                            <span className="text-xs font-semibold text-slate-700">{item.name}</span>
-                                            <span className="text-xs font-bold text-red-600">{fmt(item.value)}</span>
-                                        </div>
-                                        <div className="h-1.5 w-full rounded-full bg-slate-100">
-                                            <div className="h-full rounded-full bg-red-400 transition-all" style={{ width: `${pct}%` }} />
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    </div>
-                )}
-
-                {/* ── So sánh tháng ─────────────────────────────────────── */}
-                {curMonth && prevMonth && (
-                    <div>
-                        <SectionHeader title="So sánh tháng" sub={`${prevMonth.month} → ${curMonth.month}`} />
-                        <div className="grid grid-cols-2 gap-3">
-                            {[
-                                { label: 'Chi phí', cur: curMonth.total, prev: prevMonth.total, fmt: (v: number) => fmtK(v) + 'đ' },
-                                { label: 'Quãng đường', cur: curMonth.distance, prev: prevMonth.distance, fmt: (v: number) => v.toLocaleString() + ' km' },
-                                { label: 'Số chuyến', cur: curMonth.trips, prev: prevMonth.trips, fmt: (v: number) => String(v) },
-                            ].map(({ label, cur, prev, fmt: f }) => {
-                                const diff = prev > 0 ? Math.round(((cur - prev) / prev) * 100) : 0
-                                const up = cur > prev
-                                return (
-                                    <div key={label} className="rounded-2xl bg-white border border-slate-100 shadow-md p-4">
-                                        <p className="text-xs text-slate-500 mb-1">{label}</p>
-                                        <p className="text-base font-black text-slate-800">{f(cur)}</p>
-                                        {prev > 0 && (
-                                            <p className={`text-[10px] font-semibold mt-1 flex items-center gap-0.5 ${up ? 'text-red-500' : 'text-green-500'}`}>
-                                                {up ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                                                {up ? '+' : ''}{diff}% so với {prevMonth.month}
-                                            </p>
+                            <div className="flex items-end justify-between">
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dự báo chi phí năm</p>
+                                    <p className="text-2xl font-black text-blue-600">
+                                        {formatNumber(
+                                            statsPeriod === 'week' ? totalCost * 52 :
+                                            statsPeriod === 'month' ? totalCost * 12 :
+                                            statsPeriod === 'quarter' ? totalCost * 4 :
+                                            totalCost
                                         )}
+                                        <span className="text-sm ml-1 font-bold opacity-70 uppercase text-slate-400">đ</span>
+                                    </p>
+                                </div>
+                                <div className="text-right">
+                                    <div className={`flex items-center justify-end gap-1 text-sm font-black ${costDiffPct > 0 ? 'text-rose-500' : 'text-emerald-500'}`}>
+                                        {costDiffPct > 0 ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
+                                        {Math.abs(costDiffPct).toFixed(1)}%
                                     </div>
-                                )
-                            })}
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                                        {costDiffPct > 0 ? 'Tăng so với kỳ trước' : 'Giảm so với kỳ trước'}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                )}
+                </section>
 
-                <div className="h-[150px] w-full flex-shrink-0"></div>
+                <div className="h-20" />
             </main>
 
-            <VehicleFooterNav addLabel="Ghi chép" isElectricVehicle={isElectric} />
+            <VehicleFooterNav isElectricVehicle={isElectric} />
         </div>
     )
 }
-

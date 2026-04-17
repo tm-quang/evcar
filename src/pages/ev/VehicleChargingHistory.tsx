@@ -8,7 +8,10 @@ import {
     X,
     Save,
     Search,
-    Filter
+    Filter,
+    TrendingUp,
+    ChevronRight,
+    MapPin
 } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
@@ -21,6 +24,12 @@ const formatCurrency = (value: number) =>
         style: 'currency',
         currency: 'VND',
         maximumFractionDigits: 0,
+    }).format(value)
+
+const formatNumber = (value: number, decimals = 0) =>
+    new Intl.NumberFormat('vi-VN', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
     }).format(value)
 
 export default function VehicleChargingHistory() {
@@ -132,15 +141,15 @@ export default function VehicleChargingHistory() {
                     if (startParts.length >= 2 && endParts.length >= 2) {
                         const startTotal = parseInt(startParts[0], 10) * 60 + parseInt(startParts[1], 10)
                         let endTotal = parseInt(endParts[0], 10) * 60 + parseInt(endParts[1], 10)
-                        
+
                         // Handle overnight charging or simply chronological end > start
                         if (endTotal < startTotal) {
-                            endTotal += 24 * 60 
+                            endTotal += 24 * 60
                         }
                         durationMins = endTotal - startTotal
                     }
                 }
-                
+
                 // If duration column is available and we didn't calculate from start/end (or calculation resulted in 0)
                 if (durationMins <= 0 && durationStr) {
                     const durParts = durationStr.split(':')
@@ -300,7 +309,6 @@ export default function VehicleChargingHistory() {
     }, 0)
     const pluggedHours = Math.floor(totalDurationMins / 60)
     const pluggedMins = totalDurationMins % 60
-    const pluggedDisplay = pluggedHours > 0 ? `${pluggedHours} giờ ${pluggedMins} phút` : `${pluggedMins} phút`
     const totalCost = filteredLogs.reduce((sum, log) => sum + (log.total_cost ?? log.total_amount ?? 0), 0)
 
     // Calculate saved amount (total_amount - total_cost)
@@ -341,7 +349,7 @@ export default function VehicleChargingHistory() {
         <div className="flex h-[100dvh] flex-col overflow-hidden bg-[#F7F9FC]">
             <HeaderBar
                 variant="page"
-                title="Lịch sử chi tiết"
+                title="Chi tiết sạc pin"
                 onReload={() => { refetch(); }}
                 customContent={
                     <>
@@ -355,7 +363,7 @@ export default function VehicleChargingHistory() {
                         <button
                             onClick={() => fileInputRef.current?.click()}
                             disabled={isImporting}
-                            className="relative flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-xl ring-1 ring-slate-100 transition hover:scale-110 active:scale-95 disabled:opacity-50"
+                            className="relative flex h-9 w-9 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition-all hover:scale-110 active:scale-95 disabled:opacity-50"
                             title="Nhập Excel"
                         >
                             {isImporting ? (
@@ -370,35 +378,34 @@ export default function VehicleChargingHistory() {
 
             <main className="flex-1 overflow-y-auto min-h-0 w-full max-w-md mx-auto px-4 pt-4 pb-28">
                 {/* Summary Info Row */}
-                <div className="mb-4 flex items-center justify-between rounded-xl bg-white border border-slate-100 px-4 py-3 shadow-md">
-                    <p className="text-sm font-semibold text-slate-600">
-                        <span className="font-black text-slate-800">{filteredLogs.length}</span> / {logs.length} phiên sạc
+                <div className="mb-4 flex items-center justify-between px-1">
+                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
+                        Dữ liệu phiên sạc
                     </p>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">
-                        {filterYear === 'all' ? 'Tất cả thời gian' : `Năm ${filterYear}`}
+                    <p className="text-[11px] font-black uppercase tracking-[0.1em] text-slate-400">
+                        {filterYear === 'all' ? 'Toàn bộ' : `${filterYear}`} · {filteredLogs.length} phiên
                     </p>
                 </div>
 
                 {/* Segmented Control & Filter Button */}
                 <div className={`flex items-center justify-between gap-3 ${filterYear === 'all' ? 'mb-6' : 'mb-3'}`}>
-                    <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide flex-1">
+                    <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide flex-1 py-1">
                         <button
                             onClick={() => setFilterYear('all')}
-                            className={`px-5 py-2 rounded-xl text-sm font-bold transition-all shrink-0 ${filterYear === 'all'
-                                ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
-                                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                            className={`px-5 py-2.5 rounded-3xl text-[11px] font-black uppercase tracking-widest transition-all shrink-0 ${filterYear === 'all'
+                                ? 'bg-[#0F172A] text-white shadow-md'
+                                : 'bg-white text-slate-400 border border-slate-200'
                                 }`}
                         >
                             Tất cả
                         </button>
-                        <span className="text-slate-300">•</span>
                         {availableYears.map(year => (
                             <button
                                 key={year}
                                 onClick={() => setFilterYear(year)}
-                                className={`px-5 py-2 rounded-xl text-sm font-bold transition-all shrink-0 ${filterYear === year
-                                    ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
-                                    : 'bg-transparent text-slate-500 hover:bg-slate-100'
+                                className={`px-5 py-2.5 rounded-3xl text-[11px] font-black uppercase tracking-widest transition-all shrink-0 ${filterYear === year
+                                    ? 'bg-[#0F172A] text-white shadow-md'
+                                    : 'bg-white text-slate-400 border border-slate-200'
                                     }`}
                             >
                                 {year}
@@ -408,21 +415,21 @@ export default function VehicleChargingHistory() {
                     {/* Filter Icon Button */}
                     <button
                         onClick={() => setIsFilterModalOpen(true)}
-                        className={`p-2 rounded-3xl transition-all shadow-xl shrink-0 ${searchTerm ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50 shadow-sm'
+                        className={`h-11 w-11 flex items-center justify-center rounded-2xl transition-all shrink-0 border ${searchTerm ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300 shadow-sm'
                             }`}
                         title="Tìm kiếm & Cấu hình lọc"
                     >
-                        {searchTerm ? <Filter className="h-5 w-5 fill-blue-600/20" /> : <Search className="h-5 w-5" />}
+                        {searchTerm ? <Filter className="h-5 w-5" /> : <Search className="h-5 w-5" />}
                     </button>
                 </div>
 
                 {filterYear !== 'all' && availableMonths.length > 0 && (
-                    <div className="flex items-center gap-2 mb-6 overflow-x-auto scrollbar-hide pb-2">
+                    <div className="flex items-center gap-2 mb-4 overflow-x-auto scrollbar-hide pb-2">
                         <button
                             onClick={() => setFilterMonth('all')}
-                            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${filterMonth === 'all'
-                                ? 'bg-blue-100 text-blue-700 border border-blue-200 shadow-md'
-                                : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
+                            className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${filterMonth === 'all'
+                                ? 'bg-blue-50 text-blue-700 border-blue-200 shadow-sm'
+                                : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50'
                                 }`}
                         >
                             Cả năm
@@ -431,9 +438,9 @@ export default function VehicleChargingHistory() {
                             <button
                                 key={month}
                                 onClick={() => setFilterMonth(month)}
-                                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${filterMonth === month
-                                    ? 'bg-blue-100 text-blue-700 border border-blue-200 shadow-md'
-                                    : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
+                                className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${filterMonth === month
+                                    ? 'bg-blue-50 text-blue-700 border-blue-200 shadow-sm'
+                                    : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50'
                                     }`}
                             >
                                 T{month}
@@ -442,40 +449,57 @@ export default function VehicleChargingHistory() {
                     </div>
                 )}
 
-                {/* 4 Cards Grid */}
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                    <div className="bg-[#f0fdf4] rounded-[20px] p-5 flex flex-col items-center justify-center text-center shadow-md border border-green-200">
-                        <p className="text-[10px] font-bold text-green-600 tracking-widest uppercase mb-1.5 leading-none">Năng lượng</p>
-                        <p className="text-xl font-black text-green-700 leading-none">{Math.round(totalKwh)} kWh</p>
-                    </div>
-                    <div className="bg-[#fdf4ff] rounded-[20px] p-5 flex flex-col items-center justify-center text-center shadow-md border border-fuchsia-200">
-                        <p className="text-[10px] font-bold text-fuchsia-600 tracking-widest uppercase mb-1.5 leading-none">Cắm sạc</p>
-                        <p className="text-xl font-black text-fuchsia-700 leading-none">{pluggedDisplay}</p>
-                    </div>
-                    <div className="bg-[#eff6ff] rounded-[20px] p-5 flex flex-col items-center justify-center text-center shadow-md border border-blue-200">
-                        <p className="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-1.5 leading-none">Chi phí</p>
-                        <p className="text-xl font-black text-blue-700 leading-none">{formatCurrency(totalCost).replace('₫', 'đ').trim()}</p>
-                    </div>
-                    <div className="bg-[#fffbeb] rounded-[20px] p-5 flex flex-col items-center justify-center text-center shadow-md border border-amber-200">
-                        <p className="text-[10px] font-bold text-amber-600 tracking-widest uppercase mb-1.5 leading-none">Tiết kiệm</p>
-                        <p className="text-xl font-black text-amber-600 leading-none">{formatCurrency(totalSaved).replace('₫', 'đ').trim()}</p>
+                {/* 4 Cards Grid - Premium Dark Theme for stats */}
+                <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-blue-900 to-blue-700 p-5 text-white shadow-lg shadow-slate-900/20 mb-5 border border-white/5">
+                    <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-blue-500/10 blur-[80px]" />
+                    <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-blue-500/10 blur-[80px]" />
+
+                    <div className="relative z-10 grid grid-cols-2 gap-y-7 gap-x-4">
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-2 mb-2 text-emerald-400">
+                                <Zap className="h-3.5 w-3.5" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Năng lượng</span>
+                            </div>
+                            <p className="text-2xl font-black">{Math.round(totalKwh)} <span className="text-xs font-bold text-slate-400 uppercase">kWh</span></p>
+                        </div>
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-2 mb-2 text-blue-400">
+                                <TrendingUp className="h-3.5 w-3.5" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Chi phí</span>
+                            </div>
+                            <p className="text-xl font-black">{formatNumber(Math.round(totalCost))} <span className="text-[10px] font-black text-slate-400 uppercase">VND</span></p>
+                        </div>
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-2 mb-2 text-fuchsia-400">
+                                <Clock className="h-3.5 w-3.5" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Cắm sạc</span>
+                            </div>
+                            <p className="text-xl font-black">{pluggedHours}h <span className="text-[11px] font-black text-slate-400 uppercase">{pluggedMins}m</span></p>
+                        </div>
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-2 mb-2 text-amber-400">
+                                <Save className="h-3.5 w-3.5" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Tiết kiệm</span>
+                            </div>
+                            <p className="text-2xl font-black text-emerald-400">{formatNumber(Math.round(totalSaved))} <span className="text-xs font-bold text-slate-400 uppercase">VND</span></p>
+                        </div>
                     </div>
                 </div>
 
-                {/* List */}
-                <div className="space-y-4">
+                {/* List Header */}
+                <div className="mb-4 flex items-center justify-between px-1">
+                    <h3 className="text-[11px] font-black uppercase tracking-[0.15em] text-slate-400">Danh sách phiên sạc</h3>
+                </div>
+
+                {/* List Container with Timeline */}
+                <div className="relative ml-2 pl-4 border-l-2 border-slate-200 space-y-6 pb-10">
                     {filteredLogs.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-                            <div className="mb-4 rounded-full bg-slate-100 p-4">
-                                <Search className="h-8 w-8 text-slate-400" />
+                        <div className="flex flex-col items-center justify-center py-20 px-8 text-center bg-white rounded-[32px] border border-slate-100 shadow-sm">
+                            <div className="mb-6 rounded-3xl bg-slate-50 p-6">
+                                <Search className="h-10 w-10 text-slate-300" />
                             </div>
-                            <p className="text-sm font-bold text-slate-600">Không tìm thấy kết quả nào</p>
-                            <p className="mt-1 text-xs text-slate-400">Hãy thử thay đổi từ khóa hoặc bộ lọc</p>
-                            {searchTerm && (
-                                <button onClick={() => setSearchTerm('')} className="mt-4 text-sm font-bold text-blue-600 hover:text-blue-700 bg-blue-50 px-4 py-2 rounded-full">
-                                    Xóa tìm kiếm
-                                </button>
-                            )}
+                            <p className="text-md font-black text-slate-800 uppercase tracking-widest">Trống</p>
+                            <p className="mt-2 text-xs font-medium text-slate-400 leading-relaxed uppercase tracking-tighter">Không tìm thấy phiên sạc nào khớp với bộ lọc của bạn</p>
                         </div>
                     ) : (
                         filteredLogs.map(log => {
@@ -511,8 +535,9 @@ export default function VehicleChargingHistory() {
 
                             const dateObj = new Date(log.refuel_date)
                             const dateStr = dateObj.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                            const shortDateStr = `${dateObj.getDate()}/${dateObj.getMonth() + 1}`
                             const startTime = log.refuel_time?.slice(0, 5) || '--:--'
-                            
+
                             // Prioritize calculation from START and END if both exist
                             if (startTime !== '--:--' && parsedEndTime) {
                                 const [sh, sm] = startTime.split(':').map(Number)
@@ -523,71 +548,104 @@ export default function VehicleChargingHistory() {
                             }
 
                             const endTime = parsedEndTime || calculateEndTime(startTime, parsedDurationMins) || '--:--'
-                            const price = log.unit_price || 0
                             const locationParts = [log.station_name, log.location].filter(Boolean)
                             const title = locationParts[0] || 'Trạm sạc'
-                            const subtitle = locationParts[1] || 'Không rõ địa điểm'
+                            const subtitle = locationParts[1] || 'VinFast Station Charging'
+                            const percentage = Math.round(Math.min(100, Math.max(0, ((log.kwh || 0) / 37.23) * 100)))
+
+                            const originalCost = (log.kwh || 0) * (log.unit_price || 3858)
+                            const displayCost = log.total_cost ?? log.total_amount ?? 0
+                            const isDiscounted = displayCost < originalCost || (log.notes?.includes('Khuyến mãi'))
 
                             return (
-                                <div key={log.id} onClick={() => setEditingLog(log as FuelLogRecord)} className="bg-white rounded-[20px] p-5 shadow-md border border-gray-300 flex flex-col gap-4 cursor-pointer hover:shadow-md transition-shadow active:scale-[0.98]">
-                                    {/* Header */}
-                                    <div className="flex justify-between items-start gap-3">
-                                        <div className="flex-1 min-w-0">
-                                            <h3 className="text-[15px] font-bold text-slate-800 truncate">{title}</h3>
-                                            <p className="text-xs font-medium text-slate-400 mt-0.5 truncate">{subtitle}</p>
-                                        </div>
-                                        <div className="text-right shrink-0">
-                                            <p className="text-sm font-bold text-slate-700">{dateStr}</p>
-                                            <p className="text-xs font-medium text-slate-400 mt-0.5">{startTime} → {endTime}</p>
-                                        </div>
+                                <div key={log.id} className="relative">
+                                    {/* Timeline Dot */}
+                                    <div className="absolute -left-[17px] top-6 flex flex-col items-center -translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-300">
+                                        <span className="text-[9px] font-black text-slate-400 bg-[#F7F9FC] py-1 leading-none">{shortDateStr}</span>
+                                        <div className="h-3.5 w-3.5 rounded-full border-[3px] border-[#F7F9FC] bg-green-600 shadow-sm" />
                                     </div>
 
-                                    {/* Bottom Stats */}
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-5">
-                                            <div className="flex items-center gap-1.5">
-                                                <Zap className="h-4 w-4 text-green-500" />
-                                                <span className="text-[15px] font-black text-slate-800">{log.kwh?.toFixed(1) || 0} kWh</span>
-                                            </div>
-                                            <div className="flex items-center gap-1.5">
-                                                <Clock className="h-4 w-4 text-blue-500" />
-                                                <span className="text-[13px] font-semibold text-slate-600">{formatDuration(parsedDurationMins, true)}</span>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            {/* Show crossed original price and Free badge if cost is 0 */}
-                                            {log.total_cost === 0 ? (
-                                                <>
-                                                    <span className="text-xs font-extrabold text-green-600 bg-green-50 px-2 py-0.5 rounded-md mr-1.5 uppercase">Free</span>
-                                                    <span className="text-xs font-medium text-slate-400 line-through">{formatCurrency((log.kwh || 0) * (price || 3858)).replace('₫', 'đ').trim()}</span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <span className="text-[15px] font-black text-slate-800">{formatCurrency(log.total_cost || log.total_amount || 0).replace('₫', 'đ').trim()}</span>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                    {/* Progress Bar */}
-                                    <div className="mt-1">
-                                        <div className="flex justify-between text-[10px] text-slate-500 font-medium mb-1.5 px-0.5">
-                                            <span>Tỉ lệ sạc</span>
-                                            <span className="text-green-500 font-bold">{Math.round(Math.min(100, Math.max(0, ((log.kwh || 0) / 37.23) * 100)))}%</span>
-                                        </div>
-                                        <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                                            <div
-                                                className="bg-green-500 h-full rounded-full transition-all duration-500"
-                                                style={{ width: `${Math.min(100, Math.max(0, ((log.kwh || 0) / 37.23) * 100))}%` }}
-                                            ></div>
-                                        </div>
-                                    </div>
+                                    <div
+                                        onClick={() => setEditingLog(log as FuelLogRecord)}
+                                        className="group relative overflow-hidden bg-white rounded-3xl p-4 shadow-md border border-slate-300 transition-all duration-300 hover:shadow-xl hover:translate-x-1 cursor-pointer"
+                                    >
+                                        <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-600 opacity-0 group-hover:opacity-100 transition-all duration-300" />
 
-                                    {/* Clean Notes display if any exist */}
-                                    {cleanNotesStr && (
-                                        <div className="pt-3 border-t border-slate-100 mt-0.5">
-                                            <p className="text-[13px] text-slate-600 font-medium">Ghi chú: <span className="text-slate-500 font-normal">{cleanNotesStr}</span></p>
+                                        {/* Header Row */}
+                                        <div className="flex justify-between items-start gap-4 mb-3">
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="text-[15px] font-black text-slate-900 truncate uppercase tracking-tight">{title}</h3>
+                                                <div className="flex items-center gap-1.5 mt-1">
+                                                    <MapPin className="h-3 w-3 text-slate-400" />
+                                                    <p className="text-[11px] font-bold text-slate-400 truncate uppercase tracking-tighter">{subtitle}</p>
+                                                </div>
+                                            </div>
+                                            <div className="text-right shrink-0">
+                                                <p className="text-[11px] font-black text-slate-900 border border-slate-200 rounded-full px-2.5 py-1 bg-slate-100">{dateStr}</p>
+                                            </div>
                                         </div>
-                                    )}
+
+                                        {/* Metrics Grid */}
+                                        <div className="grid grid-cols-3 gap-4 mb-5">
+                                            <div className="flex flex-col">
+                                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Số điện</p>
+                                                <div className="flex items-baseline gap-1">
+                                                    <span className="text-lg font-black text-slate-900">{log.kwh?.toFixed(1) || 0}</span>
+                                                    <span className="text-[10px] font-black text-slate-400 uppercase">kWh</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col border-x border-slate-100 px-2">
+                                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Thời gian</p>
+                                                <div className="flex items-baseline gap-1">
+                                                    <span className="text-lg font-black text-slate-900">{formatDuration(parsedDurationMins, true).split(' ')[0]}</span>
+                                                    <span className="text-[10px] font-black text-slate-400 uppercase">{formatDuration(parsedDurationMins, true).split(' ')[1] || 'phút'}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col text-right">
+                                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Chi phí</p>
+                                                <div className="flex flex-col items-end gap-0.5">
+                                                    {isDiscounted && originalCost > 0 && (
+                                                        <span className="text-[11px] font-bold text-slate-400 line-through decoration-slate-400/50 leading-none">
+                                                            {formatNumber(Math.round(originalCost))}
+                                                        </span>
+                                                    )}
+                                                    <p className={`text-sm font-black leading-none ${displayCost === 0 ? 'text-emerald-500' : 'text-slate-900'}`}>
+                                                        {displayCost === 0 ? 'FREE' : formatNumber(displayCost)}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Bottom Row - Progress and Timeline */}
+                                        <div className="flex items-center justify-between gap-6">
+                                            <div className="flex-1">
+                                                <div className="flex justify-between items-center mb-1.5">
+                                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Tỉ lệ sạc</span>
+                                                    <span className="text-[10px] font-black text-green-600">{percentage}%</span>
+                                                </div>
+                                                <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
+                                                    <div
+                                                        className="h-full bg-green-600 rounded-full transition-all duration-700 shadow-sm"
+                                                        style={{ width: `${percentage}%` }}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-1.5 shrink-0 bg-blue-50 px-3 py-1.5 rounded-2xl border border-blue-100">
+                                                <span className="text-[10px] font-black text-blue-700">{startTime}</span>
+                                                <ChevronRight className="h-2.5 w-2.5 text-blue-300" />
+                                                <span className="text-[10px] font-black text-blue-700">{endTime}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Clean Notes */}
+                                        {cleanNotesStr && (
+                                            <div className="mt-5 pt-4 border-t border-slate-50">
+                                                <p className="text-[11px] font-bold text-slate-500 italic leading-relaxed truncate group-hover:whitespace-normal group-hover:truncate-none transition-all">
+                                                    "{cleanNotesStr}"
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )
                         })
@@ -633,16 +691,16 @@ export default function VehicleChargingHistory() {
                                         if (line.includes('Thời gian sạc:')) {
                                             const hMatch = line.match(/(\d+)\s*(g|h|giờ|hour)/i)
                                             const mMatch = line.match(/(\d+)\s*(p|ph|m|phút|minute)/i)
-                                            
+
                                             let totalMins = 0
                                             if (hMatch) totalMins += parseInt(hMatch[1], 10) * 60
                                             if (mMatch) totalMins += parseInt(mMatch[1], 10)
-                                            
+
                                             if (!hMatch && !mMatch) {
                                                 const simpleMatch = line.match(/(\d+)/)
                                                 if (simpleMatch) totalMins = parseInt(simpleMatch[1], 10)
                                             }
-                                            
+
                                             if (totalMins > 0) parsedDurationMinsModal = totalMins
                                         }
                                         if (line.includes('Khuyến mãi:')) {
@@ -655,14 +713,14 @@ export default function VehicleChargingHistory() {
                                 }
 
                                 const startTimeModal = editingLog.refuel_time?.slice(0, 5) || '--:--'
-                                
+
                                 // RE-CALCULATE duration from START and END if available
                                 if (startTimeModal !== '--:--' && parsedEndTimeModal) {
-                                     const [sh, sm] = startTimeModal.split(':').map(Number)
-                                     const [eh, em] = parsedEndTimeModal.split(':').map(Number)
-                                     let calcMins = (eh * 60 + em) - (sh * 60 + sm)
-                                     if (calcMins < 0) calcMins += 24 * 60
-                                     if (calcMins > 0) parsedDurationMinsModal = calcMins
+                                    const [sh, sm] = startTimeModal.split(':').map(Number)
+                                    const [eh, em] = parsedEndTimeModal.split(':').map(Number)
+                                    let calcMins = (eh * 60 + em) - (sh * 60 + sm)
+                                    if (calcMins < 0) calcMins += 24 * 60
+                                    if (calcMins > 0) parsedDurationMinsModal = calcMins
                                 }
 
                                 const endTimeModal = parsedEndTimeModal || calculateEndTime(startTimeModal, parsedDurationMinsModal) || '--:--'

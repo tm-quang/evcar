@@ -5,6 +5,7 @@ import {
     Bike,
     Route,
     Wrench,
+    Receipt,
     BarChart3,
     AlertTriangle,
     Star,
@@ -20,7 +21,6 @@ import {
     Calculator,
     ChevronRight,
     Plus,
-    LayoutList,
 } from 'lucide-react'
 import { useVehicles, useVehicleStats, useVehicleAlerts, useSetDefaultVehicle, vehicleKeys, useVehicleNotifications } from '../../lib/ev/useVehicleQueries'
 import { updateVehicle } from '../../lib/ev/vehicleService'
@@ -270,123 +270,109 @@ export default function VehicleManagement() {
                             </div>
                         </div>
                     ) : (
-                        <div className="space-y-4">
+                        <div className="space-y-6">
 
                             {/* ══════════════════════════════════════════════
                     VEHICLE HERO CAROUSEL
                 ══════════════════════════════════════════════ */}
-                            <section>
-                                <div className="mb-3 flex items-center justify-between px-1">
-                                    <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">Xe của bạn</h3>
+                            <section className="px-1">
+                                <div className="mb-4 flex items-center justify-between">
+                                    <h3 className="text-[13px] font-black uppercase tracking-[0.15em] text-slate-400">Xe của bạn</h3>
                                     <button
                                         onClick={() => navigate('/ev/list')}
-                                        className="text-xs font-bold text-blue-600 hover:text-blue-700 active:scale-95 transition-all"
+                                        className="text-xs font-bold text-blue-600 hover:text-blue-700 active:scale-95 transition-all bg-blue-50 px-3 py-1.5 rounded-full"
                                     >
-                                        Xem tất cả ({vehicles.length})
+                                        Tất cả ({vehicles.length})
                                     </button>
                                 </div>
-                                <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                                <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 scrollbar-hide">
                                     {vehicles.map((vehicle) => {
                                         const isSelected = selectedVehicle?.id === vehicle.id
                                         const VehicleIcon = vehicle.vehicle_type === 'motorcycle' ? Bike : Car
                                         const isMc = vehicle.vehicle_type === 'motorcycle'
-                                        const grad = 'from-emerald-500 via-green-700 to-teal-800'
+                                        
+                                        // Dynamic gradients based on vehicle type and selection
+                                        const grad = isSelected 
+                                            ? 'from-[#0F172A] via-[#111827] to-[#1E293B]' // Deep premium dark
+                                            : 'from-slate-100 to-slate-200'
 
                                         return (
                                             <div
                                                 key={vehicle.id}
                                                 onClick={() => setSelectedId(vehicle.id)}
-                                                className="group relative flex min-w-[calc(100%-1rem)] flex-shrink-0 snap-center rounded-3xl overflow-hidden cursor-pointer transition-all duration-300"
+                                                className={`group relative flex min-w-[280px] w-[88%] flex-shrink-0 snap-center rounded-[32px] overflow-hidden cursor-pointer transition-all duration-500 ${isSelected ? 'scale-100 shadow-2xl shadow-slate-900/30 ring-1 ring-white/10' : 'scale-[0.96] opacity-70 border border-slate-200 shadow-sm'}`}
                                             >
-                                                {/* Background */}
-                                                <div className={`relative h-52 w-full overflow-hidden rounded-3xl p-4 ${!vehicle.image_url ? `bg-gradient-to-br ${grad}` : 'bg-white'}`}>
+                                                {/* Background Area */}
+                                                <div className={`relative h-56 w-full p-6 transition-colors duration-500 overflow-hidden bg-gradient-to-br ${grad}`}>
                                                     {vehicle.image_url ? (
-                                                        <div className="absolute inset-0 z-0">
-                                                            <img src={vehicle.image_url} alt={vehicle.license_plate} className="h-full w-full object-cover opacity-90" />
-                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40" />
+                                                        <div className="absolute inset-0 z-0 overflow-hidden">
+                                                            <img src={vehicle.image_url} alt={vehicle.license_plate} className="h-full w-full object-cover scale-110 group-hover:scale-100 transition-transform duration-1000" />
+                                                            <div className={`absolute inset-0 bg-gradient-to-t ${isSelected ? 'from-[#0F172A] via-[#0F172A]/40 to-transparent' : 'from-slate-200/50 to-transparent'}`} />
                                                         </div>
                                                     ) : (
                                                         <div className="absolute inset-0 z-0 overflow-hidden">
-                                                            {/* Geometric deco */}
-                                                            <div className="absolute -right-8 -top-8 h-48 w-48 rounded-full bg-white/8 blur-2xl" />
-                                                            <div className="absolute -left-8 bottom-0 h-36 w-36 rounded-full bg-white/6 blur-xl" />
-                                                            <div className="absolute right-0 bottom-0 opacity-10">
-                                                                <VehicleIcon className="h-36 w-36 text-white" />
+                                                            <div className={`absolute -right-8 -top-8 h-48 w-48 rounded-full blur-3xl ${isSelected ? 'bg-blue-500/20' : 'bg-slate-300/30'}`} />
+                                                            <div className={`absolute -left-12 bottom-0 h-40 w-40 rounded-full blur-3xl ${isSelected ? 'bg-emerald-500/10' : 'bg-slate-300/20'}`} />
+                                                            <div className={`absolute right-4 bottom-4 opacity-[0.05] transition-all duration-700 ${isSelected ? 'scale-110 rotate-3' : ''}`}>
+                                                                <VehicleIcon className={`h-44 w-44 ${isSelected ? 'text-white' : 'text-slate-400'}`} />
                                                             </div>
-                                                            <svg className="absolute bottom-0 left-0 w-full opacity-10" viewBox="0 0 400 120" preserveAspectRatio="none">
-                                                                <path d="M0,80 Q100,30 200,80 T400,80 L400,120 L0,120 Z" fill="white" />
-                                                            </svg>
                                                         </div>
                                                     )}
 
-                                                    {/* Content */}
-                                                    <div className="relative z-10 flex h-full flex-col justify-between text-white">
-                                                        {/* Top row */}
-                                                        <div className="flex items-start justify-between gap-2">
-                                                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                                                                <div className="rounded-2xl bg-white/20 backdrop-blur-md p-2 shrink-0 border border-white/20">
-                                                                    <VehicleIcon className="h-5 w-5 text-white" />
+                                                    {/* Content Overlay */}
+                                                    <div className={`relative z-10 flex h-full flex-col justify-between ${isSelected ? 'text-white' : 'text-slate-700'}`}>
+                                                        {/* Header Row */}
+                                                        <div className="flex items-start justify-between">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className={`rounded-[18px] p-3 backdrop-blur-xl border transition-all duration-300 ${isSelected ? 'bg-white/5 border-white/10 shadow-lg' : 'bg-white border-slate-300 shadow-sm'}`}>
+                                                                    <VehicleIcon className={`h-5 w-5 ${isSelected ? 'text-white' : 'text-slate-600'}`} />
                                                                 </div>
                                                                 <div className="min-w-0">
-                                                                    <p className="text-lg font-black tracking-widest uppercase truncate">{vehicle.license_plate}</p>
-                                                                    <p className="text-xs font-medium text-white/70 truncate">{vehicle.model}</p>
+                                                                    <h4 className={`text-2xl font-black tracking-tighter uppercase truncate leading-none mb-1 shadow-black/20 ${isSelected ? 'text-white drop-shadow-md' : 'text-slate-900'}`}>
+                                                                        {vehicle.license_plate}
+                                                                    </h4>
+                                                                    <p className={`text-[11px] font-black uppercase tracking-[0.1em] opacity-40 truncate ${isSelected ? 'text-slate-100' : 'text-slate-500'}`}>
+                                                                        {vehicle.model}
+                                                                    </p>
                                                                 </div>
                                                             </div>
-                                                            <div className="flex items-center gap-1.5 shrink-0">
-                                                                <button onClick={(e) => { e.stopPropagation(); navigate(`/ev/edit/${vehicle.id}`) }}
-                                                                    className="h-8 w-8 flex items-center justify-center rounded-full bg-white/15 backdrop-blur-sm hover:bg-white/25 transition-all border border-white/20">
-                                                                    <Edit className="h-3.5 w-3.5 text-white" />
+                                                            <div className="flex items-center gap-2">
+                                                                <button 
+                                                                    onClick={(e) => { e.stopPropagation(); navigate(`/ev/edit/${vehicle.id}`) }}
+                                                                    className={`h-10 w-10 flex items-center justify-center rounded-[18px] backdrop-blur-xl transition-all border ${isSelected ? 'bg-white/10 border-white/20 hover:bg-white/20 text-white' : 'bg-white border-slate-200 text-slate-400 shadow-sm'}`}
+                                                                >
+                                                                    <Edit className="h-4 w-4" />
                                                                 </button>
-                                                                <button onClick={(e) => toggleDefaultVehicle(e, vehicle.id, !!vehicle.is_default)}
-                                                                    className={`h-8 w-8 flex items-center justify-center rounded-full transition-all border ${vehicle.is_default ? 'bg-yellow-400 border-yellow-300 shadow-lg shadow-yellow-400/40' : 'bg-white/15 backdrop-blur-sm border-white/20 hover:bg-white/25'}`}>
-                                                                    <Star className={`h-3.5 w-3.5 ${vehicle.is_default ? 'text-white fill-current' : 'text-white'}`} />
+                                                                <button 
+                                                                    onClick={(e) => toggleDefaultVehicle(e, vehicle.id, !!vehicle.is_default)}
+                                                                    className={`h-10 w-10 flex items-center justify-center rounded-[18px] transition-all border shadow-lg ${vehicle.is_default ? 'bg-yellow-400 border-yellow-300 shadow-yellow-400/30' : isSelected ? 'bg-white/10 border-white/20' : 'bg-white border-slate-200 shadow-sm'}`}
+                                                                >
+                                                                    <Star className={`h-4 w-4 ${vehicle.is_default ? 'text-white fill-current' : isSelected ? 'text-white' : 'text-slate-300'}`} />
                                                                 </button>
                                                             </div>
                                                         </div>
 
-                                                        {/* ODO - Hidden per user request */}
-                                                        {/* <div>
-                                                <div className="flex items-end gap-3 mb-1">
-                                                    <div className="flex items-baseline gap-1.5">
-                                                        <Gauge className="h-4 w-4 text-white/60 mb-0.5" />
-                                                        <span className="text-4xl font-black tracking-tighter">{vehicle.current_odometer.toLocaleString()}</span>
-                                                        <span className="text-sm font-semibold text-white/60">km</span>
-                                                    </div>
-                                                    {isSelected && (
-                                                        <button
-                                                            onClick={(e) => { e.stopPropagation(); setNewOdo(''); setShowOdoModal(true) }}
-                                                            className="mb-1 flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-white/30 transition-all active:scale-95"
-                                                        >
-                                                            <Edit className="h-4 w-4" />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                                <p className="text-[11px] text-white/50 font-medium">Số km hiện tại</p>
-                                            </div> */}
-
-                                                        {/* Bottom info strip */}
-                                                        <div className="flex items-center justify-between border-t border-white/15 pt-3 mt-1">
-                                                            <div className="text-center">
-                                                                <p className="text-[10px] text-white/50">Năm SX</p>
-                                                                <p className="text-sm font-black">{vehicle.year || 'N/A'}</p>
+                                                        {/* Bottom Stats Strip */}
+                                                        <div className={`flex items-center justify-around rounded-2xl py-3 border-t ${isSelected ? 'border-white/5 bg-white/5 backdrop-blur-sm' : 'border-slate-200 bg-black/5'}`}>
+                                                            <div className="flex flex-col items-center">
+                                                                <span className="text-[8px] font-black uppercase tracking-[0.2em] opacity-50 mb-1">Năm SX</span>
+                                                                <span className="text-[13px] font-black tracking-tight">{vehicle.year || '2024'}</span>
                                                             </div>
-                                                            <div className="h-8 w-px bg-white/15" />
-                                                            <div className="text-center">
-                                                                <p className="text-[10px] text-white/50">Loại xe</p>
-                                                                <p className="text-sm font-black">{isMc ? 'Xe máy' : 'Ô tô'}</p>
+                                                            <div className="h-4 w-px bg-white/10" />
+                                                            <div className="flex flex-col items-center">
+                                                                <span className="text-[8px] font-black uppercase tracking-[0.2em] opacity-50 mb-1">Loại xe</span>
+                                                                <span className="text-[13px] font-black tracking-tight">{isMc ? 'Xe máy' : 'Ô tô'}</span>
                                                             </div>
-                                                            <div className="h-8 w-px bg-white/15" />
-                                                            <div className="text-center">
-                                                                <p className="text-[10px] text-white/50">Loại xe</p>
-                                                                <p className="text-sm font-black">Điện (EV)</p>
+                                                            <div className="h-4 w-px bg-white/10" />
+                                                            <div className="flex flex-col items-center">
+                                                                <span className="text-[8px] font-black uppercase tracking-[0.2em] opacity-50 mb-1">Động cơ</span>
+                                                                <div className="flex items-center gap-1">
+                                                                    <Zap className="h-3 w-3 text-emerald-400 fill-emerald-400/20" />
+                                                                    <span className="text-[13px] font-black tracking-tight uppercase">EV</span>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-
-                                                    {/* Selected ring */}
-                                                    {isSelected && (
-                                                        <div className="absolute inset-0 rounded-3xl ring-2 ring-white/30 ring-inset pointer-events-none" />
-                                                    )}
                                                 </div>
                                             </div>
                                         )
@@ -395,21 +381,18 @@ export default function VehicleManagement() {
 
                                 {/* Dot indicators */}
                                 {vehicles.length > 1 && (
-                                    <div className="flex justify-center gap-1.5 mt-2">
+                                    <div className="flex justify-center gap-2 mt-2">
                                         {vehicles.map((v) => (
                                             <button
                                                 key={v.id}
                                                 onClick={() => setSelectedId(v.id)}
-                                                className={`rounded-full transition-all duration-300 ${selectedVehicle?.id === v.id ? 'w-5 h-1.5 bg-blue-500' : 'w-1.5 h-1.5 bg-slate-300 hover:bg-slate-400'}`}
+                                                className={`rounded-full transition-all duration-500 ${selectedVehicle?.id === v.id ? 'w-8 h-1.5 bg-blue-600' : 'w-1.5 h-1.5 bg-slate-300 hover:bg-slate-400'}`}
                                             />
                                         ))}
                                     </div>
                                 )}
                             </section>
 
-                            {/* ══════════════════════════════════════════════
-                    STATS OVERVIEW
-                ══════════════════════════════════════════════ */}
                             {/* ══════════════════════════════════════════════
                     EV ENERGY & DISTANCE STATS
                 ══════════════════════════════════════════════ */}
@@ -434,7 +417,7 @@ export default function VehicleManagement() {
                                                     </p>
                                                     <span className="text-xs font-bold text-slate-400 uppercase">km</span>
                                                 </div>
-                                                <button
+                                                <button 
                                                     onClick={(e) => { e.stopPropagation(); setNewOdo(''); setShowOdoModal(true) }}
                                                     className="mt-1 text-[10px] font-bold text-blue-600 flex items-center gap-1 hover:underline"
                                                 >
@@ -495,15 +478,15 @@ export default function VehicleManagement() {
                             )}
 
                             {/* ══════════════════════════════════════════════
-                    SUMMARY EXPENSES (REPORT STYLE)
+                    SUMMARY EXPENSES - PREMIUM REPORT STYLE
                 ══════════════════════════════════════════════ */}
                             {selectedVehicle && stats && !isLoadingStats && (
                                 <section className="px-1">
-                                    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 p-7 text-white shadow-2xl shadow-slate-900/20">
+                                    <div className="relative overflow-hidden rounded-[40px] bg-[#0F172A] p-7 text-white shadow-2xl shadow-slate-900/20">
                                         {/* Background Orbs */}
                                         <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-blue-500/10 blur-[80px]" />
                                         <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-emerald-500/10 blur-[80px]" />
-
+                                        
                                         <div className="relative z-10">
                                             <div className="flex items-center justify-between mb-8">
                                                 <div>
@@ -519,16 +502,17 @@ export default function VehicleManagement() {
 
                                             <div className="space-y-5">
                                                 {[
-                                                    { label: 'Tiền sạc pin', val: stats.totalFuelCost, icon: <Zap className="h-4 w-4" />, color: 'emerald' },
+                                                    { label: 'Năng lượng (kWh)', val: stats.totalFuelCost, icon: <Zap className="h-4 w-4" />, color: 'emerald' },
                                                     { label: 'Bảo dưỡng xe', val: stats.totalMaintenanceCost, icon: <Wrench className="h-4 w-4" />, color: 'amber' },
-                                                    { label: 'Chi phí khác', val: stats.totalOtherExpenses, icon: <LayoutList className="h-4 w-4" />, color: 'rose' },
+                                                    { label: 'Chi phí khác', val: stats.totalOtherExpenses, icon: <Receipt className="h-4 w-4" />, color: 'rose' },
                                                 ].map((item, idx) => (
                                                     <div key={idx} className="flex items-center justify-between group">
                                                         <div className="flex items-center gap-4">
-                                                            <div className={`h-11 w-11 rounded-2xl flex items-center justify-center border transition-all duration-300 ${item.color === 'emerald' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
+                                                            <div className={`h-11 w-11 rounded-2xl flex items-center justify-center border transition-all duration-300 ${
+                                                                item.color === 'emerald' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
                                                                 item.color === 'amber' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
-                                                                    'bg-rose-500/10 border-rose-500/20 text-rose-400'
-                                                                }`}>
+                                                                'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                                                            }`}>
                                                                 {item.icon}
                                                             </div>
                                                             <div>
@@ -543,9 +527,9 @@ export default function VehicleManagement() {
                                                 ))}
                                             </div>
 
-                                            <button
+                                            <button 
                                                 onClick={() => navigate('/ev/reports')}
-                                                className="mt-8 w-full py-4 rounded-3xl bg-white/10 border border-white/10 hover:bg-white/10 transition-all font-black text-xs uppercase tracking-[0.2em]"
+                                                className="mt-8 w-full py-4 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all font-black text-xs uppercase tracking-[0.2em]"
                                             >
                                                 Xem báo cáo chi tiết
                                             </button>
@@ -554,33 +538,32 @@ export default function VehicleManagement() {
                                 </section>
                             )}
 
-
                             {/* ══════════════════════════════════════════════
-                    CẢNH BÁO
+                    ALERT SECTION
                 ══════════════════════════════════════════════ */}
                             {alerts.length > 0 && (
-                                <section className="space-y-2.5">
+                                <section className="px-1 space-y-3">
                                     {alerts.map((alert, index) => {
                                         const { title, remainingText, isCritical } = getAlertInfo(alert)
                                         return (
                                             <div
                                                 key={index}
-                                                className={`flex items-start gap-3 rounded-2xl p-4 border ${isCritical
-                                                    ? 'bg-red-50 border-red-100 shadow-sm shadow-red-100'
-                                                    : 'bg-amber-50 border-amber-100 shadow-sm shadow-amber-100'
-                                                    }`}
+                                                className={`group flex items-start gap-4 rounded-3xl p-5 border transition-all duration-300 ${isCritical
+                                                    ? 'bg-red-50 border-red-100 shadow-sm'
+                                                    : 'bg-amber-50 border-amber-100 shadow-sm'
+                                                }`}
                                             >
-                                                <div className={`shrink-0 mt-0.5 rounded-xl p-2 ${isCritical ? 'bg-red-100' : 'bg-amber-100'}`}>
-                                                    <AlertTriangle className={`h-4 w-4 ${isCritical ? 'text-red-600' : 'text-amber-600'}`} />
+                                                <div className={`shrink-0 rounded-2xl p-3 shadow-inner ${isCritical ? 'bg-red-500 text-white' : 'bg-amber-500 text-white'}`}>
+                                                    <AlertTriangle className="h-5 w-5" />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center justify-between gap-2">
-                                                        <p className={`text-sm font-black ${isCritical ? 'text-red-700' : 'text-amber-700'}`}>{title}</p>
-                                                        <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase ${isCritical ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                                                    <div className="flex items-center justify-between gap-2 mb-1">
+                                                        <p className={`text-sm font-black uppercase tracking-wide ${isCritical ? 'text-red-900' : 'text-amber-900'}`}>{title}</p>
+                                                        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-tighter border ${isCritical ? 'bg-red-100 border-red-200 text-red-700' : 'bg-amber-100 border-amber-200 text-amber-700'}`}>
                                                             {remainingText}
                                                         </span>
                                                     </div>
-                                                    <p className={`text-xs mt-0.5 ${isCritical ? 'text-red-500' : 'text-amber-500'}`}>{alert.message}</p>
+                                                    <p className={`text-xs font-medium leading-relaxed opacity-80 ${isCritical ? 'text-red-700' : 'text-amber-700'}`}>{alert.message}</p>
                                                 </div>
                                             </div>
                                         )
@@ -589,74 +572,72 @@ export default function VehicleManagement() {
                             )}
 
                             {/* ══════════════════════════════════════════════
-                    VERTICAL MAINTENANCE TIMELINE
+                    MAINTENANCE TIMELINE
                 ══════════════════════════════════════════════ */}
                             {selectedVehicle && (maintProgress || maintDateProgress || selectedVehicle.insurance_expiry_date || selectedVehicle.inspection_expiry_date) && (
-                                <section>
-                                    <div className="mb-4 flex items-center justify-between px-1">
-                                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">bảo dưỡng, Bảo hiểm, đăng kiểm</h2>
+                                <section className="px-1">
+                                    <div className="mb-4 flex items-center justify-between">
+                                        <h2 className="text-[13px] font-black uppercase tracking-[0.15em] text-slate-400">Dịch vụ & Bảo hiểm</h2>
                                     </div>
 
                                     <div className="space-y-4">
-                                        {/* EV Maintenance Progress */}
+                                        {/* EV Maintenance Card */}
                                         {maintProgress && (
-                                            <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-200 to-white p-5 border border-slate-300 shadow-md transition-all hover:border-emerald-200">
-                                                <div className="absolute -right-3 -bottom-3 opacity-[0.05] text-slate-500 transition-transform group-hover:scale-110">
-                                                    <Wrench className="h-24 w-24" />
-                                                </div>
-                                                <div className="relative z-10 flex items-center justify-between">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`rounded-3xl p-2 ${maintProgress.isOverdue ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}`}>
-                                                            <Wrench className="h-5 w-5" />
+                                            <div className="group relative overflow-hidden rounded-[32px] bg-white p-6 border border-slate-200 shadow-sm transition-all hover:border-emerald-200">
+                                                <div className="flex items-center justify-between mb-5">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className={`h-12 w-12 rounded-2xl flex items-center justify-center border ${maintProgress.isOverdue ? 'bg-red-100 border-red-200 text-red-600' : 'bg-slate-100 border-slate-200 text-slate-600'}`}>
+                                                            <Wrench className="h-6 w-6" />
                                                         </div>
                                                         <div>
-                                                            <p className="text-sm font-black text-slate-800">Bảo dưỡng định kỳ</p>
-                                                            <p className="text-[10px] font-bold text-slate-400 tracking-wide uppercase">Dự kiến tại {maintProgress.target.toLocaleString()} km</p>
+                                                            <p className="text-sm font-black text-slate-900">Bảo dưỡng định kỳ</p>
+                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Mốc {maintProgress.target.toLocaleString()} km</p>
                                                         </div>
                                                     </div>
                                                     <div className="text-right">
-                                                        <p className={`text-sm font-black ${maintProgress.isOverdue ? 'text-red-500' : 'text-red-500'}`}>
-                                                            {maintProgress.isOverdue ? `Quá mốc!` : `Còn ${maintProgress.kmLeft.toLocaleString()} km`}
-                                                        </p>
+                                                        <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-full border ${maintProgress.isOverdue ? 'bg-red-500 border-red-600 text-white' : 'bg-emerald-50 border-emerald-100 text-emerald-600'}`}>
+                                                            {maintProgress.isOverdue ? `Quá hạn!` : `Khuyên dùng`}
+                                                        </span>
                                                     </div>
                                                 </div>
 
-                                                <div className="mt-4">
-                                                    <div className="h-2 w-full rounded-full bg-slate-50 overflow-hidden ring-1 ring-slate-100/50">
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between text-[10px] font-black uppercase tracking-tighter mb-1.5">
+                                                        <span className="text-slate-400">Tiến độ vận hành</span>
+                                                        <span className={maintProgress.isOverdue ? 'text-red-500' : 'text-emerald-600'}>{maintProgress.pct}%</span>
+                                                    </div>
+                                                    <div className="h-2.5 w-full rounded-full bg-slate-100 overflow-hidden border border-slate-200/50">
                                                         <div
-                                                            className={`h-full rounded-full transition-all duration-1000 ${maintProgress.isOverdue ? 'bg-red-500' : 'bg-gradient-to-r from-emerald-400 to-green-500'}`}
+                                                            className={`h-full rounded-full transition-all duration-1000 shadow-sm ${maintProgress.isOverdue ? 'bg-red-500' : 'bg-gradient-to-r from-emerald-400 to-emerald-600'}`}
                                                             style={{ width: `${Math.min(100, Math.max(2, maintProgress.pct))}%` }}
                                                         />
                                                     </div>
-                                                    <div className="mt-2 flex items-center justify-between">
-                                                        <span className="text-[10px] font-bold text-slate-400">{maintProgress.pct}% tiến độ</span>
-                                                        <button onClick={() => navigate('/ev/maintenance')} className="flex items-center gap-1 text-[10px] font-black text-emerald-600 uppercase">
-                                                            Cấu hình mốc bảo dưỡng <ChevronRight className="h-3 w-3" />
+                                                    <div className="mt-3 flex items-center justify-between">
+                                                        <p className={`text-xs font-black ${maintProgress.isOverdue ? 'text-red-600' : 'text-slate-700'}`}>
+                                                            {maintProgress.isOverdue ? `Đã quá ${Math.abs(maintProgress.kmLeft).toLocaleString()} km` : `Còn ${(maintProgress.kmLeft).toLocaleString()} km`}
+                                                        </p>
+                                                        <button onClick={() => navigate('/ev/maintenance')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1">
+                                                            Lịch sử <ChevronRight className="h-3 w-3" />
                                                         </button>
                                                     </div>
                                                 </div>
                                             </div>
                                         )}
 
-                                        {/* Legal Docs (Inspection/Insurance) in 2-col cards */}
-                                        <div className="grid grid-cols-2 gap-3">
+                                        {/* Legal Cards */}
+                                        <div className="grid grid-cols-2 gap-4">
                                             {selectedVehicle.insurance_expiry_date && (() => {
                                                 const d = new Date(selectedVehicle.insurance_expiry_date)
                                                 const days = Math.ceil((d.getTime() - Date.now()) / 86400000)
                                                 return (
-                                                    <div className="relative group overflow-hidden rounded-3xl bg-blue-50 p-5 border border-blue-100 shadow-sm transition-all hover:bg-white hover:shadow-md">
-                                                        <div className="absolute -right-3 -bottom-3 opacity-[0.08] text-blue-600 transition-transform group-hover:scale-110">
-                                                            <Shield className="h-20 w-20" />
+                                                    <div className="rounded-[32px] bg-white p-5 border border-slate-200 shadow-sm group">
+                                                        <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 shadow-sm transition-all group-hover:bg-blue-600 group-hover:text-white">
+                                                            <Shield className="h-5 w-5" />
                                                         </div>
-                                                        <div className="relative z-10">
-                                                            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-500/20">
-                                                                <Shield className="h-5 w-5" />
-                                                            </div>
-                                                            <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">Bảo hiểm</p>
-                                                            <p className={`text-sm font-black ${days < 30 ? 'text-red-500' : 'text-slate-800'}`}>
-                                                                {days < 0 ? 'Hết hạn' : `Còn ${days} ngày`}
-                                                            </p>
-                                                        </div>
+                                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">Bảo hiểm</p>
+                                                        <p className={`text-md font-black ${days < 30 ? 'text-red-600' : 'text-slate-900'}`}>
+                                                            {days < 0 ? 'Hết hạn' : `Còn ${days} ngày`}
+                                                        </p>
                                                     </div>
                                                 )
                                             })()}
@@ -664,19 +645,14 @@ export default function VehicleManagement() {
                                                 const d = new Date(selectedVehicle.inspection_expiry_date)
                                                 const days = Math.ceil((d.getTime() - Date.now()) / 86400000)
                                                 return (
-                                                    <div className="relative group overflow-hidden rounded-3xl bg-slate-50 p-5 border border-slate-200 shadow-sm transition-all hover:bg-white hover:shadow-md">
-                                                        <div className="absolute -right-3 -bottom-3 opacity-[0.08] text-slate-500 transition-transform group-hover:scale-110">
-                                                            <ClipboardCheck className="h-20 w-20" />
+                                                    <div className="rounded-[32px] bg-white p-5 border border-slate-200 shadow-sm group">
+                                                        <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 shadow-sm transition-all group-hover:bg-amber-600 group-hover:text-white">
+                                                            <ClipboardCheck className="h-5 w-5" />
                                                         </div>
-                                                        <div className="relative z-10">
-                                                            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-500 text-white shadow-lg shadow-slate-500/20">
-                                                                <ClipboardCheck className="h-5 w-5" />
-                                                            </div>
-                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Đăng kiểm</p>
-                                                            <p className={`text-sm font-black ${days < 30 ? 'text-red-600' : 'text-slate-900'}`}>
-                                                                {days < 0 ? 'Hết hạn' : `Còn ${days} ngày`}
-                                                            </p>
-                                                        </div>
+                                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">Đăng kiểm</p>
+                                                        <p className={`text-md font-black ${days < 30 ? 'text-red-600' : 'text-slate-900'}`}>
+                                                            {days < 0 ? 'Hết hạn' : `Còn ${days} ngày`}
+                                                        </p>
                                                     </div>
                                                 )
                                             })()}
@@ -686,58 +662,37 @@ export default function VehicleManagement() {
                             )}
 
                             {/* ══════════════════════════════════════════════
-                    QUICK ACTIONS / MANAGEMENT
+                    QUICK ACTIONS / MENU
                 ══════════════════════════════════════════════ */}
                             {selectedVehicle && (
-                                <section>
-                                    <div className="mb-4 flex items-center justify-between px-1">
-                                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Tiện ích khác</h2>
+                                <section className="px-1">
+                                    <div className="mb-4 flex items-center justify-between">
+                                        <h2 className="text-[13px] font-black uppercase tracking-[0.15em] text-slate-400">Tiện ích & Quản lý</h2>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-3">
+                                    <div className="grid grid-cols-2 gap-4">
                                         {[
-                                            { id: 'trips', label: 'Lộ trình', sub: 'Lịch sử di chuyển', icon: Route, color: 'bg-indigo-600', text: 'text-indigo-600', bg: 'bg-indigo-50/50', border: 'border-indigo-100', route: '/ev/trips' },
-                                            { id: 'charging', label: 'Sạc pin', sub: 'Quản lý Pin & Sạc', icon: Zap, color: 'bg-emerald-600', text: 'text-emerald-600', bg: 'bg-emerald-50/50', border: 'border-emerald-100', route: '/ev/charging' },
-                                            { id: 'reports', label: 'Báo cáo', sub: 'Phân tích hiệu suất', icon: BarChart3, color: 'bg-blue-600', text: 'text-blue-600', bg: 'bg-blue-50/50', border: 'border-blue-100', route: '/ev/reports' },
-                                            { id: 'maintenance', label: 'Bảo dưỡng', sub: 'Lịch sử & Nhắc lịch', icon: Wrench, color: 'bg-amber-600', text: 'text-amber-600', bg: 'bg-amber-50/50', border: 'border-amber-100', route: '/ev/maintenance' },
-                                            { id: 'expenses', label: 'Chi phí khác', sub: 'Gửi xe, Rửa xe...', icon: LayoutList, color: 'bg-rose-600', text: 'text-rose-600', bg: 'bg-rose-50/50', border: 'border-rose-100', route: '/ev/expenses' },
+                                            { id: 'trips', label: 'Lộ trình', sub: 'Hành trình di chuyển', icon: <Route className="h-6 w-6" />, bg: 'bg-indigo-500' },
+                                            { id: 'charging', label: 'Sạc pin', sub: 'Quản lý Pin & Sạc', icon: <Zap className="h-6 w-6" />, bg: 'bg-emerald-500' },
+                                            { id: 'reports', label: 'Báo cáo', sub: 'Phân tích hiệu suất', icon: <BarChart3 className="h-6 w-6" />, bg: 'bg-blue-500' },
+                                            { id: 'maintenance', label: 'Bảo dưỡng', sub: 'Lịch sử & Nhắc lịch', icon: <Wrench className="h-6 w-6" />, bg: 'bg-amber-500' },
+                                            { id: 'expenses', label: 'Chi phí khác', sub: 'Gửi xe, Rửa xe...', icon: <Receipt className="h-6 w-6" />, bg: 'bg-rose-500' },
+                                            { id: 'calculator', label: 'Công cụ EV', sub: 'Máy tính tiết kiệm', icon: <Calculator className="h-6 w-6" />, bg: 'bg-[#0F172A]' },
                                         ].map((item) => (
                                             <button
                                                 key={item.id}
-                                                onClick={() => navigate(item.route)}
-                                                className={`group relative overflow-hidden flex flex-col items-center justify-center text-center gap-2 rounded-3xl ${item.bg} p-6 border ${item.border} shadow-md transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95`}
+                                                onClick={() => navigate(`/ev/${item.id}`)}
+                                                className="group relative flex flex-col items-start gap-4 rounded-[32px] bg-white p-6 border border-slate-200 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-slate-300"
                                             >
-                                                <div className={`absolute -right-2 -bottom-2 opacity-10 ${item.text} transition-all duration-500 group-hover:scale-110 group-hover:rotate-6`}>
-                                                    <item.icon className="h-20 w-20" />
+                                                <div className={`h-12 w-12 flex items-center justify-center rounded-2xl ${item.bg} text-white shadow-lg shadow-${item.bg.split('-')[1]}-500/20 group-hover:scale-110 transition-transform duration-500`}>
+                                                    {item.icon}
                                                 </div>
-                                                <div className="relative z-10">
-                                                    <div className={`h-11 w-11 flex items-center justify-center rounded-2xl ${item.color} text-white shadow-lg mx-auto mb-3 transition-transform group-hover:scale-110`}>
-                                                        <item.icon className="h-5 w-5" />
-                                                    </div>
-                                                    <p className={`text-sm font-black tracking-tight ${item.text.replace('text-', 'text-')}`}>{item.label}</p>
-                                                    <p className="text-[9px] font-black opacity-50 mt-1 uppercase tracking-widest text-slate-500">{item.sub}</p>
+                                                <div>
+                                                    <p className="text-sm font-black text-slate-900 group-hover:text-blue-600 transition-colors uppercase tracking-wide">{item.label}</p>
+                                                    <p className="text-[9px] font-black text-slate-400 mt-1 uppercase tracking-widest">{item.sub}</p>
                                                 </div>
                                             </button>
                                         ))}
-
-                                        {/* EV Calculator */}
-                                        <button
-                                            onClick={() => navigate('/ev/calculator')}
-                                            className="group relative overflow-hidden flex flex-col items-center justify-center text-center gap-2 rounded-3xl bg-[#059669] p-6 shadow-xl shadow-emerald-200 transition-all hover:-translate-y-1 hover:shadow-2xl active:scale-95"
-                                        >
-                                            <div className="absolute -right-2 -bottom-2 opacity-20 text-white transition-all duration-500 group-hover:scale-110 group-hover:-rotate-6">
-                                                <Calculator className="h-20 w-20" />
-                                            </div>
-                                            <div className="relative z-10">
-                                                <div className="h-11 w-11 flex items-center justify-center rounded-2xl bg-white text-emerald-600 shadow-lg mx-auto mb-3 transition-transform group-hover:scale-110">
-                                                    <Calculator className="h-5 w-5" />
-                                                </div>
-                                                <div className="text-white">
-                                                    <p className="text-sm font-black tracking-tight">Công cụ EV</p>
-                                                    <p className="text-[9px] font-black opacity-80 mt-1 uppercase tracking-widest">Tính toán km</p>
-                                                </div>
-                                            </div>
-                                        </button>
                                     </div>
                                 </section>
                             )}

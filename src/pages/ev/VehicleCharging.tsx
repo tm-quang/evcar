@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-    Plus, Calendar, Trash2, MapPin, Settings, Zap, Droplet,
+    Plus, Calendar, MapPin, Settings, Zap, Droplet,
     BatteryCharging, Activity, TrendingUp, Clock, ChevronDown, ChevronUp,
     Check, Gift, DollarSign, Image, Loader2,
     X, CreditCard, ScanLine, Fuel, Save, CheckSquare, Square,
@@ -40,17 +40,16 @@ const FUEL_TYPES = {
 type TabType = 'fuel' | 'electric'
 
 // ── MAP: vehicle.fuel_type → tab + default fuel log type ──────────────────
-const VEHICLE_FUEL_CONFIG: Record<string, {
-    tab: TabType
-    defaultFuelLogType: string
-    label: string
-    isElectric: boolean
-}> = {
-    electric: { tab: 'electric', defaultFuelLogType: 'electric', label: 'Xe điện', isElectric: true },
-}
+
+
+const formatNumber = (value: number, decimals = 0) =>
+    new Intl.NumberFormat('vi-VN', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+    }).format(value)
 
 function getVehicleChargingConfig() {
-    return VEHICLE_FUEL_CONFIG.electric
+    return { isElectric: true, defaultFuelLogType: 'electric' }
 }
 
 // =============================================
@@ -74,15 +73,14 @@ function ElectricStatsCard({ logs }: { logs: FuelLogRecord[] }) {
     const monthKwh = monthLogs.reduce((sum, log) => sum + (log.kwh || log.liters || 0), 0)
     const monthCost = monthLogs.reduce((sum, log) => sum + (log.total_cost || log.total_amount || 0), 0)
 
-    const formatCurrency = (v: number) =>
-        new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(v)
+
 
     return (
         <div className="mb-4 space-y-3">
             {/* Main summary - solid green hero */}
             <div
                 onClick={() => navigate('/ev/history')}
-                className="rounded-2xl bg-green-500 p-4 text-white shadow-lg shadow-green-200 cursor-pointer active:scale-[0.98] transition-all hover:bg-green-600"
+                className="rounded-3xl bg-gradient-to-br from-green-500 to-green-600 p-4 text-white shadow-lg shadow-green-200 cursor-pointer active:scale-[0.98] transition-all hover:bg-green-600"
             >
                 <div className="mb-3 flex items-center gap-2">
                     <div className="rounded-xl bg-white/20 p-1.5">
@@ -93,55 +91,55 @@ function ElectricStatsCard({ logs }: { logs: FuelLogRecord[] }) {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <p className="text-2xl font-black">{totalKwh.toFixed(1)}</p>
-                        <p className="text-xs opacity-75">kWh đã sạc</p>
+                        <p className="text-3xl font-black tracking-tight">{formatNumber(totalKwh, 1)}</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest opacity-70">kWh đã sạc</p>
                     </div>
                     <div className="text-right">
-                        <p className="text-2xl font-black">{formatCurrency(totalCost)}</p>
-                        <p className="text-xs opacity-75">Tổng chi phí</p>
+                        <p className="text-3xl font-black tracking-tight">{formatNumber(totalCost)}</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Tổng chi phí</p>
                     </div>
                 </div>
             </div>
 
             {/* Mini stats row */}
-            <div className="grid grid-cols-3 gap-2">
-                <div className="flex flex-col items-center rounded-2xl bg-white p-3 shadow-md">
-                    <div className="mb-1 rounded-lg bg-amber-100 p-1.5">
-                        <BatteryCharging className="h-4 w-4 text-amber-600" />
+            <div className="grid grid-cols-3 gap-3">
+                <div className="flex flex-col items-center rounded-3xl bg-white p-4 shadow-md border border-slate-300">
+                    <div className="mb-2 rounded-2xl bg-amber-50 p-2 text-amber-600 border border-amber-100">
+                        <BatteryCharging className="h-5 w-5" />
                     </div>
-                    <p className="text-sm font-bold text-slate-800">
+                    <p className="text-lg font-black text-slate-900 leading-none">
                         {sessions}
                     </p>
-                    <p className="text-center text-[10px] leading-tight text-slate-500">Lần sạc</p>
+                    <p className="text-center text-[9px] font-black uppercase tracking-tighter text-slate-400 mt-1">Lần sạc</p>
                 </div>
-                <div className="flex flex-col items-center rounded-2xl bg-white p-3 shadow-md">
-                    <div className="mb-1 rounded-lg bg-blue-100 p-1.5">
-                        <Activity className="h-4 w-4 text-blue-600" />
+                <div className="flex flex-col items-center rounded-3xl bg-white p-4 shadow-md border border-slate-300">
+                    <div className="mb-2 rounded-2xl bg-blue-50 p-2 text-blue-600 border border-blue-100">
+                        <Activity className="h-5 w-5" />
                     </div>
-                    <p className="text-sm font-bold text-slate-800">
-                        {avgCostPerSession > 0 ? `${Math.round(avgCostPerSession).toLocaleString('vi-VN')}đ` : '--'}
+                    <p className="text-lg font-black text-slate-900 leading-none">
+                        {avgCostPerSession > 0 ? formatNumber(Math.round(avgCostPerSession)) : '--'}
                     </p>
-                    <p className="text-center text-[10px] leading-tight text-slate-500">TB/lần sạc</p>
+                    <p className="text-center text-[9px] font-black uppercase tracking-tighter text-slate-400 mt-1">TB/phiên</p>
                 </div>
-                <div className="flex flex-col items-center rounded-2xl bg-white p-3 shadow-md">
-                    <div className="mb-1 rounded-lg bg-green-100 p-1.5">
-                        <TrendingUp className="h-4 w-4 text-green-600" />
+                <div className="flex flex-col items-center rounded-3xl bg-white p-4 shadow-md border border-slate-300">
+                    <div className="mb-2 rounded-2xl bg-emerald-50 p-2 text-emerald-600 border border-emerald-100">
+                        <TrendingUp className="h-5 w-5" />
                     </div>
-                    <p className="text-sm font-bold text-slate-800">
-                        {monthKwh > 0 ? `${monthKwh.toFixed(0)} kWh` : '--'}
+                    <p className="text-lg font-black text-slate-900 leading-none">
+                        {monthKwh > 0 ? formatNumber(monthKwh, 0) : '--'}
                     </p>
-                    <p className="text-center text-[10px] leading-tight text-slate-500">Tháng này</p>
+                    <p className="text-center text-[9px] font-black uppercase tracking-tighter text-slate-400 mt-1">Tháng (kWh)</p>
                 </div>
             </div>
 
             {/* Month summary badge */}
             {monthCost > 0 && (
-                <div className="flex items-center justify-between rounded-xl bg-green-50 border border-green-200 px-4 py-2.5">
+                <div className="flex items-center justify-between rounded-3xl bg-slate-900 px-5 py-3 text-white shadow-md">
                     <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-green-600" />
-                        <span className="text-sm font-medium text-green-700">Chi phí tháng này</span>
+                        <Calendar className="h-4 w-4 text-blue-400" />
+                        <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">Chi phí tháng này</span>
                     </div>
-                    <span className="text-sm font-bold text-green-700">{formatCurrency(monthCost)}</span>
+                    <span className="text-sm font-black text-emerald-400">{formatNumber(monthCost)} VND</span>
                 </div>
             )}
         </div>
@@ -155,7 +153,6 @@ function ElectricStatsCard({ logs }: { logs: FuelLogRecord[] }) {
 // =============================================
 function ChargeLogCard({
     log,
-    onDelete,
     onEdit,
     onView
 }: {
@@ -210,94 +207,82 @@ function ChargeLogCard({
         if (!mins || mins <= 0) return '--'
         const h = Math.floor(mins / 60)
         const m = mins % 60
-        if (h > 0) return `${h} giờ ${m} phút`
+        if (h > 0) return `${h} giờ ${m} p`
         return `${m} phút`
     }
 
-    const formatCurrency = (v: number) =>
-        new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(v)
+
 
     return (
-        <div className="overflow-hidden rounded-2xl bg-white shadow-md transition-all hover:shadow-md border border-gray-300">
-            {/* Top accent bar - solid green */}
-            <div className="h-1 w-full bg-green-500" />
-
-            <div className="p-4">
+        <div className="group overflow-hidden rounded-3xl bg-white shadow-md transition-all hover:shadow-xl hover:border-blue-100 border border-slate-200">
+            <div className="p-5">
                 {/* Header row */}
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between mb-4">
                     <div>
-                        <div className="flex items-center gap-2 mb-0.5">
-                            <div className="flex items-center gap-1 rounded-full bg-green-200 px-2 py-0.5">
-                                <Zap className="h-3 w-3 text-green-600" />
-                                <span className="text-xs font-bold text-green-700">Phiên sạc xe</span>
+                        <div className="flex items-center gap-2 mb-1.5">
+                            <div className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 border border-emerald-100">
+                                <Zap className="h-3 w-3 text-emerald-600" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700">Phiên sạc điện</span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                        <div className="flex items-center gap-2 text-[11px] font-bold text-slate-400">
                             <Calendar className="h-3 w-3" />
                             {new Date(log.refuel_date).toLocaleDateString('vi-VN', {
-                                weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric'
+                                day: '2-digit', month: '2-digit', year: 'numeric'
                             })}
                             {log.refuel_time && (
-                                <span className="flex items-center gap-0.5">
-                                    <Clock className="h-3 w-3" />
+                                <span className="flex items-center gap-1 ml-1 text-slate-900 border-l border-slate-200 pl-2">
+                                    <Clock className="h-3 w-3 text-blue-500" />
                                     {log.refuel_time.slice(0, 5)}
                                 </span>
                             )}
                         </div>
                     </div>
-                    <div className="flex">
+                    <div className="flex items-center gap-1">
                         <button
                             onClick={() => onView(log)}
-                            className="ml-2 rounded-3xl p-2 text-slate-400 transition-colors bg-slate-50 hover:bg-slate-100 hover:text-slate-600"
-                            title="Xem chi tiết"
+                            className="h-8 w-8 flex items-center justify-center rounded-full text-slate-400 transition-all hover:bg-slate-50 hover:text-slate-900"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" /><circle cx="12" cy="12" r="3" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" /><circle cx="12" cy="12" r="3" /></svg>
                         </button>
                         <button
                             onClick={() => onEdit(log)}
-                            className="ml-2 rounded-3xl p-2 text-blue-400 transition-colors bg-blue-50 hover:bg-blue-50 hover:text-blue-600"
-                            title="Chỉnh sửa"
+                            className="h-8 w-8 flex items-center justify-center rounded-full text-blue-500 transition-all hover:bg-blue-50"
                         >
                             <Edit className="h-4 w-4" />
-                        </button>
-                        <button
-                            onClick={() => onDelete(log.id)}
-                            className="ml-2 rounded-3xl p-2 text-red-400 transition-colors bg-red-50 hover:bg-red-50 hover:text-red-600"
-                        >
-                            <Trash2 className="h-4 w-4" />
                         </button>
                     </div>
                 </div>
 
                 {/* Main metrics */}
-                <div className="mt-3 grid grid-cols-3 gap-2">
-                    <div className="rounded-xl bg-green-50 p-2.5 text-center">
-                        <p className="text-base font-black text-green-700">{kwh.toFixed(1)}</p>
-                        <p className="text-[10px] text-green-600 font-medium">kWh</p>
+                <div className="grid grid-cols-3 gap-3 mb-5">
+                    <div className="rounded-2xl bg-slate-50 p-3 text-center shadow-inner">
+                        <p className="text-lg font-black text-slate-900">{formatNumber(kwh, 1)}</p>
+                        <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">kWh</p>
                     </div>
-                    <div className="rounded-xl bg-amber-50 p-2.5 text-center">
-                        <p className="text-base font-black text-amber-700">
+                    <div className="rounded-2xl bg-slate-50 p-3 text-center shadow-inner">
+                        <p className="text-lg font-black text-slate-900 truncate">
                             {formatDuration(durationMins)}
                         </p>
-                        <p className="text-[10px] text-amber-600 font-medium">thời gian sạc</p>
+                        <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Sạc</p>
                     </div>
-                    <div className="rounded-xl bg-red-100 p-2.5 text-center">
-                        <p className="text-base font-black text-red-700">
-                            {formatCurrency(cost).replace('₫', '').trim()}
+                    <div className="rounded-2xl bg-slate-50 p-3 text-center shadow-inner">
+                        <p className="text-lg font-black text-slate-900">
+                            {formatNumber(Math.round(cost))}
                         </p>
-                        <p className="text-[10px] text-red-600 font-medium">tổng tiền</p>
+                        <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">VND</p>
                     </div>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="mt-3.5 px-0.5">
-                    <div className="flex justify-between text-[10px] text-slate-500 font-medium mb-1.5">
-                        <span>Tỉ lệ sạc</span>
-                        <span className="text-green-500 font-bold">{Math.round(Math.min(100, Math.max(0, (kwh / 37.23) * 100)))}%</span>
+                <div className="space-y-2">
+                    <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                        <span className="text-slate-400">Tỉ lệ sạc</span>
+                        <span className="text-emerald-600">{Math.round(Math.min(100, Math.max(0, (kwh / 37.23) * 100)))}%</span>
                     </div>
-                    <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                    <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200/50">
                         <div
-                            className="bg-green-500 h-full rounded-full transition-all duration-500"
+                            className="bg-emerald-500 h-full rounded-full transition-all duration-700 shadow-sm"
                             style={{ width: `${Math.min(100, Math.max(0, (kwh / 37.23) * 100))}%` }}
                         ></div>
                     </div>
@@ -305,19 +290,21 @@ function ChargeLogCard({
 
                 {/* Station name quick view */}
                 {log.station_name && (
-                    <div className="mt-2.5 flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1.5 text-xs text-slate-500 min-w-0">
-                            <MapPin className="h-3 w-3 shrink-0 text-green-500" />
-                            <span className="truncate">{log.station_name}</span>
+                    <div className="mt-4 flex items-center justify-between gap-2 border-t border-slate-50 pt-3">
+                        <div className="flex items-center gap-2 text-xs font-bold text-slate-600 min-w-0">
+                            <div className="h-6 w-6 rounded-xl bg-emerald-50 flex items-center justify-center">
+                                <MapPin className="h-3 w-3 text-emerald-600" />
+                            </div>
+                            <span className="truncate uppercase tracking-tighter">{log.station_name}</span>
                         </div>
                         {log.notes && (() => {
                             const endMatch = log.notes.match(/Kết thúc:\s*(\d{2}:\d{2})/);
                             const startTime = log.refuel_time ? log.refuel_time.slice(0, 5) : null;
                             if (startTime && endMatch) {
                                 return (
-                                    <div className="flex items-center gap-1 text-[11px] font-medium text-black bg-blue-200 px-1.5 py-0.5 rounded-md border border-slate-100">
+                                    <div className="flex items-center gap-1.5 text-[10px] font-black text-slate-900 bg-blue-50 px-2 py-1 rounded-full border border-blue-100">
                                         <span>{startTime}</span>
-                                        <span className="text-slate-300">→</span>
+                                        <ChevronRight className="h-2.5 w-2.5 text-blue-300" />
                                         <span>{endMatch[1]}</span>
                                     </div>
                                 );
@@ -361,8 +348,9 @@ export default function VehicleCharging() {
     const [customRange, setCustomRange] = useState({ start: '', end: '' })
 
     const { data: vehicles = [] } = useVehicles()
-    const selectedVehicle = vehicles.find(v => v.id === selectedVehicleId)
-    const { data: allLogs = [], isLoading: loading } = useVehicleCharging(selectedVehicleId || undefined)
+    const electricVehicles = vehicles.filter(v => v.fuel_type === 'electric')
+    const selectedVehicle = vehicles.find(v => v.id === selectedVehicleId) || electricVehicles[0] || vehicles[0]
+    const { data: allLogs = [], isLoading: loading } = useVehicleCharging(selectedVehicle?.id)
 
     const logs = allLogs.filter(log => {
         const fuelType = FUEL_TYPES[log.fuel_type]
@@ -547,7 +535,7 @@ export default function VehicleCharging() {
         <div className="flex h-screen flex-col overflow-hidden bg-[#F7F9FC]">
             <HeaderBar
                 variant="page"
-                title={isSearchOpen ? '' : 'Lịch sử sạc điện'}
+                title={isSearchOpen ? '' : 'Lịch sử sạc pin'}
                 showIcon={
                     <button
                         type="button"
@@ -596,7 +584,7 @@ export default function VehicleCharging() {
                             <p className="text-xs opacity-75">{selectedVehicle?.brand} {selectedVehicle?.model} · Xe điện</p>
                         </div>
                         <div className="text-right">
-                            <p className="text-sm font-bold">{selectedVehicle?.current_odometer.toLocaleString()} km</p>
+                            <p className="text-sm font-bold">{selectedVehicle?.current_odometer?.toLocaleString() || '0'} km</p>
                             <p className="text-xs opacity-75">Odometer</p>
                         </div>
                     </div>
@@ -758,7 +746,7 @@ export default function VehicleCharging() {
                 onAddClick={() => setShowAddModal(true)
                 }
                 isElectricVehicle={isElectricVehicle}
-                addLabel="Sạc điện"
+                addLabel="Sạc pin"
             />
 
             {/* Add/Edit Modal */}
@@ -1298,7 +1286,7 @@ function AddChargeModal({
                             {chargeAmount > 0 && (
                                 <div className="flex items-center justify-between rounded-xl bg-white border border-slate-200 px-3 py-2.5">
                                     <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600"><Zap className="h-3 w-3 text-green-500" /> Phí sạc thực tế</span>
-                                    <span className="text-md font-black text-slate-800">{Math.round(chargeAmount).toLocaleString('vi-VN')} đ</span>
+                                    <span className="text-md font-black text-slate-800">{formatNumber(Math.round(chargeAmount))} đ</span>
                                 </div>
                             )}
                         </div>
@@ -1368,7 +1356,7 @@ function AddChargeModal({
                                     <div className="flex items-center justify-between rounded-xl bg-red-100 px-3 py-2">
                                         <span className="text-xs font-medium text-red-700">Tiết kiệm được</span>
                                         <div className="text-right">
-                                            <span className="text-sm font-black text-red-700">-{discount.toLocaleString('vi-VN')}đ</span>
+                                            <span className="text-sm font-black text-red-700">-{formatNumber(discount)}đ</span>
                                             {discountMode === 'vnd' && chargeAmount > 0 && (
                                                 <span className="ml-1.5 text-xs text-red-500">({discountPct.toFixed(0)}%)</span>
                                             )}
@@ -1383,12 +1371,12 @@ function AddChargeModal({
                             <div className="rounded-2xl bg-green-500 px-4 py-3 text-white">
                                 <div className="flex items-center justify-between">
                                     <span className="inline-flex items-center gap-1.5 text-sm font-semibold opacity-90"><DollarSign className="h-4 w-4" /> Tổng thanh toán</span>
-                                    <span className="text-xl font-black">{totalPayment.toLocaleString('vi-VN')}đ</span>
+                                    <p className="text-xl font-black">{formatNumber(totalPayment)}đ</p>
                                 </div>
                                 {discount > 0 && (
                                     <div className="mt-1.5 flex items-center justify-between rounded-xl bg-white/20 px-3 py-1.5 text-xs">
-                                        <span>Phí gốc: {chargeAmount.toLocaleString('vi-VN')}đ</span>
-                                        <span className="inline-flex items-center gap-1"><Gift className="h-3 w-3" /> -{discount.toLocaleString('vi-VN')}đ</span>
+                                        <span>Phí gốc: {formatNumber(chargeAmount)}đ</span>
+                                        <span className="inline-flex items-center gap-1"><Gift className="h-3 w-3" /> -{formatNumber(discount)}đ</span>
                                     </div>
                                 )}
                             </div>
@@ -1621,10 +1609,10 @@ function BulkDiscountModal({
                                                 {sel ? <CheckSquare className="h-5 w-5 text-red-500 shrink-0" /> : <Square className="h-5 w-5 text-slate-300 shrink-0" />}
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-bold text-slate-700 truncate">{log.station_name || 'Không rõ địa điểm'}</p>
-                                                    <p className="text-[11px] font-medium text-slate-500">{dateStr} · {log.kwh?.toFixed(1)} kWh</p>
+                                                    <p className="text-[11px] font-medium text-slate-500">{dateStr} · {formatNumber(log.kwh || 0, 1)} kWh</p>
                                                 </div>
                                                 <div className="text-right shrink-0">
-                                                    <p className="text-sm font-black text-slate-800">{(log.total_cost || log.total_amount || 0).toLocaleString('vi-VN')}đ</p>
+                                                    <p className="text-sm font-black text-slate-800">{formatNumber(log.total_cost || log.total_amount || 0)}đ</p>
                                                 </div>
                                             </div>
                                         )
@@ -1766,7 +1754,7 @@ function ChargeDetailModal({
 
                         <div>
                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Năng lượng</p>
-                            <p className="text-sm font-bold text-slate-800">{(log.kwh || 0).toFixed(2)} kWh</p>
+                            <p className="text-sm font-bold text-slate-800">{formatNumber(log.kwh || 0, 1)} kWh</p>
                         </div>
                         <div>
                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Tỉ lệ sạc</p>
@@ -1777,16 +1765,16 @@ function ChargeDetailModal({
                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Chi phí phiên sạc</p>
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-sm font-black text-blue-600">
-                                    {(totalPayment === 0 && chargeAmount > 0) || totalPayment === 0 ? 'Miễn phí' : `${totalPayment.toLocaleString('vi-VN')}đ`}
+                                    {(totalPayment === 0 && chargeAmount > 0) || totalPayment === 0 ? 'Miễn phí' : `${formatNumber(totalPayment)}đ`}
                                 </span>
                                 {(totalPayment < chargeAmount) && (
                                     <span className="text-xs font-semibold text-slate-400 line-through">
-                                        {chargeAmount.toLocaleString('vi-VN')}đ
+                                        {formatNumber(chargeAmount)}đ
                                     </span>
                                 )}
                                 {discount > 0 && (
                                     <span className="text-xs font-bold text-green-500 bg-green-50 px-1.5 py-0.5 rounded">
-                                        KM: -{discount.toLocaleString('vi-VN')}đ
+                                        KM: -{formatNumber(discount)}đ
                                     </span>
                                 )}
                             </div>
