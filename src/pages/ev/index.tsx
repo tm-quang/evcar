@@ -20,6 +20,7 @@ import {
     ClipboardCheck,
     Calculator,
     ChevronRight,
+    Plus,
 } from 'lucide-react'
 import { useVehicles, useVehicleStats, useVehicleAlerts, useSetDefaultVehicle, vehicleKeys, useVehicleNotifications } from '../../lib/ev/useVehicleQueries'
 import { updateVehicle } from '../../lib/ev/vehicleService'
@@ -74,6 +75,7 @@ export default function VehicleManagement() {
 
     const selectedVehicle = vehicles.find(v => v.id === selectedId) || null
     const loading = isLoadingVehicles
+    const isEmpty = !loading && vehicles.length === 0
 
     const toggleDefaultVehicle = async (e: React.MouseEvent, vehicleId: string, isCurrentDefault: boolean) => {
         e.stopPropagation()
@@ -177,103 +179,173 @@ export default function VehicleManagement() {
     }
 
     return (
-        <div className="flex h-screen flex-col overflow-hidden bg-[#F7F9FC]">
-            <HeaderBar
-                variant="greeting"
-                userName={profile?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Người dùng'}
-                avatarUrl={profile?.avatar_url || user?.user_metadata?.avatar_url}
-                unreadNotificationCount={unreadNotifCount}
-                isLoadingProfile={isLoadingProfile}
-                onReload={async () => {
-                    setIsReloading(true)
-                    try {
-                        await queryClient.invalidateQueries()
-                        success('Dữ liệu đã được làm mới')
-                    } catch (e) {
-                        showError('Không thể làm mới dữ liệu')
-                    } finally {
-                        setIsReloading(false)
-                    }
-                }}
-                isReloading={isReloading}
-            />
+        <div className="flex h-[100dvh] flex-col overflow-hidden transition-all duration-700 bg-[#F7F9FC]">
+            <div className="relative z-10 flex flex-col flex-1 min-h-0">
+                <HeaderBar
+                    variant="greeting"
+                    userName={profile?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Người dùng'}
+                    avatarUrl={profile?.avatar_url || user?.user_metadata?.avatar_url}
+                    unreadNotificationCount={unreadNotifCount}
+                    isLoadingProfile={isLoadingProfile}
+                    onReload={async () => {
+                        setIsReloading(true)
+                        try {
+                            await queryClient.invalidateQueries()
+                            success('Dữ liệu đã được làm mới')
+                        } catch (e) {
+                            showError('Không thể làm mới dữ liệu')
+                        } finally {
+                            setIsReloading(false)
+                        }
+                    }}
+                    isReloading={isReloading}
+                />
 
-            <main className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-md mx-auto px-4 pb-4 pt-3 space-y-4">
+                <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 w-full max-w-md mx-auto px-4 pb-28 pt-4 flex flex-col">
+                    {isEmpty ? (
+                        <div className="flex-1 flex flex-col items-center justify-center px-2 py-4 animate-in fade-in zoom-in-95 duration-1000 relative">
+                            {/* Decorative background glow */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-blue-400/10 blur-[100px] rounded-full pointer-events-none" />
 
-                {/* ══════════════════════════════════════════════
+                            <div className="relative w-full max-w-sm bg-white rounded-3xl p-4 shadow-md flex flex-col items-center">
+                                {/* Badge */}
+                                <div className="rounded-full bg-emerald-50 px-4 py-1.5 border border-emerald-100/50">
+                                    <span className="text-[13px] font-black uppercase tracking-[0.2em] text-emerald-600">EVNGo - Quản lý xe của bạn</span>
+                                </div>
+
+                                {/* Main Illustration Container */}
+                                <div className="relative w-full aspect-square rounded-3xl overflow-hidden flex items-center justify-center">
+                                    <img
+                                        src="/EVGo-Logo.png"
+                                        alt="Dashboard Preview"
+                                        className="max-h-[220px] max-w-[220px] object-contain transition-transform duration-1000 hover:scale-105"
+                                    />
+
+                                    {/* Floating chips for visual context */}
+                                    <div className="absolute top-6 left-6 h-11 w-11 bg-white shadow-[0_8px_20px_rgba(0,0,0,0.06)] rounded-3xl flex items-center justify-center animate-bounce duration-[4000ms] border border-slate-50">
+                                        <Zap className="h-5.5 w-5.5 text-yellow-500" />
+                                    </div>
+                                    <div className="absolute bottom-12 right-6 h-11 w-11 bg-white shadow-[0_8px_20px_rgba(0,0,0,0.06)] rounded-3xl flex items-center justify-center animate-bounce duration-[5000ms] border border-slate-50">
+                                        <TrendingUp className="h-5.5 w-5.5 text-emerald-500" />
+                                    </div>
+                                </div>
+
+                                {/* Text Content */}
+                                <div className="text-center space-y-3 px-1">
+                                    <p className="text-[13px] font-medium text-slate-500 leading-relaxed max-w-[240px] mx-auto">
+                                        Thêm xe của bạn để tự động hóa việc theo dõi <span className="text-emerald-600 font-bold">Sạc pin</span>, <span className="text-blue-600 font-bold">Chi phí</span> và <span className="text-amber-600 font-bold">Bảo dưỡng</span>.
+                                    </p>
+                                </div>
+
+                                {/* Action Area */}
+                                <div className="mt-9 w-full">
+                                    <button
+                                        onClick={() => navigate('/ev/add')}
+                                        className="w-full py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 text-white font-black text-base shadow-[0_15px_30px_-8px_rgba(37,99,235,0.45)] active:scale-[0.97] transition-all flex items-center justify-center gap-3 group"
+                                    >
+                                        <div className="bg-white/20 p-1.5 rounded-2xl border border-white/10 group-hover:rotate-12 transition-transform">
+                                            <Plus className="h-4 w-4 text-white" />
+                                        </div>
+                                        <span className="tracking-wide">Thêm phương tiện</span>
+                                    </button>
+                                </div>
+
+                                {/* Micro-stats/Features hint */}
+                                <div className="mt-6 pt-2 border-t border-slate-50 flex justify-between w-full opacity-60">
+                                    <div className="flex flex-col items-center gap-1">
+                                        <BarChart3 className="h-4 w-4 text-red-500" />
+                                        <span className="text-[9px] font-black uppercase tracking-tighter text-red-500">Báo cáo</span>
+                                    </div>
+                                    <div className="h-6 w-px bg-slate-200" />
+                                    <div className="flex flex-col items-center gap-1">
+                                        <Wrench className="h-4 w-4 text-slate-700" />
+                                        <span className="text-[9px] font-black uppercase tracking-tighter text-slate-700">Bảo trì</span>
+                                    </div>
+                                    <div className="h-6 w-px bg-slate-200" />
+                                    <div className="flex flex-col items-center gap-1">
+                                        <Shield className="h-4 w-4 text-blue-500" />
+                                        <span className="text-[9px] font-black uppercase tracking-tighter text-blue-500">Bảo mật</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+
+                            {/* ══════════════════════════════════════════════
                     VEHICLE HERO CAROUSEL
                 ══════════════════════════════════════════════ */}
-                <section>
-                    <div className="mb-3 flex items-center justify-between px-1">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">Xe của bạn</h3>
-                        <button
-                            onClick={() => navigate('/ev/list')}
-                            className="text-xs font-bold text-blue-600 hover:text-blue-700 active:scale-95 transition-all"
-                        >
-                            Xem tất cả ({vehicles.length})
-                        </button>
-                    </div>
-                    <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                        {vehicles.map((vehicle) => {
-                            const isSelected = selectedVehicle?.id === vehicle.id
-                            const VehicleIcon = vehicle.vehicle_type === 'motorcycle' ? Bike : Car
-                            const isMc = vehicle.vehicle_type === 'motorcycle'
-                            const grad = 'from-emerald-500 via-green-700 to-teal-800'
+                            <section>
+                                <div className="mb-3 flex items-center justify-between px-1">
+                                    <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">Xe của bạn</h3>
+                                    <button
+                                        onClick={() => navigate('/ev/list')}
+                                        className="text-xs font-bold text-blue-600 hover:text-blue-700 active:scale-95 transition-all"
+                                    >
+                                        Xem tất cả ({vehicles.length})
+                                    </button>
+                                </div>
+                                <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                                    {vehicles.map((vehicle) => {
+                                        const isSelected = selectedVehicle?.id === vehicle.id
+                                        const VehicleIcon = vehicle.vehicle_type === 'motorcycle' ? Bike : Car
+                                        const isMc = vehicle.vehicle_type === 'motorcycle'
+                                        const grad = 'from-emerald-500 via-green-700 to-teal-800'
 
-                            return (
-                                <div
-                                    key={vehicle.id}
-                                    onClick={() => setSelectedId(vehicle.id)}
-                                    className="group relative flex min-w-[calc(100%-1rem)] flex-shrink-0 snap-center rounded-3xl overflow-hidden cursor-pointer transition-all duration-300"
-                                >
-                                    {/* Background */}
-                                    <div className={`relative h-52 w-full overflow-hidden rounded-3xl p-4 ${!vehicle.image_url ? `bg-gradient-to-br ${grad}` : 'bg-white'}`}>
-                                        {vehicle.image_url ? (
-                                            <div className="absolute inset-0 z-0">
-                                                <img src={vehicle.image_url} alt={vehicle.license_plate} className="h-full w-full object-cover opacity-90" />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40" />
-                                            </div>
-                                        ) : (
-                                            <div className="absolute inset-0 z-0 overflow-hidden">
-                                                {/* Geometric deco */}
-                                                <div className="absolute -right-8 -top-8 h-48 w-48 rounded-full bg-white/8 blur-2xl" />
-                                                <div className="absolute -left-8 bottom-0 h-36 w-36 rounded-full bg-white/6 blur-xl" />
-                                                <div className="absolute right-0 bottom-0 opacity-10">
-                                                    <VehicleIcon className="h-36 w-36 text-white" />
-                                                </div>
-                                                <svg className="absolute bottom-0 left-0 w-full opacity-10" viewBox="0 0 400 120" preserveAspectRatio="none">
-                                                    <path d="M0,80 Q100,30 200,80 T400,80 L400,120 L0,120 Z" fill="white" />
-                                                </svg>
-                                            </div>
-                                        )}
+                                        return (
+                                            <div
+                                                key={vehicle.id}
+                                                onClick={() => setSelectedId(vehicle.id)}
+                                                className="group relative flex min-w-[calc(100%-1rem)] flex-shrink-0 snap-center rounded-3xl overflow-hidden cursor-pointer transition-all duration-300"
+                                            >
+                                                {/* Background */}
+                                                <div className={`relative h-52 w-full overflow-hidden rounded-3xl p-4 ${!vehicle.image_url ? `bg-gradient-to-br ${grad}` : 'bg-white'}`}>
+                                                    {vehicle.image_url ? (
+                                                        <div className="absolute inset-0 z-0">
+                                                            <img src={vehicle.image_url} alt={vehicle.license_plate} className="h-full w-full object-cover opacity-90" />
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40" />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="absolute inset-0 z-0 overflow-hidden">
+                                                            {/* Geometric deco */}
+                                                            <div className="absolute -right-8 -top-8 h-48 w-48 rounded-full bg-white/8 blur-2xl" />
+                                                            <div className="absolute -left-8 bottom-0 h-36 w-36 rounded-full bg-white/6 blur-xl" />
+                                                            <div className="absolute right-0 bottom-0 opacity-10">
+                                                                <VehicleIcon className="h-36 w-36 text-white" />
+                                                            </div>
+                                                            <svg className="absolute bottom-0 left-0 w-full opacity-10" viewBox="0 0 400 120" preserveAspectRatio="none">
+                                                                <path d="M0,80 Q100,30 200,80 T400,80 L400,120 L0,120 Z" fill="white" />
+                                                            </svg>
+                                                        </div>
+                                                    )}
 
-                                        {/* Content */}
-                                        <div className="relative z-10 flex h-full flex-col justify-between text-white">
-                                            {/* Top row */}
-                                            <div className="flex items-start justify-between gap-2">
-                                                <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                                                    <div className="rounded-2xl bg-white/20 backdrop-blur-md p-2 shrink-0 border border-white/20">
-                                                        <VehicleIcon className="h-5 w-5 text-white" />
-                                                    </div>
-                                                    <div className="min-w-0">
-                                                        <p className="text-lg font-black tracking-widest uppercase truncate">{vehicle.license_plate}</p>
-                                                        <p className="text-xs font-medium text-white/70 truncate">{vehicle.model}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-1.5 shrink-0">
-                                                    <button onClick={(e) => { e.stopPropagation(); navigate(`/ev/edit/${vehicle.id}`) }}
-                                                        className="h-8 w-8 flex items-center justify-center rounded-full bg-white/15 backdrop-blur-sm hover:bg-white/25 transition-all border border-white/20">
-                                                        <Edit className="h-3.5 w-3.5 text-white" />
-                                                    </button>
-                                                    <button onClick={(e) => toggleDefaultVehicle(e, vehicle.id, !!vehicle.is_default)}
-                                                        className={`h-8 w-8 flex items-center justify-center rounded-full transition-all border ${vehicle.is_default ? 'bg-yellow-400 border-yellow-300 shadow-lg shadow-yellow-400/40' : 'bg-white/15 backdrop-blur-sm border-white/20 hover:bg-white/25'}`}>
-                                                        <Star className={`h-3.5 w-3.5 ${vehicle.is_default ? 'text-white fill-current' : 'text-white'}`} />
-                                                    </button>
-                                                </div>
-                                            </div>
+                                                    {/* Content */}
+                                                    <div className="relative z-10 flex h-full flex-col justify-between text-white">
+                                                        {/* Top row */}
+                                                        <div className="flex items-start justify-between gap-2">
+                                                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                                                <div className="rounded-2xl bg-white/20 backdrop-blur-md p-2 shrink-0 border border-white/20">
+                                                                    <VehicleIcon className="h-5 w-5 text-white" />
+                                                                </div>
+                                                                <div className="min-w-0">
+                                                                    <p className="text-lg font-black tracking-widest uppercase truncate">{vehicle.license_plate}</p>
+                                                                    <p className="text-xs font-medium text-white/70 truncate">{vehicle.model}</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-1.5 shrink-0">
+                                                                <button onClick={(e) => { e.stopPropagation(); navigate(`/ev/edit/${vehicle.id}`) }}
+                                                                    className="h-8 w-8 flex items-center justify-center rounded-full bg-white/15 backdrop-blur-sm hover:bg-white/25 transition-all border border-white/20">
+                                                                    <Edit className="h-3.5 w-3.5 text-white" />
+                                                                </button>
+                                                                <button onClick={(e) => toggleDefaultVehicle(e, vehicle.id, !!vehicle.is_default)}
+                                                                    className={`h-8 w-8 flex items-center justify-center rounded-full transition-all border ${vehicle.is_default ? 'bg-yellow-400 border-yellow-300 shadow-lg shadow-yellow-400/40' : 'bg-white/15 backdrop-blur-sm border-white/20 hover:bg-white/25'}`}>
+                                                                    <Star className={`h-3.5 w-3.5 ${vehicle.is_default ? 'text-white fill-current' : 'text-white'}`} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
 
-                                            {/* ODO - Hidden per user request */}
-                                            {/* <div>
+                                                        {/* ODO - Hidden per user request */}
+                                                        {/* <div>
                                                 <div className="flex items-end gap-3 mb-1">
                                                     <div className="flex items-baseline gap-1.5">
                                                         <Gauge className="h-4 w-4 text-white/60 mb-0.5" />
@@ -292,383 +364,385 @@ export default function VehicleManagement() {
                                                 <p className="text-[11px] text-white/50 font-medium">Số km hiện tại</p>
                                             </div> */}
 
-                                            {/* Bottom info strip */}
-                                            <div className="flex items-center justify-between border-t border-white/15 pt-3 mt-1">
-                                                <div className="text-center">
-                                                    <p className="text-[10px] text-white/50">Năm SX</p>
-                                                    <p className="text-sm font-black">{vehicle.year || 'N/A'}</p>
+                                                        {/* Bottom info strip */}
+                                                        <div className="flex items-center justify-between border-t border-white/15 pt-3 mt-1">
+                                                            <div className="text-center">
+                                                                <p className="text-[10px] text-white/50">Năm SX</p>
+                                                                <p className="text-sm font-black">{vehicle.year || 'N/A'}</p>
+                                                            </div>
+                                                            <div className="h-8 w-px bg-white/15" />
+                                                            <div className="text-center">
+                                                                <p className="text-[10px] text-white/50">Loại xe</p>
+                                                                <p className="text-sm font-black">{isMc ? 'Xe máy' : 'Ô tô'}</p>
+                                                            </div>
+                                                            <div className="h-8 w-px bg-white/15" />
+                                                            <div className="text-center">
+                                                                <p className="text-[10px] text-white/50">Loại xe</p>
+                                                                <p className="text-sm font-black">Điện (EV)</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Selected ring */}
+                                                    {isSelected && (
+                                                        <div className="absolute inset-0 rounded-3xl ring-2 ring-white/30 ring-inset pointer-events-none" />
+                                                    )}
                                                 </div>
-                                                <div className="h-8 w-px bg-white/15" />
-                                                <div className="text-center">
-                                                    <p className="text-[10px] text-white/50">Loại xe</p>
-                                                    <p className="text-sm font-black">{isMc ? 'Xe máy' : 'Ô tô'}</p>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+
+                                {/* Dot indicators */}
+                                {vehicles.length > 1 && (
+                                    <div className="flex justify-center gap-1.5 mt-2">
+                                        {vehicles.map((v) => (
+                                            <button
+                                                key={v.id}
+                                                onClick={() => setSelectedId(v.id)}
+                                                className={`rounded-full transition-all duration-300 ${selectedVehicle?.id === v.id ? 'w-5 h-1.5 bg-blue-500' : 'w-1.5 h-1.5 bg-slate-300 hover:bg-slate-400'}`}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </section>
+
+                            {/* ══════════════════════════════════════════════
+                    STATS OVERVIEW
+                ══════════════════════════════════════════════ */}
+                            {/* ══════════════════════════════════════════════
+                    EV ENERGY & DISTANCE STATS
+                ══════════════════════════════════════════════ */}
+                            {selectedVehicle && (
+                                <section>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {/* Total Range / Distance */}
+                                        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 shadow-md transition-all hover:shadow-md flex flex-col justify-between h-[150px] border border-slate-300">
+                                            <div className="absolute -left-6 -bottom-6 h-36 w-36 rounded-full bg-blue-500/30 blur-2xl" />
+                                            <div className="z-10 flex items-center gap-2">
+                                                <div className="rounded-3xl bg-blue-600 p-2 text-white">
+                                                    <Gauge className="h-4 w-4" />
                                                 </div>
-                                                <div className="h-8 w-px bg-white/15" />
-                                                <div className="text-center">
-                                                    <p className="text-[10px] text-white/50">Loại xe</p>
-                                                    <p className="text-sm font-black">Điện (EV)</p>
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Số Odo hiện tại</span>
+                                            </div>
+                                            <div className="z-10 mt-2">
+                                                <div className="flex items-center gap-1">
+                                                    <p className="text-3xl font-black text-slate-800 leading-none">
+                                                        {selectedVehicle.current_odometer.toLocaleString()}
+                                                    </p>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); setNewOdo(''); setShowOdoModal(true) }}
+                                                        className="p-1 text-slate-400 hover:text-blue-600 transition-colors"
+                                                    >
+                                                        <Edit className="h-3 w-3" />
+                                                    </button>
                                                 </div>
+                                                <p className="mt-1 text-xs font-bold text-blue-600 uppercase tracking-tighter">Tổng km</p>
                                             </div>
                                         </div>
 
-                                        {/* Selected ring */}
-                                        {isSelected && (
-                                            <div className="absolute inset-0 rounded-3xl ring-2 ring-white/30 ring-inset pointer-events-none" />
-                                        )}
+                                        {/* Energy Consumption / Charging */}
+                                        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 shadow-md transition-all hover:-translate-y-1 flex flex-col justify-between h-[150px] border border-slate-300">
+                                            <div className="absolute -left-6 -bottom-6 h-36 w-36 rounded-full bg-emerald-500/30 blur-2xl" />
+                                            <div className="z-10 flex items-center gap-2">
+                                                <div className="rounded-3xl bg-emerald-500 p-2 text-white">
+                                                    <Zap className="h-4 w-4" />
+                                                </div>
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">KWh tháng này</span>
+                                            </div>
+                                            <div className="z-10 mt-2">
+                                                <p className="text-3xl font-black text-slate-800 leading-none">
+                                                    {isLoadingStats ? '...' : (stats?.totalKwh ? stats.totalKwh.toFixed(1) : '0')}
+                                                </p>
+                                                <p className="mt-1 text-xs font-bold text-emerald-600">KWH</p>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            )
-                        })}
-                    </div>
 
-                    {/* Dot indicators */}
-                    {vehicles.length > 1 && (
-                        <div className="flex justify-center gap-1.5 mt-2">
-                            {vehicles.map((v) => (
-                                <button
-                                    key={v.id}
-                                    onClick={() => setSelectedId(v.id)}
-                                    className={`rounded-full transition-all duration-300 ${selectedVehicle?.id === v.id ? 'w-5 h-1.5 bg-blue-500' : 'w-1.5 h-1.5 bg-slate-300 hover:bg-slate-400'}`}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </section>
-
-                {/* ══════════════════════════════════════════════
-                    STATS OVERVIEW
-                ══════════════════════════════════════════════ */}
-                {/* ══════════════════════════════════════════════
-                    EV ENERGY & DISTANCE STATS
-                ══════════════════════════════════════════════ */}
-                {selectedVehicle && (
-                    <section>
-                        <div className="grid grid-cols-2 gap-3">
-                            {/* Total Range / Distance */}
-                            <div className="group relative overflow-hidden rounded-3xl bg-white p-5 shadow-md transition-all hover:shadow-md flex flex-col justify-between h-[150px] border border-slate-300">
-                                <div className="absolute -left-6 -bottom-6 h-36 w-36 rounded-full bg-blue-500/30 blur-2xl" />
-                                <div className="z-10 flex items-center gap-2">
-                                    <div className="rounded-3xl bg-blue-600 p-2 text-white">
-                                        <Gauge className="h-4 w-4" />
+                                    {/* Middle Stats Row */}
+                                    <div className="mt-3 grid grid-cols-2 gap-3">
+                                        <div className="rounded-3xl bg-white p-5 shadow-md flex items-center gap-3 h-[100px] border border-slate-300">
+                                            <div className="rounded-3xl bg-blue-50 p-2">
+                                                <Route className="h-5 w-5 text-blue-500" />
+                                            </div>
+                                            <div>
+                                                <p className="text-md font-black text-slate-800 leading-none">{stats?.totalTrips || 0}</p>
+                                                <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Lộ trình</p>
+                                            </div>
+                                        </div>
+                                        <div className="rounded-3xl bg-white p-5 shadow-md flex items-center gap-3 h-[100px] border border-slate-300">
+                                            <div className="rounded-3xl bg-emerald-100 p-2">
+                                                <BatteryCharging className="h-5 w-5 text-emerald-600" />
+                                            </div>
+                                            <div>
+                                                <p className="text-md font-black text-slate-800 leading-none">{stats?.totalChargeSessions || 0}</p>
+                                                <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Lần sạc tháng này</p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Số Odo hiện tại</span>
-                                </div>
-                                <div className="z-10 mt-2">
-                                    <div className="flex items-center gap-1">
-                                        <p className="text-3xl font-black text-slate-800 leading-none">
-                                            {selectedVehicle.current_odometer.toLocaleString()}
-                                        </p>
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); setNewOdo(''); setShowOdoModal(true) }}
-                                            className="p-1 text-slate-400 hover:text-blue-600 transition-colors"
-                                        >
-                                            <Edit className="h-3 w-3" />
-                                        </button>
-                                    </div>
-                                    <p className="mt-1 text-xs font-bold text-blue-600 uppercase tracking-tighter">Tổng km</p>
-                                </div>
-                            </div>
+                                </section>
+                            )}
 
-                            {/* Energy Consumption / Charging */}
-                            <div className="group relative overflow-hidden rounded-3xl bg-white p-5 shadow-md transition-all hover:-translate-y-1 flex flex-col justify-between h-[150px] border border-slate-300">
-                                <div className="absolute -left-6 -bottom-6 h-36 w-36 rounded-full bg-emerald-500/30 blur-2xl" />
-                                <div className="z-10 flex items-center gap-2">
-                                    <div className="rounded-3xl bg-emerald-500 p-2 text-white">
-                                        <Zap className="h-4 w-4" />
-                                    </div>
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">KWh tháng này</span>
-                                </div>
-                                <div className="z-10 mt-2">
-                                    <p className="text-3xl font-black text-slate-800 leading-none">
-                                        {isLoadingStats ? '...' : (stats?.totalKwh ? stats.totalKwh.toFixed(1) : '0')}
-                                    </p>
-                                    <p className="mt-1 text-xs font-bold text-emerald-600">KWH</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Middle Stats Row */}
-                        <div className="mt-3 grid grid-cols-2 gap-3">
-                            <div className="rounded-3xl bg-white p-5 shadow-md flex items-center gap-3 h-[100px] border border-slate-300">
-                                <div className="rounded-3xl bg-blue-50 p-2">
-                                    <Route className="h-5 w-5 text-blue-500" />
-                                </div>
-                                <div>
-                                    <p className="text-md font-black text-slate-800 leading-none">{stats?.totalTrips || 0}</p>
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Lộ trình</p>
-                                </div>
-                            </div>
-                            <div className="rounded-3xl bg-white p-5 shadow-md flex items-center gap-3 h-[100px] border border-slate-300">
-                                <div className="rounded-3xl bg-emerald-100 p-2">
-                                    <BatteryCharging className="h-5 w-5 text-emerald-600" />
-                                </div>
-                                <div>
-                                    <p className="text-md font-black text-slate-800 leading-none">{stats?.totalChargeSessions || 0}</p>
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Lần sạc tháng này</p>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                )}
-
-                {/* ══════════════════════════════════════════════
+                            {/* ══════════════════════════════════════════════
                     SUMMARY EXPENSES (REPORT STYLE)
                 ══════════════════════════════════════════════ */}
-                {selectedVehicle && stats && !isLoadingStats && (
-                    <section className="bg-white rounded-3xl shadow-md border border-slate-300 overflow-hidden">
-                        <div className="bg-gradient-to-r from-emerald-100 to-white px-6 py-4 border-b border-slate-50">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1">Chi phí tháng này</p>
-                                    <p className="text-2xl font-black text-slate-800">
-                                        {formatCurrency(stats.totalFuelCost + stats.totalMaintenanceCost + stats.totalOtherExpenses)}
-                                    </p>
-                                </div>
-                                <div className="h-12 w-12 rounded-3xl bg-emerald-100 flex items-center justify-center">
-                                    <TrendingUp className="h-6 w-6 text-emerald-600" />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="p-6 grid grid-cols-1 gap-4">
-                            {[
-                                { label: 'Sạc điện (kWh)', val: stats.totalFuelCost, icon: <Zap className="h-4 w-4 text-emerald-500" />, bg: 'bg-emerald-50' },
-                                { label: 'Bảo dưỡng xe', val: stats.totalMaintenanceCost, icon: <Wrench className="h-4 w-4 text-amber-500" />, bg: 'bg-amber-50' },
-                                { label: 'Chi phí khác', val: stats.totalOtherExpenses, icon: <Receipt className="h-4 w-4 text-rose-500" />, bg: 'bg-rose-50' },
-                            ].map((item, idx) => (
-                                <div key={idx} className="flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
-                                        <div className={`h-10 w-10 rounded-3xl ${item.bg} flex items-center justify-center`}>
-                                            {item.icon}
+                            {selectedVehicle && stats && !isLoadingStats && (
+                                <section className="bg-white rounded-3xl shadow-md border border-slate-300 overflow-hidden">
+                                    <div className="bg-gradient-to-r from-emerald-100 to-white px-6 py-4 border-b border-slate-50">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1">Chi phí tháng này</p>
+                                                <p className="text-2xl font-black text-slate-800">
+                                                    {formatCurrency(stats.totalFuelCost + stats.totalMaintenanceCost + stats.totalOtherExpenses)}
+                                                </p>
+                                            </div>
+                                            <div className="h-12 w-12 rounded-3xl bg-emerald-100 flex items-center justify-center">
+                                                <TrendingUp className="h-6 w-6 text-emerald-600" />
+                                            </div>
                                         </div>
-                                        <span className="text-xs font-bold text-slate-600">{item.label}</span>
                                     </div>
-                                    <span className="text-sm font-black text-slate-800">{formatCurrency(item.val)}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
 
-                {/* ══════════════════════════════════════════════
+                                    <div className="p-6 grid grid-cols-1 gap-4">
+                                        {[
+                                            { label: 'Sạc điện (kWh)', val: stats.totalFuelCost, icon: <Zap className="h-4 w-4 text-emerald-500" />, bg: 'bg-emerald-50' },
+                                            { label: 'Bảo dưỡng xe', val: stats.totalMaintenanceCost, icon: <Wrench className="h-4 w-4 text-amber-500" />, bg: 'bg-amber-50' },
+                                            { label: 'Chi phí khác', val: stats.totalOtherExpenses, icon: <Receipt className="h-4 w-4 text-rose-500" />, bg: 'bg-rose-50' },
+                                        ].map((item, idx) => (
+                                            <div key={idx} className="flex items-center justify-between">
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`h-10 w-10 rounded-3xl ${item.bg} flex items-center justify-center`}>
+                                                        {item.icon}
+                                                    </div>
+                                                    <span className="text-xs font-bold text-slate-600">{item.label}</span>
+                                                </div>
+                                                <span className="text-sm font-black text-slate-800">{formatCurrency(item.val)}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* ══════════════════════════════════════════════
                     CẢNH BÁO
                 ══════════════════════════════════════════════ */}
-                {alerts.length > 0 && (
-                    <section className="space-y-2.5">
-                        {alerts.map((alert, index) => {
-                            const { title, remainingText, isCritical } = getAlertInfo(alert)
-                            return (
-                                <div
-                                    key={index}
-                                    className={`flex items-start gap-3 rounded-2xl p-4 border ${isCritical
-                                        ? 'bg-red-50 border-red-100 shadow-sm shadow-red-100'
-                                        : 'bg-amber-50 border-amber-100 shadow-sm shadow-amber-100'
-                                        }`}
-                                >
-                                    <div className={`shrink-0 mt-0.5 rounded-xl p-2 ${isCritical ? 'bg-red-100' : 'bg-amber-100'}`}>
-                                        <AlertTriangle className={`h-4 w-4 ${isCritical ? 'text-red-600' : 'text-amber-600'}`} />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center justify-between gap-2">
-                                            <p className={`text-sm font-black ${isCritical ? 'text-red-700' : 'text-amber-700'}`}>{title}</p>
-                                            <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase ${isCritical ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
-                                                {remainingText}
-                                            </span>
-                                        </div>
-                                        <p className={`text-xs mt-0.5 ${isCritical ? 'text-red-500' : 'text-amber-500'}`}>{alert.message}</p>
-                                    </div>
-                                </div>
-                            )
-                        })}
-                    </section>
-                )}
+                            {alerts.length > 0 && (
+                                <section className="space-y-2.5">
+                                    {alerts.map((alert, index) => {
+                                        const { title, remainingText, isCritical } = getAlertInfo(alert)
+                                        return (
+                                            <div
+                                                key={index}
+                                                className={`flex items-start gap-3 rounded-2xl p-4 border ${isCritical
+                                                    ? 'bg-red-50 border-red-100 shadow-sm shadow-red-100'
+                                                    : 'bg-amber-50 border-amber-100 shadow-sm shadow-amber-100'
+                                                    }`}
+                                            >
+                                                <div className={`shrink-0 mt-0.5 rounded-xl p-2 ${isCritical ? 'bg-red-100' : 'bg-amber-100'}`}>
+                                                    <AlertTriangle className={`h-4 w-4 ${isCritical ? 'text-red-600' : 'text-amber-600'}`} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <p className={`text-sm font-black ${isCritical ? 'text-red-700' : 'text-amber-700'}`}>{title}</p>
+                                                        <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase ${isCritical ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                                                            {remainingText}
+                                                        </span>
+                                                    </div>
+                                                    <p className={`text-xs mt-0.5 ${isCritical ? 'text-red-500' : 'text-amber-500'}`}>{alert.message}</p>
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
+                                </section>
+                            )}
 
-                {/* ══════════════════════════════════════════════
+                            {/* ══════════════════════════════════════════════
                     VERTICAL MAINTENANCE TIMELINE
                 ══════════════════════════════════════════════ */}
-                {selectedVehicle && (maintProgress || maintDateProgress || selectedVehicle.insurance_expiry_date || selectedVehicle.inspection_expiry_date) && (
-                    <section>
-                        <div className="mb-4 flex items-center justify-between px-1">
-                            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Thông tin bảo dưỡng & Bảo hiểm</h2>
-                        </div>
+                            {selectedVehicle && (maintProgress || maintDateProgress || selectedVehicle.insurance_expiry_date || selectedVehicle.inspection_expiry_date) && (
+                                <section>
+                                    <div className="mb-4 flex items-center justify-between px-1">
+                                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Thông tin bảo dưỡng & Bảo hiểm</h2>
+                                    </div>
 
-                        <div className="space-y-4">
-                            {/* EV Maintenance Progress */}
-                            {maintProgress && (
-                                <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-100 to-white p-5 border border-slate-300 shadow-md transition-all hover:border-emerald-200">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`rounded-3xl p-2 ${maintProgress.isOverdue ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}`}>
+                                    <div className="space-y-4">
+                                        {/* EV Maintenance Progress */}
+                                        {maintProgress && (
+                                            <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-100 to-white p-5 border border-slate-300 shadow-md transition-all hover:border-emerald-200">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`rounded-3xl p-2 ${maintProgress.isOverdue ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}`}>
+                                                            <Wrench className="h-5 w-5" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-black text-slate-800">Bảo dưỡng định kỳ</p>
+                                                            <p className="text-[10px] font-bold text-slate-400 tracking-wide uppercase">Dự kiến tại {maintProgress.target.toLocaleString()} km</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className={`text-sm font-black ${maintProgress.isOverdue ? 'text-red-500' : 'text-red-500'}`}>
+                                                            {maintProgress.isOverdue ? `Quá mốc!` : `Còn ${maintProgress.kmLeft.toLocaleString()} km`}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-4">
+                                                    <div className="h-2 w-full rounded-full bg-slate-50 overflow-hidden ring-1 ring-slate-100/50">
+                                                        <div
+                                                            className={`h-full rounded-full transition-all duration-1000 ${maintProgress.isOverdue ? 'bg-red-500' : 'bg-gradient-to-r from-emerald-400 to-green-500'}`}
+                                                            style={{ width: `${Math.min(100, Math.max(2, maintProgress.pct))}%` }}
+                                                        />
+                                                    </div>
+                                                    <div className="mt-2 flex items-center justify-between">
+                                                        <span className="text-[10px] font-bold text-slate-400">{maintProgress.pct}% tiến độ</span>
+                                                        <button onClick={() => navigate('/ev/maintenance')} className="flex items-center gap-1 text-[10px] font-black text-emerald-600 uppercase">
+                                                            Cấu hình mốc bảo dưỡng <ChevronRight className="h-3 w-3" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Legal Docs (Inspection/Insurance) in 2-col cards */}
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {selectedVehicle.insurance_expiry_date && (() => {
+                                                const d = new Date(selectedVehicle.insurance_expiry_date)
+                                                const days = Math.ceil((d.getTime() - Date.now()) / 86400000)
+                                                return (
+                                                    <div className="rounded-3xl bg-gradient-to-r from-blue-100 to-blue-50 p-4 border border-slate-300 shadow-md">
+                                                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-3xl bg-blue-500">
+                                                            <Shield className="h-5 w-5 text-white" />
+                                                        </div>
+                                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Bảo hiểm</p>
+                                                        <p className={`text-sm font-black ${days < 30 ? 'text-red-500' : 'text-slate-800'}`}>
+                                                            {days < 0 ? 'Hết hạn' : `Còn ${days} ngày`}
+                                                        </p>
+                                                    </div>
+                                                )
+                                            })()}
+                                            {selectedVehicle.inspection_expiry_date && (() => {
+                                                const d = new Date(selectedVehicle.inspection_expiry_date)
+                                                const days = Math.ceil((d.getTime() - Date.now()) / 86400000)
+                                                return (
+                                                    <div className="rounded-3xl bg-gradient-to-r from-slate-100 to-slate-50 p-4 border border-slate-300 shadow-md">
+                                                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-3xl bg-slate-500">
+                                                            <ClipboardCheck className="h-5 w-5 text-white" />
+                                                        </div>
+                                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Đăng kiểm</p>
+                                                        <p className={`text-sm font-black ${days < 30 ? 'text-red-500' : 'text-slate-800'}`}>
+                                                            {days < 0 ? 'Hết hạn' : `Còn ${days} ngày`}
+                                                        </p>
+                                                    </div>
+                                                )
+                                            })()}
+                                        </div>
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* ══════════════════════════════════════════════
+                    CHỨC NĂNG QUẢN LÝ
+                ══════════════════════════════════════════════ */}
+                            {/* ══════════════════════════════════════════════
+                    QUICK ACTIONS / MANAGEMENT
+                ══════════════════════════════════════════════ */}
+                            {selectedVehicle && (
+                                <section>
+                                    <div className="mb-4 flex items-center justify-between px-1">
+                                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Tiện ích khác</h2>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {/* Trip Analysis */}
+                                        <button
+                                            onClick={() => navigate('/ev/trips')}
+                                            className="group flex flex-col gap-2 rounded-3xl bg-white p-5 border border-slate-300 shadow-md transition-all hover:-translate-y-1 hover:shadow-md"
+                                        >
+                                            <div className="h-10 w-10 flex items-center justify-center rounded-3xl bg-indigo-500 text-white">
+                                                <Route className="h-5 w-5" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-black text-slate-800">Lộ trình</p>
+                                                <p className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase">Lịch sử di chuyển</p>
+                                            </div>
+                                        </button>
+
+                                        {/* Energy Management */}
+                                        <button
+                                            onClick={() => navigate('/ev/charging')}
+                                            className="group flex flex-col gap-4 rounded-3xl bg-white p-5 border border-slate-300 shadow-md transition-all hover:-translate-y-1 hover:shadow-md"
+                                        >
+                                            <div className="h-10 w-10 flex items-center justify-center rounded-3xl bg-emerald-500 text-white">
+                                                <Zap className="h-5 w-5" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-black text-slate-800">Sạc điện</p>
+                                                <p className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase">Quản lý Pin & Sạc</p>
+                                            </div>
+                                        </button>
+
+                                        {/* Reports */}
+                                        <button
+                                            onClick={() => navigate('/ev/reports')}
+                                            className="group flex flex-col gap-4 rounded-3xl bg-white p-5 border border-slate-300 shadow-md transition-all hover:-translate-y-1 hover:shadow-md"
+                                        >
+                                            <div className="h-10 w-10 flex items-center justify-center rounded-3xl bg-blue-500 text-white">
+                                                <BarChart3 className="h-5 w-5" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-black text-slate-800">Báo cáo</p>
+                                                <p className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase">Phân tích hiệu suất</p>
+                                            </div>
+                                        </button>
+
+                                        {/* Maintenance */}
+                                        <button
+                                            onClick={() => navigate('/ev/maintenance')}
+                                            className="group flex flex-col gap-4 rounded-3xl bg-white p-5 border border-slate-300 shadow-md transition-all hover:-translate-y-1 hover:shadow-md"
+                                        >
+                                            <div className="h-10 w-10 flex items-center justify-center rounded-3xl bg-amber-500 text-white shadow-sm">
                                                 <Wrench className="h-5 w-5" />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-black text-slate-800">Bảo dưỡng định kỳ</p>
-                                                <p className="text-[10px] font-bold text-slate-400 tracking-wide uppercase">Dự kiến tại {maintProgress.target.toLocaleString()} km</p>
+                                                <p className="text-sm font-black text-slate-800">Bảo dưỡng</p>
+                                                <p className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-tighter">Lịch sử & Nhắc lịch</p>
                                             </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className={`text-sm font-black ${maintProgress.isOverdue ? 'text-red-500' : 'text-red-500'}`}>
-                                                {maintProgress.isOverdue ? `Quá mốc!` : `Còn ${maintProgress.kmLeft.toLocaleString()} km`}
-                                            </p>
-                                        </div>
-                                    </div>
+                                        </button>
 
-                                    <div className="mt-4">
-                                        <div className="h-2 w-full rounded-full bg-slate-50 overflow-hidden ring-1 ring-slate-100/50">
-                                            <div
-                                                className={`h-full rounded-full transition-all duration-1000 ${maintProgress.isOverdue ? 'bg-red-500' : 'bg-gradient-to-r from-emerald-400 to-green-500'}`}
-                                                style={{ width: `${Math.min(100, Math.max(2, maintProgress.pct))}%` }}
-                                            />
-                                        </div>
-                                        <div className="mt-2 flex items-center justify-between">
-                                            <span className="text-[10px] font-bold text-slate-400">{maintProgress.pct}% tiến độ</span>
-                                            <button onClick={() => navigate('/ev/maintenance')} className="flex items-center gap-1 text-[10px] font-black text-emerald-600 uppercase">
-                                                Cấu hình mốc bảo dưỡng <ChevronRight className="h-3 w-3" />
-                                            </button>
-                                        </div>
+                                        {/* Expenses */}
+                                        <button
+                                            onClick={() => navigate('/ev/expenses')}
+                                            className="group flex flex-col gap-4 rounded-3xl bg-white p-5 border border-slate-300 shadow-md transition-all hover:-translate-y-1 hover:shadow-md"
+                                        >
+                                            <div className="h-10 w-10 flex items-center justify-center rounded-3xl bg-rose-500 text-white shadow-sm">
+                                                <Receipt className="h-5 w-5" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-black text-slate-800">Chi phí khác</p>
+                                                <p className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-tighter">Gửi xe, Rửa xe...</p>
+                                            </div>
+                                        </button>
+
+                                        {/* EV Calculator */}
+                                        <button
+                                            onClick={() => navigate('/ev/calculator')}
+                                            className="group flex flex-col gap-4 rounded-3xl bg-emerald-600 p-5 shadow-lg shadow-emerald-200 transition-all hover:-translate-y-1"
+                                        >
+                                            <div className="h-10 w-10 flex items-center justify-center rounded-3xl bg-white text-emerald-600">
+                                                <Calculator className="h-5 w-5" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-black text-white">Công cụ EV</p>
+                                                <p className="text-[10px] font-bold text-white/80 mt-0.5 uppercase tracking-tighter">Tính toán km</p>
+                                            </div>
+                                        </button>
                                     </div>
-                                </div>
+                                </section>
                             )}
-
-                            {/* Legal Docs (Inspection/Insurance) in 2-col cards */}
-                            <div className="grid grid-cols-2 gap-3">
-                                {selectedVehicle.insurance_expiry_date && (() => {
-                                    const d = new Date(selectedVehicle.insurance_expiry_date)
-                                    const days = Math.ceil((d.getTime() - Date.now()) / 86400000)
-                                    return (
-                                        <div className="rounded-3xl bg-gradient-to-r from-blue-100 to-blue-50 p-4 border border-slate-300 shadow-md">
-                                            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-3xl bg-blue-500">
-                                                <Shield className="h-5 w-5 text-white" />
-                                            </div>
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Bảo hiểm</p>
-                                            <p className={`text-sm font-black ${days < 30 ? 'text-red-500' : 'text-slate-800'}`}>
-                                                {days < 0 ? 'Hết hạn' : `Còn ${days} ngày`}
-                                            </p>
-                                        </div>
-                                    )
-                                })()}
-                                {selectedVehicle.inspection_expiry_date && (() => {
-                                    const d = new Date(selectedVehicle.inspection_expiry_date)
-                                    const days = Math.ceil((d.getTime() - Date.now()) / 86400000)
-                                    return (
-                                        <div className="rounded-3xl bg-gradient-to-r from-slate-100 to-slate-50 p-4 border border-slate-300 shadow-md">
-                                            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-3xl bg-slate-500">
-                                                <ClipboardCheck className="h-5 w-5 text-white" />
-                                            </div>
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Đăng kiểm</p>
-                                            <p className={`text-sm font-black ${days < 30 ? 'text-red-500' : 'text-slate-800'}`}>
-                                                {days < 0 ? 'Hết hạn' : `Còn ${days} ngày`}
-                                            </p>
-                                        </div>
-                                    )
-                                })()}
-                            </div>
                         </div>
-                    </section>
-                )}
-
-                {/* ══════════════════════════════════════════════
-                    CHỨC NĂNG QUẢN LÝ
-                ══════════════════════════════════════════════ */}
-                {/* ══════════════════════════════════════════════
-                    QUICK ACTIONS / MANAGEMENT
-                ══════════════════════════════════════════════ */}
-                {selectedVehicle && (
-                    <section>
-                        <div className="mb-4 flex items-center justify-between px-1">
-                            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Tiện ích khác</h2>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                            {/* Trip Analysis */}
-                            <button
-                                onClick={() => navigate('/ev/trips')}
-                                className="group flex flex-col gap-2 rounded-3xl bg-white p-5 border border-slate-300 shadow-md transition-all hover:-translate-y-1 hover:shadow-md"
-                            >
-                                <div className="h-10 w-10 flex items-center justify-center rounded-3xl bg-indigo-500 text-white">
-                                    <Route className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-black text-slate-800">Lộ trình</p>
-                                    <p className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase">Lịch sử di chuyển</p>
-                                </div>
-                            </button>
-
-                            {/* Energy Management */}
-                            <button
-                                onClick={() => navigate('/ev/charging')}
-                                className="group flex flex-col gap-4 rounded-3xl bg-white p-5 border border-slate-300 shadow-md transition-all hover:-translate-y-1 hover:shadow-md"
-                            >
-                                <div className="h-10 w-10 flex items-center justify-center rounded-3xl bg-emerald-500 text-white">
-                                    <Zap className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-black text-slate-800">Sạc điện</p>
-                                    <p className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase">Quản lý Pin & Sạc</p>
-                                </div>
-                            </button>
-
-                            {/* Reports */}
-                            <button
-                                onClick={() => navigate('/ev/reports')}
-                                className="group flex flex-col gap-4 rounded-3xl bg-white p-5 border border-slate-300 shadow-md transition-all hover:-translate-y-1 hover:shadow-md"
-                            >
-                                <div className="h-10 w-10 flex items-center justify-center rounded-3xl bg-blue-500 text-white">
-                                    <BarChart3 className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-black text-slate-800">Báo cáo</p>
-                                    <p className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase">Phân tích hiệu suất</p>
-                                </div>
-                            </button>
-
-                            {/* Maintenance */}
-                            <button
-                                onClick={() => navigate('/ev/maintenance')}
-                                className="group flex flex-col gap-4 rounded-3xl bg-white p-5 border border-slate-300 shadow-md transition-all hover:-translate-y-1 hover:shadow-md"
-                            >
-                                <div className="h-10 w-10 flex items-center justify-center rounded-3xl bg-amber-500 text-white shadow-sm">
-                                    <Wrench className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-black text-slate-800">Bảo dưỡng</p>
-                                    <p className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-tighter">Lịch sử & Nhắc lịch</p>
-                                </div>
-                            </button>
-
-                            {/* Expenses */}
-                            <button
-                                onClick={() => navigate('/ev/expenses')}
-                                className="group flex flex-col gap-4 rounded-3xl bg-white p-5 border border-slate-300 shadow-md transition-all hover:-translate-y-1 hover:shadow-md"
-                            >
-                                <div className="h-10 w-10 flex items-center justify-center rounded-3xl bg-rose-500 text-white shadow-sm">
-                                    <Receipt className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-black text-slate-800">Chi phí khác</p>
-                                    <p className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-tighter">Gửi xe, Rửa xe...</p>
-                                </div>
-                            </button>
-
-                            {/* EV Calculator */}
-                            <button
-                                onClick={() => navigate('/ev/calculator')}
-                                className="group flex flex-col gap-4 rounded-3xl bg-emerald-600 p-5 shadow-lg shadow-emerald-200 transition-all hover:-translate-y-1"
-                            >
-                                <div className="h-10 w-10 flex items-center justify-center rounded-3xl bg-white text-emerald-600">
-                                    <Calculator className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-black text-white">Công cụ EV</p>
-                                    <p className="text-[10px] font-bold text-white/80 mt-0.5 uppercase tracking-tighter">Tính toán km</p>
-                                </div>
-                            </button>
-                        </div>
-                    </section>
-                )}
-
-                <div className="h-[120px] w-full flex-shrink-0" />
-            </main>
+                    )}
+                    <div className="h-[120px] w-full flex-shrink-0" />
+                </main>
+            </div>
 
             {/* ══ ODO Modal ══ */}
             {showOdoModal && selectedVehicle && (

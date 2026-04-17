@@ -32,6 +32,7 @@ const VehicleExpensesPage = lazy(() => import('./pages/ev/VehicleExpenses'))
 const VehicleReportsPage = lazy(() => import('./pages/ev/VehicleReports'))
 const VehicleChargingHistoryPage = lazy(() => import('./pages/ev/VehicleChargingHistory'))
 const EVCalculatorPage = lazy(() => import('./pages/ev/EVCalculator'))
+const DataManagementPage = lazy(() => import('./pages/ev/DataManagement'))
 
 
 const PageFallback = () => {
@@ -146,6 +147,14 @@ function AppContent() {
               element={
                 <ProtectedRoute>
                   <SettingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/data"
+              element={
+                <ProtectedRoute>
+                  <DataManagementPage />
                 </ProtectedRoute>
               }
             />

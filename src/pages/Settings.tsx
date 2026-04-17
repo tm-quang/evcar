@@ -14,7 +14,7 @@ import {
   LuDownload,
 } from 'react-icons/lu'
 
-import FooterNav from '../components/layout/FooterNav'
+import { VehicleFooterNav } from '../components/ev/VehicleFooterNav'
 import HeaderBar from '../components/layout/HeaderBar'
 import { NotificationSettingsModal } from '../components/settings/NotificationSettingsModal'
 import { CalculatorModal } from '../components/settings/CalculatorModal'
@@ -145,7 +145,7 @@ const SettingsPage = () => {
         <div className="mx-auto max-w-md space-y-6">
 
           {/* Profile Section - Hero Card */}
-          <section className="relative overflow-hidden rounded-3xl bg-white p-6 shadow-lg border border-slate-100 transition-all hover:shadow-xl">
+          <section className="relative overflow-hidden rounded-3xl bg-white p-6 shadow-md border border-slate-300 transition-all hover:shadow-xl">
             <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-gradient-to-br from-sky-100 to-blue-50 opacity-50 blur-2xl" />
 
             <div className="relative z-10 flex items-center gap-5">
@@ -178,7 +178,7 @@ const SettingsPage = () => {
                     <h3 className="text-xl font-bold text-slate-800">
                       {profile?.full_name && profile.full_name !== 'Người dùng'
                         ? profile.full_name
-                        : 'Người dùng BoFin'}
+                        : 'Người dùng EVNGo'}
                     </h3>
                     <p className="text-sm font-medium text-slate-500">{profile?.email || 'Chưa cập nhật email'}</p>
                     <button
@@ -201,9 +201,9 @@ const SettingsPage = () => {
               {/* Vehicle Management */}
               <button
                 onClick={() => navigate('/ev/list')}
-                className="group flex flex-col items-center justify-center gap-3 rounded-3xl bg-white p-4 text-center shadow-lg border border-slate-100 transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95"
+                className="group flex flex-col items-center justify-center gap-3 rounded-3xl bg-white p-4 text-center shadow-md border border-slate-300 transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 shadow-inner group-hover:scale-110 transition-transform">
+                <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-blue-50 text-blue-600 shadow-inner group-hover:scale-110 transition-transform">
                   <LuCar className="h-6 w-6" />
                 </div>
                 <div>
@@ -215,9 +215,9 @@ const SettingsPage = () => {
 
               {/* Privacy/Shield */}
               <button
-                className="group flex flex-col items-center justify-center gap-3 rounded-3xl bg-white p-4 text-center shadow-lg border border-slate-100 transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95"
+                className="group flex flex-col items-center justify-center gap-3 rounded-3xl bg-white p-4 text-center shadow-md border border-slate-300 transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 shadow-inner group-hover:scale-110 transition-transform">
+                <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-sky-50 text-sky-600 shadow-inner group-hover:scale-110 transition-transform">
                   <LuShield className="h-6 w-6" />
                 </div>
                 <div>
@@ -228,9 +228,10 @@ const SettingsPage = () => {
 
               {/* Data Sync */}
               <button
-                className="group flex flex-col items-center justify-center gap-3 rounded-3xl bg-white p-4 text-center shadow-lg border border-slate-100 transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95"
+                onClick={() => navigate('/settings/data')}
+                className="group flex flex-col items-center justify-center gap-3 rounded-3xl bg-white p-4 text-center shadow-md border border-slate-300 transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 shadow-inner group-hover:scale-110 transition-transform">
+                <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-emerald-50 text-emerald-600 shadow-inner group-hover:scale-110 transition-transform">
                   <LuDatabase className="h-6 w-6" />
                 </div>
                 <div>
@@ -241,9 +242,9 @@ const SettingsPage = () => {
 
               {/* Advanced UI Settings */}
               <button
-                className="group flex flex-col items-center justify-center gap-3 rounded-3xl bg-white p-4 text-center shadow-lg border border-slate-100 transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95"
+                className="group flex flex-col items-center justify-center gap-3 rounded-3xl bg-white p-4 text-center shadow-md border border-slate-300 transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 shadow-inner group-hover:scale-110 transition-transform">
+                <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-amber-50 text-amber-600 shadow-inner group-hover:scale-110 transition-transform">
                   <LuSettings2 className="h-6 w-6" />
                 </div>
                 <div>
@@ -254,9 +255,9 @@ const SettingsPage = () => {
 
               {/* Export Data */}
               <button
-                className="group flex flex-col items-center justify-center gap-3 rounded-3xl bg-white p-4 text-center shadow-lg border border-slate-100 transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95"
+                className="group flex flex-col items-center justify-center gap-3 rounded-3xl bg-white p-4 text-center shadow-md border border-slate-300 transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-teal-600 shadow-inner group-hover:scale-110 transition-transform">
+                <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-teal-50 text-teal-600 shadow-inner group-hover:scale-110 transition-transform">
                   <LuDownload className="h-6 w-6" />
                 </div>
                 <div>
@@ -275,10 +276,10 @@ const SettingsPage = () => {
               {systemSettings.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between gap-4 rounded-3xl bg-white p-4 shadow-lg border border-slate-100 transition-all hover:shadow-xl"
+                  className="flex items-center justify-between gap-4 rounded-3xl bg-white p-4 shadow-md border border-slate-300 transition-all hover:shadow-xl"
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${item.bg} ${item.color} shadow-inner`}>
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-3xl ${item.bg} ${item.color} shadow-inner`}>
                       {item.icon}
                     </div>
                     <div>
@@ -306,32 +307,32 @@ const SettingsPage = () => {
             </div>
           </section>
 
-        {/* QR Scan Button */}
-        <button
-          onClick={handleQRScanClick}
-          className="mb-8 flex w-full items-center justify-between rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 p-5 text-white shadow-lg shadow-emerald-200 active:scale-[0.98] transition-all"
-        >
-          <div className="flex items-center gap-4">
-            <div className="rounded-xl bg-white/20 p-3">
-              <LuZap className="h-6 w-6" />
+          {/* QR Scan Button */}
+          <button
+            onClick={handleQRScanClick}
+            className="mb-8 flex w-full items-center justify-between rounded-3xl bg-gradient-to-r from-emerald-600 to-teal-600 p-5 text-white shadow-lg shadow-emerald-200 active:scale-[0.98] transition-all"
+          >
+            <div className="flex items-center gap-4">
+              <div className="rounded-3xl bg-white/20 p-3">
+                <LuZap className="h-6 w-6" />
+              </div>
+              <div className="text-left">
+                <h4 className="text-base font-black">Quét mã QR</h4>
+                <p className="text-xs opacity-80">Đồng bộ dữ liệu</p>
+              </div>
             </div>
-            <div className="text-left">
-              <h4 className="text-base font-black">Quét mã QR VinFast</h4>
-              <p className="text-xs opacity-80">Đồng bộ dữ liệu xe & trạm sạc</p>
-            </div>
-          </div>
-          <LuChevronRight className="h-5 w-5 opacity-60" />
-        </button>
+            <LuChevronRight className="h-5 w-5 opacity-60" />
+          </button>
 
-        {/* Footer Info */}
-        <div className="mb-8 text-center text-slate-300">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em]">BOfin EV Dashboard</p>
-          <p className="text-[10px] mt-1">Version 2.4.0 • Build 2024.EV</p>
+          {/* Footer Info */}
+          <div className="mb-8 text-center text-slate-300">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em]">EVNGo Dashboard</p>
+            <p className="text-[10px] mt-1">Version 1.0.0 • Build 2026.EV</p>
           </div>
         </div>
       </main>
 
-      <FooterNav onAddClick={() => navigate('/ev/charging')} />
+      <VehicleFooterNav onAddClick={() => navigate('/ev/charging')} />
 
 
       <CalculatorModal

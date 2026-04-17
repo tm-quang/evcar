@@ -18,15 +18,15 @@ interface BeforeInstallPromptEvent extends Event {
 export const preventZoom = () => {
   // Prevent pinch zoom
   document.addEventListener('gesturestart', (e) => {
-    e.preventDefault()
+    if (e.cancelable) e.preventDefault()
   })
 
   document.addEventListener('gesturechange', (e) => {
-    e.preventDefault()
+    if (e.cancelable) e.preventDefault()
   })
 
   document.addEventListener('gestureend', (e) => {
-    e.preventDefault()
+    if (e.cancelable) e.preventDefault()
   })
 
   // Prevent double-tap zoom
@@ -34,7 +34,7 @@ export const preventZoom = () => {
   document.addEventListener('touchend', (e) => {
     const now = Date.now()
     if (now - lastTouchEnd <= 300) {
-      e.preventDefault()
+      if (e.cancelable) e.preventDefault()
     }
     lastTouchEnd = now
   }, { passive: false })
@@ -86,7 +86,7 @@ export const preventPullToRefresh = () => {
       const isVerticalPull = deltaY > 0 && deltaY > deltaX * 2
 
       if (!isScrolling && isAtTop && isVerticalPull && deltaY > 10) {
-        e.preventDefault()
+        if (e.cancelable) e.preventDefault()
         hasMoved = true
       } else {
         hasMoved = true

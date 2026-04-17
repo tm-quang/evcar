@@ -338,7 +338,7 @@ export default function VehicleChargingHistory() {
     }
 
     return (
-        <div className="flex h-screen flex-col overflow-hidden bg-[#F7F9FC]">
+        <div className="flex h-[100dvh] flex-col overflow-hidden bg-[#F7F9FC]">
             <HeaderBar
                 variant="page"
                 title="Lịch sử chi tiết"
@@ -368,7 +368,7 @@ export default function VehicleChargingHistory() {
                 }
             />
 
-            <main className="flex-1 overflow-y-auto w-full max-w-md mx-auto px-4 pt-4 pb-4">
+            <main className="flex-1 overflow-y-auto min-h-0 w-full max-w-md mx-auto px-4 pt-4 pb-28">
                 {/* Summary Info Row */}
                 <div className="mb-4 flex items-center justify-between rounded-xl bg-white border border-slate-100 px-4 py-3 shadow-md">
                     <p className="text-sm font-semibold text-slate-600">

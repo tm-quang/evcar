@@ -584,7 +584,7 @@ export default function VehicleCharging() {
                 }
             />
 
-            <main className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-md mx-auto px-4 pb-4 pt-4">
+            <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 w-full max-w-md mx-auto px-4 pb-28 pt-4">
                 {/* Electric header when electric vehicle */}
                 {isElectricVehicle && (
                     <div className="mb-4 flex items-center gap-3 rounded-2xl bg-green-500 px-4 py-3 text-white">

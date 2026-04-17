@@ -80,7 +80,7 @@ export default function VehicleList() {
                 onReload={() => { void refetch() }}
             />
 
-            <main className="flex-1 overflow-y-auto overscroll-contain pb-24">
+            <main className="flex-1 overflow-y-auto min-h-0 overscroll-contain pb-28">
                 <div className="mx-auto flex w-full max-w-md flex-col gap-4 px-4 pt-4 pb-12">
 
                     {/* Summary Card */}
