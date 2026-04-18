@@ -21,8 +21,8 @@ import HeaderBar from '../../components/layout/HeaderBar'
 
 const formatCurrency = (value: number) =>
     new Intl.NumberFormat('vi-VN', {
-        maximumFractionDigits: 3,
-    }).format(value) + ' đ'
+        maximumFractionDigits: 0,
+    }).format(Math.round(value)) + ' đ'
 
 const formatNumber = (value: number, decimals = 0) =>
     new Intl.NumberFormat('vi-VN', {

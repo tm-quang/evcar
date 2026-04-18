@@ -35,8 +35,8 @@ import { useAuthState } from '../../hooks/useAuthState'
 
 const formatCurrency = (value: number) =>
     new Intl.NumberFormat('vi-VN', {
-        maximumFractionDigits: 3,
-    }).format(value) + ' đ'
+        maximumFractionDigits: 0,
+    }).format(Math.round(value)) + ' đ'
 
 export default function VehicleManagement() {
     const navigate = useNavigate()
