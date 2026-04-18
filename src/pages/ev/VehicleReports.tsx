@@ -32,9 +32,9 @@ import HeaderBar from '../../components/layout/HeaderBar'
 import { VehicleFooterNav } from '../../components/ev/VehicleFooterNav'
 
 
-const formatNumber = (value: number, decimals = 0) =>
+const formatNumber = (value: number, decimals = 3) =>
     new Intl.NumberFormat('vi-VN', {
-        minimumFractionDigits: decimals,
+        minimumFractionDigits: 0,
         maximumFractionDigits: decimals,
     }).format(value)
 
@@ -260,7 +260,7 @@ export default function VehicleReports() {
                                         </div>
                                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Chi phí / Km</span>
                                     </div>
-                                    <p className="text-xl font-black">{formatNumber(Math.round(stats?.costPerKm || 0))} <span className="text-xs font-medium opacity-50">đ</span></p>
+                                    <p className="text-xl font-black">{formatNumber(stats?.costPerKm || 0)} <span className="text-xs font-medium opacity-50">đ</span></p>
                                 </div>
                             </div>
                         </div>

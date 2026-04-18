@@ -512,10 +512,8 @@ export const sendReminderNotification = async (
 ): Promise<void> => {
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
       maximumFractionDigits: 0,
-    }).format(value)
+    }).format(value) + ' đ'
 
   const emoji = type === 'Thu' ? '💰' : '💸'
   const notificationTitle = `${emoji} Nhắc nhở`

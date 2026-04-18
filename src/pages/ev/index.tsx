@@ -35,10 +35,8 @@ import { useAuthState } from '../../hooks/useAuthState'
 
 const formatCurrency = (value: number) =>
     new Intl.NumberFormat('vi-VN', {
-        style: 'currency',
-        currency: 'VND',
-        maximumFractionDigits: 0,
-    }).format(value)
+        maximumFractionDigits: 3,
+    }).format(value) + ' đ'
 
 export default function VehicleManagement() {
     const navigate = useNavigate()
@@ -458,7 +456,7 @@ export default function VehicleManagement() {
                                             <div className="z-10">
                                                 <div className="flex items-baseline gap-1">
                                                     <p className="text-3xl font-black text-slate-900 tracking-tight">
-                                                        {isLoadingStats ? '...' : (stats?.totalKwh ? stats.totalKwh.toFixed(1) : '0')}
+                                                        {isLoadingStats ? '...' : (stats?.totalKwh ? stats.totalKwh.toLocaleString('vi-VN', { maximumFractionDigits: 3 }) : '0')}
                                                     </p>
                                                     <span className="text-xs font-bold text-slate-400 uppercase">kWh</span>
                                                 </div>

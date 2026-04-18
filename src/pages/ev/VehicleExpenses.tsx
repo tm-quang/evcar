@@ -17,7 +17,7 @@ import { useVehicleStore } from '../../store/useVehicleStore'
 import { NumberPadModal } from '../../components/ui/NumberPadModal'
 
 const fmt = (v: number) =>
-    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(v)
+    new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 0 }).format(v) + ' đ'
 
 const EXPENSE_TYPES: Record<string, { label: string; accentBar: string; bg: string; text: string; iconBg: string }> = {
     toll: { label: 'Cầu đường', accentBar: 'bg-orange-400', bg: 'bg-orange-100', text: 'text-orange-700', iconBg: 'bg-orange-100' },

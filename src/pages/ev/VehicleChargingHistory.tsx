@@ -21,10 +21,8 @@ import HeaderBar from '../../components/layout/HeaderBar'
 
 const formatCurrency = (value: number) =>
     new Intl.NumberFormat('vi-VN', {
-        style: 'currency',
-        currency: 'VND',
-        maximumFractionDigits: 0,
-    }).format(value)
+        maximumFractionDigits: 3,
+    }).format(value) + ' đ'
 
 const formatNumber = (value: number, decimals = 0) =>
     new Intl.NumberFormat('vi-VN', {
@@ -113,8 +111,8 @@ export default function VehicleChargingHistory() {
                 const durationStr = parseTimeCell(row.getCell(timeCol + 2))
 
                 const kwh = getNum(row.getCell(timeCol + 3), true)
-                const unitPrice = Math.round(getNum(row.getCell(timeCol + 4)))
-                const cost = Math.round(getNum(row.getCell(timeCol + 5)))
+                const unitPrice = getNum(row.getCell(timeCol + 4))
+                const cost = getNum(row.getCell(timeCol + 5))
                 const notesStr = row.getCell(timeCol + 6).text || ''
 
                 // Parse Date avoiding 1-day offset issues
@@ -175,8 +173,8 @@ export default function VehicleChargingHistory() {
                 }
                 if (unitPrice === 3858) {
                     // Mốc giá 3.858đ là điểm sạc có VAT. total_amount (gốc) mình sẽ tính từ kwh * 3.858, phần còn lại cost (thực tế trả qua excel)
-                    const expectedTotal = Math.round(kwh * unitPrice)
-                    if (expectedTotal > cost) finalNotes += ` \nKhuyến mãi: -${(expectedTotal - cost).toLocaleString('vi-VN')}đ`
+                    const expectedTotal = kwh * unitPrice
+                    if (expectedTotal > cost) finalNotes += ` \nKhuyến mãi: -${(expectedTotal - cost).toLocaleString('vi-VN', { maximumFractionDigits: 2 })} đ`
                 }
 
                 let validRefuelTime = null
@@ -460,14 +458,14 @@ export default function VehicleChargingHistory() {
                                 <Zap className="h-3.5 w-3.5" />
                                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Năng lượng</span>
                             </div>
-                            <p className="text-2xl font-black">{Math.round(totalKwh)} <span className="text-xs font-bold text-slate-400 uppercase">kWh</span></p>
+                            <p className="text-2xl font-black">{totalKwh.toLocaleString('vi-VN', { maximumFractionDigits: 2 })} <span className="text-xs font-bold text-slate-400 uppercase">kWh</span></p>
                         </div>
                         <div className="flex flex-col">
                             <div className="flex items-center gap-2 mb-2 text-blue-400">
                                 <TrendingUp className="h-3.5 w-3.5" />
                                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Chi phí</span>
                             </div>
-                            <p className="text-xl font-black">{formatNumber(Math.round(totalCost))} <span className="text-[10px] font-black text-slate-400 uppercase">VND</span></p>
+                            <p className="text-xl font-black">{formatNumber(totalCost, 0)} <span className="text-[10px] font-black text-slate-400 uppercase">VND</span></p>
                         </div>
                         <div className="flex flex-col">
                             <div className="flex items-center gap-2 mb-2 text-fuchsia-400">
@@ -481,7 +479,7 @@ export default function VehicleChargingHistory() {
                                 <Save className="h-3.5 w-3.5" />
                                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Tiết kiệm</span>
                             </div>
-                            <p className="text-2xl font-black text-emerald-400">{formatNumber(Math.round(totalSaved))} <span className="text-xs font-bold text-slate-400 uppercase">VND</span></p>
+                            <p className="text-2xl font-black text-emerald-400">{formatNumber(totalSaved, 0)} <span className="text-xs font-bold text-slate-400 uppercase">VND</span></p>
                         </div>
                     </div>
                 </div>
@@ -590,7 +588,7 @@ export default function VehicleChargingHistory() {
                                             <div className="flex flex-col">
                                                 <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Số điện</p>
                                                 <div className="flex items-baseline gap-1">
-                                                    <span className="text-lg font-black text-slate-900">{log.kwh?.toFixed(1) || 0}</span>
+                                                    <span className="text-lg font-black text-slate-900">{log.kwh?.toLocaleString('vi-VN', { maximumFractionDigits: 3 }) || 0}</span>
                                                     <span className="text-[10px] font-black text-slate-400 uppercase">kWh</span>
                                                 </div>
                                             </div>
@@ -606,11 +604,11 @@ export default function VehicleChargingHistory() {
                                                 <div className="flex flex-col items-end gap-0.5">
                                                     {isDiscounted && originalCost > 0 && (
                                                         <span className="text-[11px] font-bold text-slate-400 line-through decoration-slate-400/50 leading-none">
-                                                            {formatNumber(Math.round(originalCost))}
+                                                            {formatNumber(originalCost, 0)}
                                                         </span>
                                                     )}
                                                     <p className={`text-sm font-black leading-none ${displayCost === 0 ? 'text-emerald-500' : 'text-slate-900'}`}>
-                                                        {displayCost === 0 ? 'FREE' : formatNumber(displayCost)}
+                                                        {displayCost === 0 ? 'FREE' : formatNumber(displayCost, 0)}
                                                     </p>
                                                 </div>
                                             </div>
@@ -760,11 +758,11 @@ export default function VehicleChargingHistory() {
                                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Chi phí phiên sạc</p>
                                                 <div className="flex flex-wrap items-center gap-2">
                                                     <span className="text-sm font-black text-blue-600">
-                                                        {actualCostModal === 0 ? 'Miễn phí' : formatCurrency(actualCostModal).replace('₫', 'đ').trim()}
+                                                        {actualCostModal === 0 ? 'Miễn phí' : formatCurrency(actualCostModal)}
                                                     </span>
                                                     {(actualCostModal < originalCostModal || parsedKhuyenMai) && (
                                                         <span className="text-xs font-semibold text-slate-400 line-through">
-                                                            {formatCurrency(originalCostModal).replace('₫', 'đ').trim()}
+                                                            {formatCurrency(originalCostModal)}
                                                         </span>
                                                     )}
                                                     {parsedKhuyenMai && (

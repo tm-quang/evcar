@@ -136,7 +136,7 @@ function parseEVReceipt(rawText: string): ChargeReceiptData {
     if (result.kwh) parts.push(`${result.kwh} kWh`)
     const displayCost = result.totalPayment ?? result.chargeAmount
     if (displayCost !== undefined)
-        parts.push(`${displayCost.toLocaleString('vi-VN')}đ`)
+        parts.push(`${displayCost.toLocaleString('vi-VN')} đ`)
     if (result.stationName) parts.push(result.stationName)
 
     result.summary = parts.length

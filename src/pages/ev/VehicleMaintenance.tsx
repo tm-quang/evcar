@@ -17,7 +17,7 @@ import { LoadingOverlay } from '../../components/ui/LoadingOverlay'
 import { DateRangePickerModal } from '../../components/ui/DateRangePickerModal'
 
 const fmt = (v: number) =>
-    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(v)
+    new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 0 }).format(v) + ' đ'
 
 const MAINT_TYPES = {
     scheduled: { label: 'Định kỳ', icon: Clock, accent: 'blue' },

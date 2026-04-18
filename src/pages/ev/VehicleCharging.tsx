@@ -42,9 +42,9 @@ type TabType = 'fuel' | 'electric'
 // ── MAP: vehicle.fuel_type → tab + default fuel log type ──────────────────
 
 
-const formatNumber = (value: number, decimals = 0) =>
+const formatNumber = (value: number, decimals = 3) =>
     new Intl.NumberFormat('vi-VN', {
-        minimumFractionDigits: decimals,
+        minimumFractionDigits: 0,
         maximumFractionDigits: decimals,
     }).format(value)
 
@@ -91,7 +91,7 @@ function ElectricStatsCard({ logs }: { logs: FuelLogRecord[] }) {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <p className="text-3xl font-black tracking-tight">{formatNumber(totalKwh, 1)}</p>
+                        <p className="text-3xl font-black tracking-tight">{formatNumber(totalKwh)}</p>
                         <p className="text-[10px] font-black uppercase tracking-widest opacity-70">kWh đã sạc</p>
                     </div>
                     <div className="text-right">
@@ -117,7 +117,7 @@ function ElectricStatsCard({ logs }: { logs: FuelLogRecord[] }) {
                         <Activity className="h-5 w-5" />
                     </div>
                     <p className="text-lg font-black text-slate-900 leading-none">
-                        {avgCostPerSession > 0 ? formatNumber(Math.round(avgCostPerSession)) : '--'}
+                        {avgCostPerSession > 0 ? formatNumber(avgCostPerSession) : '--'}
                     </p>
                     <p className="text-center text-[9px] font-black uppercase tracking-tighter text-slate-400 mt-1">TB/phiên</p>
                 </div>
@@ -126,7 +126,7 @@ function ElectricStatsCard({ logs }: { logs: FuelLogRecord[] }) {
                         <TrendingUp className="h-5 w-5" />
                     </div>
                     <p className="text-lg font-black text-slate-900 leading-none">
-                        {monthKwh > 0 ? formatNumber(monthKwh, 0) : '--'}
+                        {monthKwh > 0 ? formatNumber(monthKwh) : '--'}
                     </p>
                     <p className="text-center text-[9px] font-black uppercase tracking-tighter text-slate-400 mt-1">Tháng (kWh)</p>
                 </div>
@@ -257,7 +257,7 @@ function ChargeLogCard({
                 {/* Main metrics */}
                 <div className="grid grid-cols-3 gap-3 mb-5">
                     <div className="rounded-2xl bg-slate-50 p-3 text-center shadow-inner">
-                        <p className="text-lg font-black text-slate-900">{formatNumber(kwh, 1)}</p>
+                        <p className="text-lg font-black text-slate-900">{formatNumber(kwh)}</p>
                         <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">kWh</p>
                     </div>
                     <div className="rounded-2xl bg-slate-50 p-3 text-center shadow-inner">
@@ -268,7 +268,7 @@ function ChargeLogCard({
                     </div>
                     <div className="rounded-2xl bg-slate-50 p-3 text-center shadow-inner">
                         <p className="text-lg font-black text-slate-900">
-                            {formatNumber(Math.round(cost))}
+                            {formatNumber(cost)}
                         </p>
                         <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">VND</p>
                     </div>
@@ -671,7 +671,7 @@ export default function VehicleCharging() {
                                 <span className="font-bold text-slate-700">{periodTotalKwh.toLocaleString('vi-VN', { maximumFractionDigits: 1 })}</span>
                                 kWh
                             </span>
-                            <span className="text-sm font-black text-green-700">{Math.round(periodTotalCost).toLocaleString('vi-VN')}đ</span>
+                            <span className="text-sm font-black text-green-700">{formatNumber(periodTotalCost)} đ</span>
                         </div>
                     )}
                 </div>
@@ -723,7 +723,7 @@ export default function VehicleCharging() {
                                                 <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">{dayLabel}</span>
                                             </div>
                                             <span className="text-xs font-semibold text-slate-400">
-                                                {Math.round(dayTotal).toLocaleString('vi-VN')}đ
+                                                {formatNumber(dayTotal)} đ
                                             </span>
                                         </div>
                                         <div className="space-y-2 pl-4 border-l-2 border-green-100">
@@ -1000,7 +1000,7 @@ function AddChargeModal({
                 if (data.unitPrice && data.unitPrice > 0) {
                     u.unit_price = data.unitPrice.toString()
                 } else if (data.chargeAmount && data.kwh && data.kwh > 0) {
-                    u.unit_price = Math.round(data.chargeAmount / data.kwh).toString()
+                    u.unit_price = (data.chargeAmount / data.kwh).toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 3 })
                 }
                 // Discount = chargeAmount - totalPayment
                 if (data.chargeAmount != null && data.totalPayment != null) {
@@ -1041,15 +1041,15 @@ function AddChargeModal({
                 if (duration) extras.push(`Thời gian sạc: ${duration}`)
             }
             if (isElectric && discount > 0)
-                extras.push(`Khuyến mãi: -${discount.toLocaleString('vi-VN')}đ`)
+                extras.push(`Khuyến mãi: -${discount.toLocaleString('vi-VN')} đ`)
             if (stationLocationData) {
                 extras.push(`GPS: ${stationLocationData.lat.toFixed(6)}, ${stationLocationData.lng.toFixed(6)}`)
                 extras.push(`https://www.google.com/maps?q=${stationLocationData.lat},${stationLocationData.lng}`)
             }
             const finalNotes = [formData.notes, ...extras].filter(Boolean).join('\n')
 
-            const rawChargeAmount = Math.round(chargeAmount)   // phí sạc gốc trước khuyến mãi
-            const rawTotalPayment = Math.round(totalPayment)   // số thực trả sau khuyến mãi
+            const rawChargeAmount = chargeAmount   // phí sạc gốc trước khuyến mãi
+            const rawTotalPayment = totalPayment   // số thực trả sau khuyến mãi
 
             const payload = {
                 vehicle_id: formData.vehicle_id,
@@ -1147,7 +1147,7 @@ function AddChargeModal({
                                         </div>
                                         <div className="flex flex-wrap gap-1.5">
                                             {scanResult.kwh != null && <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-bold text-green-700 shadow-md border border-green-200"><Zap className="h-3 w-3" /> {scanResult.kwh} kWh</span>}
-                                            {(scanResult.chargeAmount ?? scanResult.totalPayment) != null && <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-bold text-slate-700 shadow-md border border-slate-200"><CreditCard className="h-3 w-3" /> {((scanResult.chargeAmount ?? scanResult.totalPayment) ?? 0).toLocaleString('vi-VN')}đ</span>}
+                                            {(scanResult.chargeAmount ?? scanResult.totalPayment) != null && <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs font-bold text-slate-700 shadow-md border border-slate-200"><CreditCard className="h-3 w-3" /> {((scanResult.chargeAmount ?? scanResult.totalPayment) ?? 0).toLocaleString('vi-VN')} đ</span>}
                                             {scanResult.date && <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs text-slate-600 shadow-md border border-slate-200"><Calendar className="h-3 w-3" /> {new Date(scanResult.date).toLocaleDateString('vi-VN')}</span>}
                                             {scanResult.stationName && <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs text-slate-600 shadow-md border border-slate-200 max-w-[180px] truncate"><MapPin className="h-3 w-3 shrink-0" /> {scanResult.stationName}</span>}
                                         </div>
@@ -1286,7 +1286,7 @@ function AddChargeModal({
                             {chargeAmount > 0 && (
                                 <div className="flex items-center justify-between rounded-xl bg-white border border-slate-200 px-3 py-2.5">
                                     <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600"><Zap className="h-3 w-3 text-green-500" /> Phí sạc thực tế</span>
-                                    <span className="text-md font-black text-slate-800">{formatNumber(Math.round(chargeAmount))} đ</span>
+                                    <span className="text-md font-black text-slate-800">{formatNumber(chargeAmount)} đ</span>
                                 </div>
                             )}
                         </div>
@@ -1356,7 +1356,7 @@ function AddChargeModal({
                                     <div className="flex items-center justify-between rounded-xl bg-red-100 px-3 py-2">
                                         <span className="text-xs font-medium text-red-700">Tiết kiệm được</span>
                                         <div className="text-right">
-                                            <span className="text-sm font-black text-red-700">-{formatNumber(discount)}đ</span>
+                                            <span className="text-sm font-black text-red-700">-{formatNumber(discount)} đ</span>
                                             {discountMode === 'vnd' && chargeAmount > 0 && (
                                                 <span className="ml-1.5 text-xs text-red-500">({discountPct.toFixed(0)}%)</span>
                                             )}
@@ -1371,12 +1371,12 @@ function AddChargeModal({
                             <div className="rounded-2xl bg-green-500 px-4 py-3 text-white">
                                 <div className="flex items-center justify-between">
                                     <span className="inline-flex items-center gap-1.5 text-sm font-semibold opacity-90"><DollarSign className="h-4 w-4" /> Tổng thanh toán</span>
-                                    <p className="text-xl font-black">{formatNumber(totalPayment)}đ</p>
+                                    <p className="text-xl font-black">{formatNumber(totalPayment)} đ</p>
                                 </div>
                                 {discount > 0 && (
                                     <div className="mt-1.5 flex items-center justify-between rounded-xl bg-white/20 px-3 py-1.5 text-xs">
-                                        <span>Phí gốc: {formatNumber(chargeAmount)}đ</span>
-                                        <span className="inline-flex items-center gap-1"><Gift className="h-3 w-3" /> -{formatNumber(discount)}đ</span>
+                                        <span>Phí gốc: {formatNumber(chargeAmount)} đ</span>
+                                        <span className="inline-flex items-center gap-1"><Gift className="h-3 w-3" /> -{formatNumber(discount)} đ</span>
                                     </div>
                                 )}
                             </div>
@@ -1520,7 +1520,7 @@ function BulkDiscountModal({
                     // clean old bulk discount notes if any (simple approach)
                     newNotes = newNotes.replace(/\n?Khuyến mãi: -[\d.]+đ \)/g, '')
                     if (disc > 0) {
-                        newNotes += `\nKhuyến mãi: -${disc.toLocaleString('vi-VN')}đ`
+                        newNotes += `\nKhuyến mãi: -${disc.toLocaleString('vi-VN')} đ`
                     }
 
                     await updateFuelLog(id, {
@@ -1609,10 +1609,10 @@ function BulkDiscountModal({
                                                 {sel ? <CheckSquare className="h-5 w-5 text-red-500 shrink-0" /> : <Square className="h-5 w-5 text-slate-300 shrink-0" />}
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-bold text-slate-700 truncate">{log.station_name || 'Không rõ địa điểm'}</p>
-                                                    <p className="text-[11px] font-medium text-slate-500">{dateStr} · {formatNumber(log.kwh || 0, 1)} kWh</p>
+                                                    <p className="text-[11px] font-medium text-slate-500">{dateStr} · {formatNumber(log.kwh || 0)} kWh</p>
                                                 </div>
                                                 <div className="text-right shrink-0">
-                                                    <p className="text-sm font-black text-slate-800">{formatNumber(log.total_cost || log.total_amount || 0)}đ</p>
+                                                    <p className="text-sm font-black text-slate-800">{formatNumber(log.total_cost || log.total_amount || 0)} đ</p>
                                                 </div>
                                             </div>
                                         )
@@ -1754,7 +1754,7 @@ function ChargeDetailModal({
 
                         <div>
                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Năng lượng</p>
-                            <p className="text-sm font-bold text-slate-800">{formatNumber(log.kwh || 0, 1)} kWh</p>
+                            <p className="text-sm font-bold text-slate-800">{formatNumber(log.kwh || 0)} kWh</p>
                         </div>
                         <div>
                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Tỉ lệ sạc</p>
@@ -1765,16 +1765,16 @@ function ChargeDetailModal({
                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Chi phí phiên sạc</p>
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-sm font-black text-blue-600">
-                                    {(totalPayment === 0 && chargeAmount > 0) || totalPayment === 0 ? 'Miễn phí' : `${formatNumber(totalPayment)}đ`}
+                                    {(totalPayment === 0 && chargeAmount > 0) || totalPayment === 0 ? 'Miễn phí' : `${formatNumber(totalPayment)} đ`}
                                 </span>
                                 {(totalPayment < chargeAmount) && (
                                     <span className="text-xs font-semibold text-slate-400 line-through">
-                                        {formatNumber(chargeAmount)}đ
+                                        {formatNumber(chargeAmount)} đ
                                     </span>
                                 )}
                                 {discount > 0 && (
                                     <span className="text-xs font-bold text-green-500 bg-green-50 px-1.5 py-0.5 rounded">
-                                        KM: -{formatNumber(discount)}đ
+                                        KM: -{formatNumber(discount)} đ
                                     </span>
                                 )}
                             </div>

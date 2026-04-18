@@ -518,7 +518,7 @@ export async function createExpense(expense: Omit<ExpenseRecord, 'id' | 'user_id
     await createVehicleNotification({
         type: 'expense',
         title: 'Phát sinh chi phí',
-        message: `Đã thêm chi phí ${expense.expense_type} mới trị giá ${expense.amount.toLocaleString('vi-VN')}đ.`,
+        message: `Đã thêm chi phí ${expense.expense_type} mới trị giá ${expense.amount.toLocaleString('vi-VN')} đ.`,
         related_id: data.id
     })
     return data

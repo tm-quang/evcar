@@ -25,15 +25,13 @@ export const parseVNDInput = (value: string): number => {
 }
 
 /**
- * Format a number to VND display format with thousand separators and currency symbol
- * Example: 1000000 -> "1.000.000 ₫"
+ * Format a number to VND display format with thousand separators and currency unit
+ * Example: 1000000 -> "1.000.000 đ"
  */
 export const formatVNDDisplay = (value: number): string => {
   return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
     maximumFractionDigits: 0,
-  }).format(value)
+  }).format(value) + ' đ'
 }
 
 /**
