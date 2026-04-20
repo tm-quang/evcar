@@ -552,15 +552,29 @@ export async function deleteExpense(id: string): Promise<void> {
 // ============================================
 
 export interface VehicleStats {
+    // Trips
     totalTrips: number
     totalDistance: number
+    longestTrip: number
+    avgTripDistance: number
+    // Costs
     totalFuelCost: number
     totalMaintenanceCost: number
     totalOtherExpenses: number
-    averageFuelConsumption: number // L/100km or kWh/100km
+    totalCostValue: number
     costPerKm: number
-    totalKwh?: number
-    totalChargeSessions?: number
+    // Charging (electric)
+    totalKwh: number
+    totalChargeSessions: number
+    avgKwhPerSession: number
+    avgCostPerSession: number
+    avgChargeMinutes: number
+    // Maintenance
+    totalMaintenanceCount: number
+    // Expenses
+    totalExpenseCount: number
+    // Efficiency
+    averageFuelConsumption: number // L/100km or kWh/100km
 }
 
 export async function getVehicleStats(vehicleId: string, startDate?: string, endDate?: string): Promise<VehicleStats> {
@@ -585,31 +599,50 @@ export async function getVehicleStats(vehicleId: string, startDate?: string, end
     const filteredMaintenance = filterByDate(maintenance, 'maintenance_date')
     const filteredExpenses = filterByDate(expenses, 'expense_date')
 
+    // Trips
     const totalDistance = filteredTrips.reduce((sum, trip) => sum + (trip.distance_km || 0), 0)
+    const longestTrip = filteredTrips.reduce((max, trip) => Math.max(max, trip.distance_km || 0), 0)
+    const avgTripDistance = filteredTrips.length > 0 ? totalDistance / filteredTrips.length : 0
+
+    // Costs
     const totalFuelCost = filteredFuel.reduce((sum, log) => sum + parseFloat(log.total_amount.toString()), 0)
     const totalMaintenanceCost = filteredMaintenance.reduce((sum, m) => sum + parseFloat((m.total_cost || 0).toString()), 0)
     const totalOtherExpenses = filteredExpenses.reduce((sum, e) => sum + parseFloat(e.amount.toString()), 0)
+    const totalCostValue = totalFuelCost + totalMaintenanceCost + totalOtherExpenses
+    const costPerKm = totalDistance > 0 ? totalCostValue / totalDistance : 0
 
-    // Calculate average fuel consumption
+    // Charging (electric-specific)
     const totalLiters = filteredFuel.reduce((sum, log) => sum + (log.liters || 0), 0)
     const totalKwh = filteredFuel.reduce((sum, log) => sum + (log.kwh || 0), 0)
+    const totalChargeSessions = filteredFuel.length
+    const avgKwhPerSession = totalChargeSessions > 0 ? totalKwh / totalChargeSessions : 0
+    const avgCostPerSession = totalChargeSessions > 0 ? totalFuelCost / totalChargeSessions : 0
+    const totalChargeMinutes = filteredFuel.reduce((sum, log) => sum + (log.charge_duration_minutes || 0), 0)
+    const avgChargeMinutes = totalChargeSessions > 0 ? totalChargeMinutes / totalChargeSessions : 0
+
+    // Efficiency
     const averageFuelConsumption = totalDistance > 0
         ? (totalLiters > 0 ? (totalLiters / totalDistance) * 100 : (totalKwh / totalDistance) * 100)
         : 0
 
-    const totalCost = totalFuelCost + totalMaintenanceCost + totalOtherExpenses
-    const costPerKm = totalDistance > 0 ? totalCost / totalDistance : 0
-
     return {
         totalTrips: filteredTrips.length,
         totalDistance,
+        longestTrip,
+        avgTripDistance,
         totalFuelCost,
         totalMaintenanceCost,
         totalOtherExpenses,
-        averageFuelConsumption,
+        totalCostValue,
         costPerKm,
         totalKwh,
-        totalChargeSessions: filteredFuel.length,
+        totalChargeSessions,
+        avgKwhPerSession,
+        avgCostPerSession,
+        avgChargeMinutes,
+        totalMaintenanceCount: filteredMaintenance.length,
+        totalExpenseCount: filteredExpenses.length,
+        averageFuelConsumption,
     }
 }
 

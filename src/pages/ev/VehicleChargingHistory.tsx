@@ -11,8 +11,9 @@ import {
     Filter,
     TrendingUp,
     ChevronRight,
-    MapPin
+    MapPin,
 } from 'lucide-react'
+import { LuDollarSign } from "react-icons/lu";
 import { useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { useVehicles, useVehicleCharging, vehicleKeys } from '../../lib/ev/useVehicleQueries'
@@ -376,7 +377,7 @@ export default function VehicleChargingHistory() {
 
             <main className="flex-1 overflow-y-auto min-h-0 w-full max-w-md mx-auto px-4 pt-4 pb-28">
                 {/* Summary Info Row */}
-                <div className="mb-4 flex items-center justify-between px-1">
+                <div className="mb-2 flex items-center justify-between px-1">
                     <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
                         Dữ liệu phiên sạc
                     </p>
@@ -386,7 +387,7 @@ export default function VehicleChargingHistory() {
                 </div>
 
                 {/* Segmented Control & Filter Button */}
-                <div className={`flex items-center justify-between gap-3 ${filterYear === 'all' ? 'mb-6' : 'mb-3'}`}>
+                <div className={`flex items-center justify-between gap-3 ${filterYear === 'all' ? 'mb-2' : 'mb-2'}`}>
                     <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide flex-1 py-1">
                         <button
                             onClick={() => setFilterYear('all')}
@@ -413,7 +414,7 @@ export default function VehicleChargingHistory() {
                     {/* Filter Icon Button */}
                     <button
                         onClick={() => setIsFilterModalOpen(true)}
-                        className={`h-11 w-11 flex items-center justify-center rounded-2xl transition-all shrink-0 border ${searchTerm ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300 shadow-sm'
+                        className={`h-10 w-10 flex items-center justify-center rounded-3xl transition-all shrink-0 border ${searchTerm ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300 shadow-sm'
                             }`}
                         title="Tìm kiếm & Cấu hình lọc"
                     >
@@ -422,7 +423,7 @@ export default function VehicleChargingHistory() {
                 </div>
 
                 {filterYear !== 'all' && availableMonths.length > 0 && (
-                    <div className="flex items-center gap-2 mb-4 overflow-x-auto scrollbar-hide pb-2">
+                    <div className="flex items-center gap-2 mb-2 overflow-x-auto scrollbar-hide pb-2">
                         <button
                             onClick={() => setFilterMonth('all')}
                             className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${filterMonth === 'all'
@@ -448,56 +449,82 @@ export default function VehicleChargingHistory() {
                 )}
 
                 {/* 4 Cards Grid - Premium Dark Theme for stats */}
-                <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-blue-900 to-blue-700 p-5 text-white shadow-lg shadow-slate-900/20 mb-5 border border-white/5">
-                    <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-blue-500/10 blur-[80px]" />
-                    <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-blue-500/10 blur-[80px]" />
+                <div className="relative overflow-hidden rounded-3xl bg-[#1E40AF] p-4 text-white shadow-md shadow-blue-900/60 mb-5 border border-white/10">
+                    <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-blue-400/10 blur-[90px]" />
+                    <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-blue-300/10 blur-[90px]" />
 
-                    <div className="relative z-10 grid grid-cols-2 gap-y-7 gap-x-4">
+                    <div className="relative z-10 grid grid-cols-2 gap-y-8 gap-x-6">
+                        {/* Energy Card */}
                         <div className="flex flex-col">
-                            <div className="flex items-center gap-2 mb-2 text-emerald-400">
-                                <Zap className="h-3.5 w-3.5" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Năng lượng</span>
+                            <div className="flex items-center gap-2.5 mb-3">
+                                <div className="h-8 w-8 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 border border-emerald-500/10">
+                                    <Zap className="h-4 w-4 fill-emerald-400/20" />
+                                </div>
+                                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-white/60">Năng lượng</span>
                             </div>
-                            <p className="text-2xl font-black">{totalKwh.toLocaleString('vi-VN', { maximumFractionDigits: 2 })} <span className="text-xs font-bold text-slate-400 uppercase">kWh</span></p>
+                            <p className="text-[25px] font-black leading-none flex items-baseline gap-1.5">
+                                {totalKwh.toLocaleString('vi-VN', { maximumFractionDigits: 2 })}
+                                <span className="text-xs font-black text-white/40 uppercase tracking-wider">KWH</span>
+                            </p>
                         </div>
+                        {/* Plugged Card */}
                         <div className="flex flex-col">
-                            <div className="flex items-center gap-2 mb-2 text-blue-400">
-                                <TrendingUp className="h-3.5 w-3.5" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Chi phí</span>
+                            <div className="flex items-center gap-2.5 mb-3">
+                                <div className="h-8 w-8 rounded-xl bg-orange-500/20 flex items-center justify-center text-orange-300 border border-orange-500/10">
+                                    <Clock className="h-4 w-4" />
+                                </div>
+                                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-white/60">Cắm sạc</span>
                             </div>
-                            <p className="text-xl font-black">{formatNumber(totalCost, 0)} <span className="text-[10px] font-black text-slate-400 uppercase">VND</span></p>
+                            <p className="text-[25px] font-black leading-none flex items-baseline gap-1.5">
+                                {pluggedHours}h
+                                <span className="text-[13px] font-black text-white/40 uppercase tracking-wider">{pluggedMins}M</span>
+                            </p>
                         </div>
+                        {/* Cost Card */}
                         <div className="flex flex-col">
-                            <div className="flex items-center gap-2 mb-2 text-fuchsia-400">
-                                <Clock className="h-3.5 w-3.5" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Cắm sạc</span>
+                            <div className="flex items-center gap-2.5 mb-3">
+                                <div className="h-8 w-8 rounded-xl bg-blue-400/20 flex items-center justify-center text-blue-300 border border-blue-400/10">
+                                    <TrendingUp className="h-4 w-4" />
+                                </div>
+                                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-white/60">Chi phí</span>
                             </div>
-                            <p className="text-xl font-black">{pluggedHours}h <span className="text-[11px] font-black text-slate-400 uppercase">{pluggedMins}m</span></p>
+                            <p className="text-[25px] font-black leading-none flex items-baseline gap-1.5">
+                                {formatNumber(totalCost, 0)}
+                                <span className="text-[10px] font-black text-white/40 uppercase tracking-wider">VND</span>
+                            </p>
                         </div>
+
+
+
+                        {/* Savings Card */}
                         <div className="flex flex-col">
-                            <div className="flex items-center gap-2 mb-2 text-amber-400">
-                                <Save className="h-3.5 w-3.5" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Tiết kiệm</span>
+                            <div className="flex items-center gap-2.5 mb-3">
+                                <div className="h-8 w-8 rounded-xl bg-red-500/20 flex items-center justify-center text-red-300 border border-red-500/10">
+                                    <LuDollarSign className="h-4 w-4" />
+                                </div>
+                                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-white/60">Tiết kiệm</span>
                             </div>
-                            <p className="text-2xl font-black text-emerald-400">{formatNumber(totalSaved, 0)} <span className="text-xs font-bold text-slate-400 uppercase">VND</span></p>
+                            <p className="text-[25px] font-black leading-none text-[#10B981] flex items-baseline gap-1.5">
+                                {formatNumber(totalSaved, 0)}
+                                <span className="text-[10px] font-black text-white/40 uppercase tracking-wider">VND</span>
+                            </p>
                         </div>
                     </div>
                 </div>
 
                 {/* List Header */}
-                <div className="mb-4 flex items-center justify-between px-1">
+                <div className="mb-3 flex items-center justify-between px-1">
                     <h3 className="text-[11px] font-black uppercase tracking-[0.15em] text-slate-400">Danh sách phiên sạc</h3>
                 </div>
 
                 {/* List Container with Timeline */}
-                <div className="relative ml-2 pl-4 border-l-2 border-slate-200 space-y-6 pb-10">
+                <div className="relative ml-2 pl-4 border-l border-slate-200 space-y-6 pb-10">
                     {filteredLogs.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 px-8 text-center bg-white rounded-[32px] border border-slate-100 shadow-sm">
-                            <div className="mb-6 rounded-3xl bg-slate-50 p-6">
-                                <Search className="h-10 w-10 text-slate-300" />
+                            <div className="mb-4 rounded-3xl bg-slate-200 p-6 shadow-inner">
+                                <Search className="h-10 w-10 text-slate-500" />
                             </div>
-                            <p className="text-md font-black text-slate-800 uppercase tracking-widest">Trống</p>
-                            <p className="mt-2 text-xs font-medium text-slate-400 leading-relaxed uppercase tracking-tighter">Không tìm thấy phiên sạc nào khớp với bộ lọc của bạn</p>
+                            <p className="mt-2 text-xs font-medium text-slate-400 leading-relaxed uppercase tracking-tighter">Không tìm thấy phiên sạc, không có dữ liệu phiên sạc</p>
                         </div>
                     ) : (
                         filteredLogs.map(log => {
@@ -628,10 +655,10 @@ export default function VehicleChargingHistory() {
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-1.5 shrink-0 bg-blue-50 px-3 py-1.5 rounded-2xl border border-blue-100">
-                                                <span className="text-[10px] font-black text-blue-700">{startTime}</span>
-                                                <ChevronRight className="h-2.5 w-2.5 text-blue-300" />
-                                                <span className="text-[10px] font-black text-blue-700">{endTime}</span>
+                                            <div className="flex items-center gap-1.5 shrink-0 bg-emerald-50 px-3 py-1.5 rounded-2xl border border-emerald-100">
+                                                <span className="text-[10px] font-black text-emerald-700">{startTime}</span>
+                                                <ChevronRight className="h-2.5 w-2.5 text-emerald-300" />
+                                                <span className="text-[10px] font-black text-emerald-700">{endTime}</span>
                                             </div>
                                         </div>
 
