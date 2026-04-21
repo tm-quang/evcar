@@ -20,6 +20,7 @@ const SettingsPage = lazy(() => import('./pages/Settings'))
 const NotificationsPage = lazy(() => import('./pages/Notifications'))
 const LoginPage = lazy(() => import('./pages/Login'))
 const RegisterPage = lazy(() => import('./pages/Register'))
+const ResetPasswordPage = lazy(() => import('./pages/ResetPassword'))
 const AccountInfoPage = lazy(() => import('./pages/AccountInfo'))
 const VehicleManagementPage = lazy(() => import('./pages/ev'))
 const AddEVPage = lazy(() => import('./pages/ev/AddEV'))
@@ -82,6 +83,20 @@ function AppContent() {
   const splashEligible = ['/login', '/register', '/'].includes(initialPath)
   const [showSplash, setShowSplash] = useState(splashEligible)
 
+  // Kiểm tra sận session trong localStorage để quyết định redirect sau splash
+  const hasExistingSession = useState(() => {
+    try {
+      // Supabase lưu session với key 'bofin-auth-token'
+      const stored = localStorage.getItem('bofin-auth-token')
+      if (!stored) return false
+      const parsed = JSON.parse(stored)
+      // Kiểm tra cấu trúc Supabase session
+      return !!parsed?.access_token || !!parsed?.currentSession?.access_token
+    } catch {
+      return false
+    }
+  })[0]
+
 
 
   // Enable swipe back gesture (swipe from left edge to go back)
@@ -117,7 +132,8 @@ function AppContent() {
       ) : (
         <Suspense fallback={null}>
           <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
+            {/* Root: nếu đã có session thì vào /ev thẳng, không qua /login */}
+            <Route path="/" element={<Navigate to={hasExistingSession ? '/ev' : '/login'} replace />} />
             <Route
               path="/login"
               element={
@@ -255,14 +271,16 @@ function AppContent() {
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/ev/calculator"
+            <Route path="/ev/calculator"
               element={
                 <ProtectedRoute>
                   <EVCalculatorPage />
                 </ProtectedRoute>
               }
             />
+
+            {/* Route public — không cần đăng nhập, cần nhận token từ email */}
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
 
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>

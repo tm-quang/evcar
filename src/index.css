@@ -431,3 +431,9 @@ button:active,
 .loading-dot-wave {
   animation: loading-dot-wave 1.5s ease-in-out infinite both;
 }
+
+/* Progress bar co lại theo thời gian (dùng ở ResetPassword success) */
+@keyframes shrink {
+  from { width: 100%; }
+  to   { width: 0%;   }
+}

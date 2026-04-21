@@ -86,8 +86,23 @@ export const useAuthState = () => {
             await supabase.auth.refreshSession()
 
           if (refreshError) {
-            console.warn('Session refresh failed:', refreshError)
-            setGlobalAuth({ user: null, session: null, loading: false, initialized: true })
+            // Chỉ logout nếu lỗi thực sự từ server (token hết hạn, bị revoke)
+            // Không logout nếu lỗi mạng tạm thời
+            const isAuthError = refreshError.status === 400 || 
+                               refreshError.status === 401 ||
+                               refreshError.message?.includes('invalid_grant') ||
+                               refreshError.message?.includes('Invalid Refresh Token') ||
+                               refreshError.message?.includes('token is expired') ||
+                               refreshError.message?.includes('Refresh Token Not Found')
+
+            if (isAuthError) {
+              console.warn('Session refresh failed with auth error (token invalid/expired):', refreshError.message)
+              setGlobalAuth({ user: null, session: null, loading: false, initialized: true })
+            } else {
+              // Lỗi mạng hoặc lỗi server tạm thời → giữ nguyên session hiện tại
+              console.warn('Session refresh failed (network/temp error), keeping existing session:', refreshError.message)
+              // Giữ nguyên setGlobalAuth với session cũ (không logout)
+            }
           } else if (refreshedSession) {
             if (refreshedSession?.user) {
               const { setCachedUser } = await import('../lib/userCache')

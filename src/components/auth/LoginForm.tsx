@@ -1,17 +1,34 @@
 import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react'
-import { FaEye, FaEyeSlash, FaLock, FaEnvelope } from 'react-icons/fa'
+import { FaEye, FaEyeSlash, FaLock, FaEnvelope, FaCheckCircle } from 'react-icons/fa'
 
 import { getSupabaseClient } from '../../lib/supabaseClient'
 import { useNotification } from '../../contexts/notificationContext.helpers'
 import { translateAuthError } from '../../utils/authErrorTranslator'
 import { setAuthStateOnLogin } from '../../hooks/useAuthState'
+import { ForgotPasswordModal } from './ForgotPasswordModal'
 
 type LoginFormProps = {
   onSuccess?: (email: string) => void
   onError?: (message: string) => void
 }
 
-const REMEMBER_EMAIL_KEY = 'bofin_remembered_email'
+// Keys cho saved credentials
+const REMEMBER_CREDENTIALS_KEY = 'bofin_saved_credentials'
+
+// Mã hóa nhẹ để không lưu plaintext (không phải bảo mật cao, chỉ che khuất)
+const encodeCredentials = (email: string, password: string): string => {
+  const payload = JSON.stringify({ e: email, p: password, ts: Date.now() })
+  return btoa(encodeURIComponent(payload))
+}
+
+const decodeCredentials = (encoded: string): { email: string; password: string } | null => {
+  try {
+    const payload = JSON.parse(decodeURIComponent(atob(encoded)))
+    return { email: payload.e || '', password: payload.p || '' }
+  } catch {
+    return null
+  }
+}
 
 export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
   const { success, error: showError } = useNotification()
@@ -20,24 +37,30 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
+  const [hasRememberedCredentials, setHasRememberedCredentials] = useState(false)
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
 
-  // Load remembered email on mount
+  // Load remembered credentials on mount
   useEffect(() => {
-    const rememberedEmail = localStorage.getItem(REMEMBER_EMAIL_KEY)
-    if (rememberedEmail) {
-      setFormData((prev) => ({ ...prev, email: rememberedEmail }))
-      setRememberMe(true)
+    const saved = localStorage.getItem(REMEMBER_CREDENTIALS_KEY)
+    if (saved) {
+      const credentials = decodeCredentials(saved)
+      if (credentials && credentials.email) {
+        setFormData({ email: credentials.email, password: credentials.password })
+        setRememberMe(true)
+        setHasRememberedCredentials(true)
+      }
     }
   }, [])
 
   const handleChange =
     (field: 'email' | 'password') =>
-    (event: ChangeEvent<HTMLInputElement>) => {
-      setFormData((prev) => ({ ...prev, [field]: event.target.value }))
-      if (error) {
-        setError('')
+      (event: ChangeEvent<HTMLInputElement>) => {
+        setFormData((prev) => ({ ...prev, [field]: event.target.value }))
+        if (error) {
+          setError('')
+        }
       }
-    }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -78,11 +101,12 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
       const { setCachedUser } = await import('../../lib/userCache')
       setCachedUser(data.session.user)
 
-      // Save or remove email based on remember me checkbox
+      // Save or clear credentials based on remember me checkbox
       if (rememberMe) {
-        localStorage.setItem(REMEMBER_EMAIL_KEY, formData.email)
+        const encoded = encodeCredentials(formData.email.trim(), formData.password)
+        localStorage.setItem(REMEMBER_CREDENTIALS_KEY, encoded)
       } else {
-        localStorage.removeItem(REMEMBER_EMAIL_KEY)
+        localStorage.removeItem(REMEMBER_CREDENTIALS_KEY)
       }
 
       // Set flags
@@ -96,9 +120,9 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
       console.error('Login error:', error)
       console.error('Error type:', typeof error)
       console.error('Error keys:', error && typeof error === 'object' ? Object.keys(error) : 'N/A')
-      
+
       let rawMessage = 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin và thử lại.'
-      
+
       // Xử lý Supabase AuthError
       if (error && typeof error === 'object') {
         // Supabase error thường có cấu trúc: { message, status, name, ... }
@@ -114,7 +138,7 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
       } else if (typeof error === 'string') {
         rawMessage = error
       }
-      
+
       const message = translateAuthError(rawMessage)
       setError(message)
       showError(message)
@@ -124,8 +148,16 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
     }
   }
 
-  return (
+  return (<>
     <div className="w-full max-w-lg rounded-3xl shadow-lg bg-white p-6 sm:p-8">
+      {/* Banner thông báo đã ghi nhớ thông tin */}
+      {hasRememberedCredentials && !error && (
+        <div className="mb-4 flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">
+          <FaCheckCircle className="h-4 w-4 flex-shrink-0 text-emerald-500" />
+          <span>Nhấn <strong>Đăng nhập</strong> để tiếp tục.</span>
+        </div>
+      )}
+
       {error && (
         <div className="mb-5 rounded-3xl border border-red-200 bg-red-50 px-4 py-10 text-sm text-red-700">
           {error}
@@ -143,10 +175,11 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
               name="email"
               type="email"
               required
-              className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+              autoComplete="username"
+              className="block w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
               placeholder="Nhập địa chỉ Email"
               value={formData.email}
-              onChange={handleChange('email')}
+              onChange={(e) => { handleChange('email')(e); setHasRememberedCredentials(false) }}
             />
           </div>
         </div>
@@ -162,10 +195,10 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
               type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
               required
-              className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-12 text-slate-900 placeholder:text-slate-400 transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="block w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-12 text-slate-900 placeholder:text-slate-400 transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
               placeholder="Nhập mật khẩu"
               value={formData.password}
-              onChange={handleChange('password')}
+              onChange={(e) => { handleChange('password')(e); setHasRememberedCredentials(false) }}
             />
             <button
               type="button"
@@ -181,24 +214,28 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
         <div className="flex items-center justify-between">
           <label className="flex items-center gap-2 cursor-pointer group">
             <input
+              id="remember-me"
               type="checkbox"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
               className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-2 focus:ring-sky-500 focus:ring-offset-0 cursor-pointer transition"
             />
             <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
-              Ghi nhớ đăng nhập
+              Ghi nhớ tài khoản & mật khẩu
             </span>
           </label>
           <button
-            className="text-sm font-medium text-sky-600 transition-colors hover:text-sky-500"
+            id="forgot-password-btn"
+            className="text-sm font-medium text-sky-600 transition-colors hover:text-sky-500 active:text-sky-700"
             type="button"
+            onClick={() => setShowForgotPassword(true)}
           >
             Quên mật khẩu?
           </button>
         </div>
 
         <button
+          id="login-submit-btn"
           type="submit"
           disabled={isSubmitting}
           className="w-full transform rounded-3xl bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-3.5 text-base font-semibold text-white shadow-lg transition duration-200 hover:scale-[1.02] hover:shadow-xl hover:from-sky-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
@@ -207,7 +244,14 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
         </button>
       </form>
     </div>
-  )
+
+    {/* Forgot Password Modal */}
+    <ForgotPasswordModal
+      isOpen={showForgotPassword}
+      onClose={() => setShowForgotPassword(false)}
+      initialEmail={formData.email}
+    />
+  </>)
 }
 
 

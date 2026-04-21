@@ -25,12 +25,12 @@ export const RegisterForm = ({ onSuccess, onError }: RegisterFormProps) => {
 
   const handleChange =
     (field: keyof typeof formData) =>
-    (event: ChangeEvent<HTMLInputElement>) => {
-      setFormData((prev) => ({ ...prev, [field]: event.target.value }))
-      if (error) {
-        setError('')
+      (event: ChangeEvent<HTMLInputElement>) => {
+        setFormData((prev) => ({ ...prev, [field]: event.target.value }))
+        if (error) {
+          setError('')
+        }
       }
-    }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -102,7 +102,7 @@ export const RegisterForm = ({ onSuccess, onError }: RegisterFormProps) => {
               name="name"
               type="text"
               required
-              className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="block w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
               placeholder="Họ và tên"
               value={formData.name}
               onChange={handleChange('name')}
@@ -120,7 +120,7 @@ export const RegisterForm = ({ onSuccess, onError }: RegisterFormProps) => {
               name="email"
               type="email"
               required
-              className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="block w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
               placeholder="Email của bạn"
               value={formData.email}
               onChange={handleChange('email')}
@@ -139,7 +139,7 @@ export const RegisterForm = ({ onSuccess, onError }: RegisterFormProps) => {
               type={showPassword ? 'text' : 'password'}
               autoComplete="new-password"
               required
-              className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-12 text-slate-900 placeholder:text-slate-400 transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="block w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-12 text-slate-900 placeholder:text-slate-400 transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
               placeholder="Nhập mật khẩu"
               value={formData.password}
               onChange={handleChange('password')}
@@ -166,7 +166,7 @@ export const RegisterForm = ({ onSuccess, onError }: RegisterFormProps) => {
               type={showConfirmPassword ? 'text' : 'password'}
               autoComplete="new-password"
               required
-              className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-12 text-slate-900 placeholder:text-slate-400 transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="block w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-12 text-slate-900 placeholder:text-slate-400 transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
               placeholder="Nhập lại mật khẩu"
               value={formData.confirmPassword}
               onChange={handleChange('confirmPassword')}
@@ -185,7 +185,7 @@ export const RegisterForm = ({ onSuccess, onError }: RegisterFormProps) => {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full transform rounded-3xl bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-3.5 text-base font-semibold text-white shadow-lg transition duration-200 hover:scale-[1.02] hover:shadow-xl hover:from-sky-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full transform rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-3.5 text-base font-semibold text-white shadow-lg transition duration-200 hover:scale-[1.02] hover:shadow-xl hover:from-sky-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? 'Đang đăng ký...' : 'Tạo tài khoản'}
         </button>
