@@ -53,6 +53,14 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
     }
   }, [])
 
+  // L\u1eafng nghe event t\u1eeb Login page \u0111\u1ec3 m\u1edf modal forgot password
+  // (trigger khi user click "G\u1eedi l\u1ea1i link" t\u1eeb banner l\u1ed7i)
+  useEffect(() => {
+    const handler = () => setShowForgotPassword(true)
+    window.addEventListener('open-forgot-password', handler)
+    return () => window.removeEventListener('open-forgot-password', handler)
+  }, [])
+
   const handleChange =
     (field: 'email' | 'password') =>
       (event: ChangeEvent<HTMLInputElement>) => {
@@ -238,7 +246,7 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
           id="login-submit-btn"
           type="submit"
           disabled={isSubmitting}
-          className="w-full transform rounded-3xl bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-3.5 text-base font-semibold text-white shadow-lg transition duration-200 hover:scale-[1.02] hover:shadow-xl hover:from-sky-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full transform rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-3.5 text-base font-semibold text-white shadow-lg transition duration-200 hover:scale-[1.02] hover:shadow-xl hover:from-sky-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
         </button>

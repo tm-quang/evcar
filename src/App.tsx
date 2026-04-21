@@ -76,11 +76,49 @@ const PageFallback = () => {
   )
 }
 
+/**
+ * RootRedirect: x\u1eed l\u00fd hash token t\u1eeb Supabase email link khi user m\u1edf link t\u1eeb email
+ * Supabase g\u1eedi email v\u1edbi link d\u1ea1ng: https://app.com/#access_token=...&type=recovery
+ * Component n\u00e0y detect v\u00e0 redirect \u0111\u00fang trang
+ */
+function RootRedirect({ hasExistingSession }: { hasExistingSession: boolean }) {
+  const hash = window.location.hash
+
+  // Case 1: Recovery token → trang \u0111\u1eb7t l\u1ea1i m\u1eadt kh\u1ea9u
+  if (hash.includes('type=recovery') && hash.includes('access_token')) {
+    // Gi\u1eef nguy\u00ean hash \u0111\u1ec3 ResetPassword page c\u00f3 th\u1ec3 \u0111\u1ecdc token
+    return <Navigate to={`/reset-password${hash}`} replace />
+  }
+
+  // Case 2: L\u1ed7i t\u1eeb Supabase (token h\u1ebft h\u1ea1n, invalid...) → login v\u1edbi th\u00f4ng b\u00e1o
+  if (hash.includes('error=')) {
+    const params = new URLSearchParams(hash.replace('#', ''))
+    const errorCode = params.get('error_code') ?? ''
+    const errorDesc = params.get('error_description') ?? ''
+    
+    // Encode error info v\u00e0o search params \u0111\u1ec3 Login page hi\u1ec3n th\u1ecb
+    const loginSearch = `?auth_error=${encodeURIComponent(errorCode)}&msg=${encodeURIComponent(errorDesc)}`
+    return <Navigate to={`/login${loginSearch}`} replace />
+  }
+
+  // Case 3: B\u00ecnh th\u01b0\u1eddng → v\u00e0o app ho\u1eb7c login
+  return <Navigate to={hasExistingSession ? '/ev' : '/login'} replace />
+}
+
 function AppContent() {
   const location = useLocation()
   const navigate = useNavigate()
   const [initialPath] = useState(() => location.pathname)
-  const splashEligible = ['/login', '/register', '/'].includes(initialPath)
+
+  // Kiểm tra hash ngay lúc khởi tạo (trước splash) — token từ email của Supabase nằm trong hash
+  const initialHash = useState(() => window.location.hash)[0]
+  const hasRecoveryToken = initialHash.includes('type=recovery') || 
+                           (initialHash.includes('access_token') && initialHash.includes('type=recovery'))
+  const hasHashError = initialHash.includes('error=')
+
+  // Splash chỉ hiện khi đi vào trang login/register bình thường, không hiện khi có token
+  const splashEligible = ['/login', '/register', '/'].includes(initialPath) 
+                          && !hasRecoveryToken && !hasHashError
   const [showSplash, setShowSplash] = useState(splashEligible)
 
   // Kiểm tra sận session trong localStorage để quyết định redirect sau splash
@@ -132,8 +170,8 @@ function AppContent() {
       ) : (
         <Suspense fallback={null}>
           <Routes>
-            {/* Root: nếu đã có session thì vào /ev thẳng, không qua /login */}
-            <Route path="/" element={<Navigate to={hasExistingSession ? '/ev' : '/login'} replace />} />
+            {/* Root: xử lý thông minh, bao gồm cả hash token từ email Supabase */}
+            <Route path="/" element={<RootRedirect hasExistingSession={hasExistingSession} />} />
             <Route
               path="/login"
               element={
