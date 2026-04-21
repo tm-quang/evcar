@@ -67,19 +67,7 @@ html/
 *.sqlite3
 
 # Security-related files (files containing API keys, secrets, tokens, credentials)
-*key*
-*secret*
-*api*
-*token*
-*credential*
-*password*
-*passwd*
-*auth*
-*private*
-*secure*
-*config.local*
-*settings.local*
-# Common security file patterns
+# specific files that should be ignored
 secrets.json
 credentials.json
 api-keys.json
