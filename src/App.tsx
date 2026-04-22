@@ -34,13 +34,16 @@ const VehicleReportsPage = lazy(() => import('./pages/ev/VehicleReports'))
 const VehicleChargingHistoryPage = lazy(() => import('./pages/ev/VehicleChargingHistory'))
 const EVCalculatorPage = lazy(() => import('./pages/ev/EVCalculator'))
 const DataManagementPage = lazy(() => import('./pages/ev/DataManagement'))
+const AppearanceSettingsPage = lazy(() => import('./pages/AppearanceSettings'))
+
+import { AppearanceProvider } from './contexts/AppearanceContext'
 
 
 const PageFallback = () => {
   const { value: splashLogo } = useSystemSetting('app_splash_logo', '/EVGo-Logo.png')
 
   return (
-    <div className="flex h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 px-6">
+    <div className="flex h-screen items-center justify-center px-6 transition-colors duration-500" style={{ backgroundColor: 'var(--app-home-bg)' }}>
       <div className="flex w-full max-w-sm flex-col items-center gap-6">
         <div className="relative h-32 w-32">
           <div className="absolute -inset-6 rounded-full bg-sky-200/30 blur-[40px]" />
@@ -209,6 +212,14 @@ function AppContent() {
               element={
                 <ProtectedRoute>
                   <DataManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/appearance"
+              element={
+                <ProtectedRoute>
+                  <AppearanceSettingsPage />
                 </ProtectedRoute>
               }
             />
@@ -408,7 +419,9 @@ function App() {
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
           <NotificationProvider>
             <DialogProvider>
-              <AppContent />
+              <AppearanceProvider>
+                <AppContent />
+              </AppearanceProvider>
             </DialogProvider>
           </NotificationProvider>
         </PersistQueryClientProvider>

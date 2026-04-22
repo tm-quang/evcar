@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { FaBell, FaArrowLeft, FaRedoAlt } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import { ProfileModal } from './ProfileModal'
+import { useAppearance } from '../../contexts/AppearanceContext'
 
 type HeaderBarProps =
   | {
@@ -28,6 +29,7 @@ type HeaderBarProps =
 
 const HeaderBar = (props: HeaderBarProps) => {
   const navigate = useNavigate()
+  const { isDarkMode } = useAppearance()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
@@ -46,7 +48,6 @@ const HeaderBar = (props: HeaderBarProps) => {
 
   useEffect(() => {
     const handleScroll = () => {
-      // Check both window scroll and scrollable main elements
       const windowScroll = window.scrollY || document.documentElement.scrollTop
       const mainElements = document.querySelectorAll('main')
       let maxScroll = windowScroll
@@ -60,10 +61,8 @@ const HeaderBar = (props: HeaderBarProps) => {
       setIsScrolled(maxScroll > 20)
     }
 
-    // Listen to scroll on window
     window.addEventListener('scroll', handleScroll, { passive: true })
 
-    // Also listen to scroll on all main elements (for overflow-y-auto containers)
     const mainElements = document.querySelectorAll('main')
     mainElements.forEach((main) => {
       main.addEventListener('scroll', handleScroll, { passive: true })
@@ -77,61 +76,56 @@ const HeaderBar = (props: HeaderBarProps) => {
     }
   }, [])
 
+  // Icon button styles based on theme
+  const iconBtnClass = isDarkMode
+    ? 'bg-slate-800 ring-1 ring-slate-700 shadow-lg shadow-black/20'
+    : 'bg-white shadow-lg ring-1 ring-slate-100'
+
   if (props.variant === 'page') {
     const { title, onBack, showIcon, onReload, isReloading = false, customContent } = props
     return (
-      <header className="pointer-events-none relative z-40 flex-shrink-0 bg-[#F7F9FC]">
+      <header className="pointer-events-none relative z-40 flex-shrink-0 transition-colors duration-500" style={{ backgroundColor: 'var(--app-home-bg)' }}>
         {isScrolled && (
-          <div className="absolute inset-0 bg-white" aria-hidden="true" />
+          <div
+            className={`absolute inset-0 backdrop-blur-md ${isDarkMode ? 'border-b border-slate-700/50' : 'border-b border-slate-200/50'} shadow-sm transition-all duration-300`}
+            style={{ backgroundColor: 'var(--app-home-bg)', opacity: 0.92 }}
+            aria-hidden="true"
+          />
         )}
         <div className="relative px-1 py-1">
-          <div
-            className={`pointer-events-auto mx-auto flex w-full max-w-md items-center justify-between px-4 py-1.5 transition-all duration-300 ${isScrolled
-              ? 'bg-transparent'
-              : 'bg-transparent'
-              }`}
-          >
+          <div className={`pointer-events-auto mx-auto flex w-full max-w-md items-center justify-between px-4 py-1.5 transition-all duration-300`}>
             <button
               type="button"
               onClick={onBack ?? (() => navigate(-1))}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-lg ring-1 ring-slate-100"
+              className={`flex h-10 w-10 items-center justify-center rounded-full transition-all active:scale-95 ${iconBtnClass}`}
               aria-label="Quay lại"
             >
-              <FaArrowLeft className="h-4 w-4" />
+              <FaArrowLeft className={`h-4 w-4 ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`} />
             </button>
-            <p className="flex-1 px-4 text-center text-base font-semibold uppercase tracking-[0.2em] text-slate-800">
+            <p className={`flex-1 px-4 text-center text-base font-semibold uppercase tracking-[0.2em] ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
               {title}
             </p>
             <div className="flex items-center gap-2">
-              {/* Custom Content (e.g., Add button) */}
               {customContent}
 
-              {/* Reload Button */}
               {onReload && (
                 <button
-                  onClick={() => {
-                    if (onReload) {
-                      onReload()
-                    }
-                  }}
+                  onClick={() => { if (onReload) onReload() }}
                   disabled={isReloading}
-                  className="relative flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-xl ring-1 ring-slate-100 transition hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`relative flex h-9 w-9 items-center justify-center rounded-full transition hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${iconBtnClass}`}
                   aria-label="Làm mới dữ liệu"
                   title="Làm mới dữ liệu"
                 >
-                  <FaRedoAlt className={`h-5 w-5 text-slate-500 ${isReloading ? 'animate-spin' : ''}`} />
+                  <FaRedoAlt className={`h-5 w-5 ${isReloading ? 'animate-spin' : ''} ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`} />
                 </button>
               )}
-              {/* Custom Icon */}
               {showIcon && (
-                <div className="flex h-10 w-10 items-center justify-center text-slate-500">
+                <div className={`flex h-10 w-10 items-center justify-center ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                   {showIcon}
                 </div>
               )}
               {!onReload && !showIcon && !customContent && (
-                <div className="flex h-10 w-10 items-center justify-center text-slate-500">
-                  {/* Empty space để cân bằng layout */}
-                </div>
+                <div className="flex h-10 w-10 items-center justify-center" />
               )}
             </div>
           </div>
@@ -157,25 +151,24 @@ const HeaderBar = (props: HeaderBarProps) => {
     isLoadingProfile = false,
   } = props
 
-  let ringColorClass = 'from-green-400 via-green-300 to-green-500' // Xanh (Connected)
+  let ringColorClass = 'from-green-400 via-green-300 to-green-500'
   if (!isOnline) {
-    ringColorClass = 'from-red-500 via-red-400 to-red-600' // Đỏ (Disconnected)
+    ringColorClass = 'from-red-500 via-red-400 to-red-600'
   } else if (isReloading || isLoadingProfile) {
-    ringColorClass = 'from-amber-400 via-yellow-300 to-amber-500' // Vàng (Connecting)
+    ringColorClass = 'from-amber-400 via-yellow-300 to-amber-500'
   }
 
   return (
-    <header className="pointer-events-none relative z-40 flex-shrink-0 bg-[#F7F9FC]">
+    <header className="pointer-events-none relative z-40 flex-shrink-0 transition-colors duration-500" style={{ backgroundColor: 'var(--app-home-bg)' }}>
       {isScrolled && (
-        <div className="absolute inset-0 bg-white" aria-hidden="true" />
+        <div
+          className={`absolute inset-0 backdrop-blur-md ${isDarkMode ? 'border-b border-slate-700/50' : 'border-b border-slate-200/50'} shadow-sm transition-all duration-300`}
+          style={{ backgroundColor: 'var(--app-home-bg)', opacity: 0.92 }}
+          aria-hidden="true"
+        />
       )}
       <div className="relative px-1 py-1">
-        <div
-          className={`pointer-events-auto mx-auto flex w-full max-w-md items-center justify-between px-4 py-1.5 transition-all duration-300 ${isScrolled
-            ? 'bg-transparent'
-            : 'bg-transparent'
-            }`}
-        >
+        <div className={`pointer-events-auto mx-auto flex w-full max-w-md items-center justify-between px-4 py-1.5 transition-all duration-300`}>
           <button
             type="button"
             onClick={() => setIsProfileModalOpen(true)}
@@ -183,10 +176,10 @@ const HeaderBar = (props: HeaderBarProps) => {
           >
             {isLoadingProfile ? (
               <>
-                <div className="h-10 w-10 animate-pulse rounded-full bg-slate-200 ring-2 ring-white shadow-[0_18px_35px_rgba(102,166,255,0.35)]" />
+                <div className={`h-10 w-10 animate-pulse rounded-full ring-2 ring-white shadow-[0_18px_35px_rgba(102,166,255,0.35)] ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`} />
                 <div className="space-y-1.5">
-                  <div className="h-2.5 w-20 animate-pulse rounded bg-slate-200" />
-                  <div className="h-4 w-32 animate-pulse rounded bg-slate-200" />
+                  <div className={`h-2.5 w-20 animate-pulse rounded ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`} />
+                  <div className={`h-4 w-32 animate-pulse rounded ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`} />
                 </div>
               </>
             ) : avatarUrl ? (
@@ -208,30 +201,24 @@ const HeaderBar = (props: HeaderBarProps) => {
             ) : null}
             {!isLoadingProfile && userName && userName !== 'Người dùng' && (
               <div>
-                <p className="text-xs tracking-[0.25em] text-slate-500" style={{ fontFamily: "'Lobster', cursive" }}>Xin chào,</p>
-                <p className="text-lg font-medium text-slate-900" style={{ fontFamily: "'Lobster', cursive" }}>{userName}</p>
+                <p className={`text-xs tracking-[0.25em] ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`} style={{ fontFamily: "'Lobster', cursive" }}>Xin chào,</p>
+                <p className={`text-lg font-medium ${isDarkMode ? 'text-white' : 'text-slate-900'}`} style={{ fontFamily: "'Lobster', cursive" }}>{userName}</p>
               </div>
             )}
           </button>
           <div className="flex items-center gap-2">
-            {/* Reload Button */}
             {onReload && (
               <button
-                onClick={() => {
-                  if (onReload) {
-                    onReload()
-                  }
-                }}
+                onClick={() => { if (onReload) onReload() }}
                 disabled={isReloading}
-                className="relative flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-xl ring-1 ring-slate-100 transition hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`relative flex h-9 w-9 items-center justify-center rounded-full transition hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${iconBtnClass}`}
                 aria-label="Làm mới dữ liệu"
                 title="Làm mới dữ liệu"
               >
-                <FaRedoAlt className={`h-5 w-5 text-slate-500 ${isReloading ? 'animate-spin' : ''}`} />
+                <FaRedoAlt className={`h-5 w-5 ${isReloading ? 'animate-spin' : ''} ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`} />
               </button>
             )}
 
-            {/* Notification Button */}
             <button
               onClick={() => {
                 if (onNotificationClick) {
@@ -240,7 +227,7 @@ const HeaderBar = (props: HeaderBarProps) => {
                   navigate('/notifications')
                 }
               }}
-              className="relative flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-xl ring-1 ring-slate-100 transition hover:scale-110 active:scale-95"
+              className={`relative flex h-9 w-9 items-center justify-center rounded-full transition hover:scale-110 active:scale-95 ${iconBtnClass}`}
               aria-label="Thông báo"
             >
               {unreadNotificationCount > 0 ? (
@@ -250,7 +237,7 @@ const HeaderBar = (props: HeaderBarProps) => {
               ) : (
                 <span className={`absolute right-0.5 top-0.5 h-2 w-2 rounded-full ${badgeColor}`} />
               )}
-              <FaBell className="h-5 w-5 text-slate-500" />
+              <FaBell className={`h-5 w-5 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`} />
             </button>
           </div>
         </div>
@@ -274,4 +261,3 @@ const HeaderBar = (props: HeaderBarProps) => {
 }
 
 export default HeaderBar
-

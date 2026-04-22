@@ -2,20 +2,12 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Home, Settings, LayoutList, Zap } from 'lucide-react'
 import { LuClipboardPen } from 'react-icons/lu'
+import { useAppearance } from '../../contexts/AppearanceContext'
 
 type VehicleFooterNavProps = {
-    /** Called when the center + button is tapped */
     onAddClick?: () => void
-    /** Override add button label */
     addLabel?: string
-    /** If the selected vehicle is electric, show Zap icon for fuel tab */
     isElectricVehicle?: boolean
-    /**
-     * When true (on the /vehicles main page):
-     *   - first tab shows "Trang chủ" + Home icon → navigates to /dashboard
-     * When false/undefined (on child pages):
-     *   - first tab shows "Tổng quan" + grid icon → navigates to /vehicles
-     */
     isMainPage?: boolean
 }
 
@@ -33,19 +25,16 @@ export function VehicleFooterNav({
 }: VehicleFooterNavProps) {
     const navigate = useNavigate()
     const location = useLocation()
+    const { isDarkMode } = useAppearance()
     const [addAnimating, setAddAnimating] = useState(false)
     const [animatingTab, setAnimatingTab] = useState<string | null>(null)
 
-    // Check for animation trigger from navigation state
     useEffect(() => {
         if (location.state?.animateTab) {
             const tabId = location.state.animateTab
-            // Small delay to ensure DOM is ready and transition can happen
             requestAnimationFrame(() => {
                 setAnimatingTab(tabId)
-                setTimeout(() => {
-                    setAnimatingTab(null)
-                }, 600)
+                setTimeout(() => setAnimatingTab(null), 600)
             })
         }
     }, [location.state])
@@ -59,42 +48,16 @@ export function VehicleFooterNav({
     }
 
     const tabs: VehicleTab[] = [
-        {
-            id: 'home',
-            label: 'Trang chủ',
-            icon: Home,
-            path: '/ev',
-        },
-        {
-            id: 'fuel',
-            label: 'Sạc pin',
-            icon: Zap,
-            path: '/ev/charging',
-        },
-        {
-            id: 'add',
-            label: addLabel,
-            icon: LuClipboardPen,
-            prominent: true,
-        },
-        {
-            id: 'expenses',
-            label: 'Chi phí',
-            icon: LayoutList,
-            path: '/ev/expenses',
-        },
-        {
-            id: 'settings',
-            label: 'Cài đặt',
-            icon: Settings,
-            path: '/settings',
-        },
+        { id: 'home', label: 'Trang chủ', icon: Home, path: '/ev' },
+        { id: 'fuel', label: 'Sạc pin', icon: Zap, path: '/ev/charging' },
+        { id: 'add', label: addLabel, icon: LuClipboardPen, prominent: true },
+        { id: 'expenses', label: 'Chi phí', icon: LayoutList, path: '/ev/expenses' },
+        { id: 'settings', label: 'Cài đặt', icon: Settings, path: '/settings' },
     ]
 
     const isActive = (path?: string) => {
         if (!path) return false
         const pathname = location.pathname
-        // Exact match for /vehicles and /dashboard
         if (path === '/ev' || path === '/dashboard') return pathname === path
         return pathname === path || pathname.startsWith(path)
     }
@@ -106,19 +69,14 @@ export function VehicleFooterNav({
             return
         }
 
-        // Trigger animation when clicking on a menu item
         if (tab.path) {
-            // If staying on same page, animate locally
             if (location.pathname === tab.path) {
                 setAnimatingTab(null)
                 requestAnimationFrame(() => {
                     setAnimatingTab(tab.id)
-                    setTimeout(() => {
-                        setAnimatingTab(null)
-                    }, 600)
+                    setTimeout(() => setAnimatingTab(null), 600)
                 })
             } else {
-                // If navigating, pass state to trigger animation on next mount
                 navigate(tab.path, { state: { animateTab: tab.id } })
             }
         }
@@ -128,27 +86,30 @@ export function VehicleFooterNav({
         <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none">
             <div className="relative w-full max-w-md pointer-events-auto">
 
-                {/* Center Add Button - floats above the notch */}
+                {/* Center Add Button */}
                 <div className="absolute left-1/2 bottom-[14px] z-30 -translate-x-1/2">
                     <button
                         type="button"
                         onClick={() => handleClick(tabs[2])}
                         className="group flex h-14 w-14 items-center justify-center rounded-full shadow-xl transition-all hover:scale-110 active:scale-95"
                         style={{
-                            background: 'linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)',
-                            boxShadow: '0 4px 20px rgba(29, 78, 216, 0.45)',
+                            background: isDarkMode
+                                ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
+                                : 'linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)',
+                            boxShadow: isDarkMode
+                                ? '0 4px 20px rgba(59, 130, 246, 0.4)'
+                                : '0 4px 20px rgba(29, 78, 216, 0.45)',
                         }}
                         aria-label="Thêm ghi chép"
                     >
                         <LuClipboardPen
-                            className={`h-8 w-8 text-white ${addAnimating ? 'animate-zoom-once' : ''
-                                }`}
+                            className={`h-8 w-8 text-white ${addAnimating ? 'animate-zoom-once' : ''}`}
                             strokeWidth={2.5}
                         />
                     </button>
                 </div>
 
-                {/* Background SVG with convex notch */}
+                {/* Background SVG */}
                 <div className="relative h-[100px]">
                     <div className="absolute bottom-0 w-full h-[105px] drop-shadow-[0_-8px_24px_rgba(0,0,0,0.07)]">
                         <svg
@@ -167,8 +128,23 @@ export function VehicleFooterNav({
                                    L 400,100
                                    L 0,100
                                    Z"
-                                fill="white"
+                                fill="var(--app-home-bg)"
+                                className="transition-colors duration-500"
                             />
+                            {isDarkMode && (
+                                <path
+                                    d="M 0,60
+                                       C 0,48.954 8.954,40 20,40
+                                       L 128,40
+                                       C 153,40 173,22 200,22
+                                       C 227,22 247,40 272,40
+                                       L 380,40
+                                       C 391.046,40 400,48.954 400,60"
+                                    fill="none"
+                                    stroke="#334155"
+                                    strokeWidth="0.8"
+                                />
+                            )}
                         </svg>
                     </div>
 
@@ -176,7 +152,6 @@ export function VehicleFooterNav({
                     <div className="relative z-10 flex items-end justify-between px-0 h-full pb-1">
                         {tabs.map((tab) => {
                             if (tab.prominent) {
-                                // placeholder gap for center button
                                 return <div key={tab.id} className="flex flex-1" />
                             }
 
@@ -191,18 +166,28 @@ export function VehicleFooterNav({
                                     onClick={() => handleClick(tab)}
                                     aria-current={active ? 'page' : undefined}
                                     data-no-haptic="true"
-                                    className={`relative z-20 flex flex-1 flex-col items-center gap-0.5 text-[10px] font-semibold transition-colors ${active ? 'text-blue-800' : 'text-slate-500 hover:text-slate-700'
-                                        }`}
+                                    className={`relative z-20 flex flex-1 flex-col items-center gap-0.5 text-[10px] font-semibold transition-colors ${
+                                        active
+                                            ? isDarkMode ? 'text-blue-400' : 'text-blue-800'
+                                            : isDarkMode ? 'text-slate-500 hover:text-slate-400' : 'text-slate-500 hover:text-slate-700'
+                                    }`}
                                 >
                                     <span
-                                        className={`flex h-9 w-9 items-center justify-center rounded-full transition-all ${active
-                                            ? 'bg-blue-800 text-white shadow-md'
-                                            : 'text-slate-500 hover:bg-slate-100/50'
-                                            } ${shouldAnimate ? 'animate-zoom-once' : ''}`}
+                                        className={`flex h-9 w-9 items-center justify-center rounded-full transition-all ${
+                                            active
+                                                ? isDarkMode
+                                                    ? 'bg-blue-500/20 text-blue-400 shadow-md'
+                                                    : 'bg-blue-800 text-white shadow-md'
+                                                : isDarkMode
+                                                    ? 'text-slate-500 hover:bg-slate-700/50'
+                                                    : 'text-slate-500 hover:bg-slate-100/50'
+                                        } ${shouldAnimate ? 'animate-zoom-once' : ''}`}
                                     >
                                         <Icon className={`h-5 w-5 ${shouldAnimate ? 'animate-zoom-once' : ''}`} />
                                     </span>
-                                    <span className={`leading-tight inline-block ${shouldAnimate ? 'animate-zoom-text-once' : ''}`}>{tab.label}</span>
+                                    <span className={`leading-tight inline-block ${shouldAnimate ? 'animate-zoom-text-once' : ''}`}>
+                                        {tab.label}
+                                    </span>
                                 </button>
                             )
                         })}
@@ -214,4 +199,3 @@ export function VehicleFooterNav({
 }
 
 export default VehicleFooterNav
-

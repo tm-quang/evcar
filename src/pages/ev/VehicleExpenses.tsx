@@ -152,7 +152,7 @@ export default function VehicleExpenses() {
     const appliedFilterCount = (filterPeriod !== 'month' ? 1 : 0) + (filterType !== 'all' ? 1 : 0)
 
     return (
-        <div className="flex h-screen flex-col overflow-hidden bg-[#F7F9FC]">
+        <div className="flex h-screen flex-col overflow-hidden text-slate-900" style={{ backgroundColor: 'var(--app-home-bg)' }}>
             <HeaderBar
                 variant="page"
                 title="Chi Phí Khác"

@@ -229,7 +229,7 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
               className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-2 focus:ring-sky-500 focus:ring-offset-0 cursor-pointer transition"
             />
             <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
-              Ghi nhớ tài khoản & mật khẩu
+              Ghi nhớ tài khoản
             </span>
           </label>
           <button

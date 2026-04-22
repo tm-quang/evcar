@@ -347,7 +347,7 @@ export default function VehicleReports() {
 
     if (!effectiveId && !isLoadingStats) {
         return (
-            <div className="flex h-screen flex-col items-center justify-center bg-[#F7F9FC] p-4 text-center">
+            <div className="flex h-screen flex-col items-center justify-center p-4 text-center" style={{ backgroundColor: 'var(--app-home-bg)' }}>
                 <div className="mb-6 rounded-full bg-slate-100 p-6">
                     <BarChart3 className="h-12 w-12 text-slate-400" />
                 </div>
@@ -358,7 +358,7 @@ export default function VehicleReports() {
     }
 
     return (
-        <div className="flex h-[100dvh] flex-col overflow-hidden bg-[#F7F9FC]">
+        <div className="flex h-[100dvh] flex-col overflow-hidden" style={{ backgroundColor: 'var(--app-home-bg)' }}>
             <HeaderBar variant="page" title="Báo cáo chi tiết" />
 
             <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 w-full max-w-md mx-auto px-4 pb-28 pt-4">

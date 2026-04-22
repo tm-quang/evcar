@@ -272,7 +272,7 @@ const AccountInfoPage = () => {
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-[#F7F9FC] text-slate-900">
+    <div className="flex h-full flex-col overflow-hidden text-slate-900" style={{ backgroundColor: 'var(--app-home-bg)' }}>
       <HeaderBar variant="page" title="Thông tin tài khoản" />
       <main className="flex-1 overflow-y-auto overscroll-contain pb-24">
         <div className="mx-auto flex w-full max-w-md flex-col gap-3 px-4 pt-2 pb-4 sm:pt-2 sm:pb-4">

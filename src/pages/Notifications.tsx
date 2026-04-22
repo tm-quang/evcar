@@ -156,8 +156,8 @@ export const NotificationsPage = () => {
   const unreadCount = useMemo(() => notifications.filter((n) => n.status === 'unread').length, [notifications])
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-[#F7F9FC] text-slate-900">
-      <header className="flex-shrink-0 bg-[#F7F9FC]">
+    <div className="flex h-full flex-col overflow-hidden text-slate-900" style={{ backgroundColor: 'var(--app-home-bg)' }}>
+      <header className="flex-shrink-0" style={{ backgroundColor: 'var(--app-home-bg)' }}>
         <div className="mx-auto flex w-full max-w-md items-center justify-between px-4 py-3">
           <button onClick={() => navigate(-1)} className="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-lg border border-slate-100 transition-all active:scale-90">
             <ArrowLeft className="h-5 w-5" />

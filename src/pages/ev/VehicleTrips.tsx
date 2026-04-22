@@ -616,7 +616,7 @@ export default function VehicleTrips() {
     }
 
     return (
-        <div className="flex h-screen flex-col overflow-hidden bg-[#F7F9FC]">
+        <div className="flex h-screen flex-col overflow-hidden" style={{ backgroundColor: 'var(--app-home-bg)' }}>
             <HeaderBar variant="page" title="Quản Lý Lộ Trình" />
 
             <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 w-full max-w-md mx-auto px-4 pb-28 pt-4">

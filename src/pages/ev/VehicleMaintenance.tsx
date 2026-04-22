@@ -164,7 +164,7 @@ export default function VehicleMaintenance() {
     }
 
     return (
-        <div className="flex h-screen flex-col overflow-hidden bg-[#F7F9FC]">
+        <div className="flex h-screen flex-col overflow-hidden" style={{ backgroundColor: 'var(--app-home-bg)' }}>
             <HeaderBar
                 variant="page"
                 title="Bảo Dưỡng Xe"

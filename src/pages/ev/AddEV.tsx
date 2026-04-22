@@ -157,7 +157,7 @@ export default function AddEV({ vehicle, onSuccess }: AddEVProps) {
     }
 
     return (
-        <div className="flex h-full flex-col overflow-hidden bg-[#F7F9FC] text-slate-900">
+        <div className="flex h-full flex-col overflow-hidden text-slate-900" style={{ backgroundColor: 'var(--app-home-bg)' }}>
             <HeaderBar
                 variant="page"
                 title={vehicle ? 'Cập nhật xe' : 'Thêm xe mới'}

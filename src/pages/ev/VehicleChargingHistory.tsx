@@ -345,7 +345,7 @@ export default function VehicleChargingHistory() {
     }
 
     return (
-        <div className="flex h-[100dvh] flex-col overflow-hidden bg-[#F7F9FC]">
+        <div className="flex h-[100dvh] flex-col overflow-hidden" style={{ backgroundColor: 'var(--app-home-bg)' }}>
             <HeaderBar
                 variant="page"
                 title="Chi tiết sạc pin"
@@ -586,8 +586,8 @@ export default function VehicleChargingHistory() {
                                 <div key={log.id} className="relative">
                                     {/* Timeline Dot */}
                                     <div className="absolute -left-[17px] top-6 flex flex-col items-center -translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-300">
-                                        <span className="text-[9px] font-black text-slate-400 bg-[#F7F9FC] py-1 leading-none">{shortDateStr}</span>
-                                        <div className="h-3.5 w-3.5 rounded-full border-[3px] border-[#F7F9FC] bg-green-600 shadow-sm" />
+                                        <span className="text-[9px] font-black text-slate-400 py-1 leading-none" style={{ backgroundColor: 'var(--app-home-bg)' }}>{shortDateStr}</span>
+                                        <div className="h-3.5 w-3.5 rounded-full border-[3px] bg-green-600 shadow-sm" style={{ borderColor: 'var(--app-home-bg)' }} />
                                     </div>
 
                                     <div

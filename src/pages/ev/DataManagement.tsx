@@ -321,7 +321,7 @@ export default function DataManagementPage() {
     }
 
     return (
-        <div className="flex h-[100dvh] flex-col overflow-hidden bg-[#F7F9FC]">
+        <div className="flex h-[100dvh] flex-col overflow-hidden" style={{ backgroundColor: 'var(--app-home-bg)' }}>
             <HeaderBar variant="page" title="Quản lý dữ liệu" onBack={() => navigate('/settings')} />
 
             <main className="flex-1 overflow-y-auto min-h-0 w-full max-w-md mx-auto px-4 pt-4 pb-28 space-y-6">

@@ -22,6 +22,7 @@ import {
     Plus,
     LayoutList,
 } from 'lucide-react'
+import { useAppearance } from '../../contexts/AppearanceContext'
 import { useVehicles, useVehicleStats, useVehicleAlerts, useSetDefaultVehicle, vehicleKeys, useVehicleNotifications } from '../../lib/ev/useVehicleQueries'
 import { updateVehicle } from '../../lib/ev/vehicleService'
 import type { VehicleAlert } from '../../lib/ev/vehicleService'
@@ -40,6 +41,7 @@ const formatCurrency = (value: number) =>
 
 export default function VehicleManagement() {
     const navigate = useNavigate()
+    const { isDarkMode } = useAppearance()
     const queryClient = useQueryClient()
     const { success, error: showError } = useNotification()
     const { user } = useAuthState()
@@ -161,23 +163,31 @@ export default function VehicleManagement() {
 
 
 
+    const cardClass = isDarkMode
+        ? 'bg-slate-800 border border-slate-700 shadow-xl shadow-black/20'
+        : 'bg-white border border-slate-200 shadow-sm'
+    const textPrimary = isDarkMode ? 'text-slate-100' : 'text-slate-900'
+    const textSecondary = isDarkMode ? 'text-slate-400' : 'text-slate-400'
+    const subStatBg = isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-[#F1F5F9] border-white'
+    const subStatIconBg = isDarkMode ? 'bg-slate-700' : 'bg-white'
+
     if (loading) {
         return (
-            <div className="flex h-screen flex-col overflow-hidden bg-[#F7F9FC]">
+            <div className="flex h-screen flex-col overflow-hidden transition-colors duration-500" style={{ backgroundColor: 'var(--app-home-bg)' }}>
                 <HeaderBar variant="page" title="Phương tiện" />
                 <main className="flex-1 overflow-y-auto w-full max-w-md mx-auto px-4 pt-4 space-y-4">
-                    <div className="h-56 rounded-3xl bg-gradient-to-br from-slate-200 to-slate-300 animate-pulse" />
+                    <div className={`h-56 rounded-3xl animate-pulse ${isDarkMode ? 'bg-slate-700' : 'bg-gradient-to-br from-slate-200 to-slate-300'}`} />
                     <div className="grid grid-cols-3 gap-3">
-                        {[1, 2, 3].map(i => <div key={i} className="h-24 rounded-2xl bg-slate-200 animate-pulse" />)}
+                        {[1, 2, 3].map(i => <div key={i} className={`h-24 rounded-2xl animate-pulse ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`} />)}
                     </div>
-                    <div className="h-40 rounded-3xl bg-slate-200 animate-pulse" />
+                    <div className={`h-40 rounded-3xl animate-pulse ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`} />
                 </main>
             </div>
         )
     }
 
     return (
-        <div className="flex h-[100dvh] flex-col overflow-hidden transition-all duration-700 bg-[#F7F9FC]">
+        <div className="flex h-[100dvh] flex-col overflow-hidden transition-colors duration-500" style={{ backgroundColor: 'var(--app-home-bg)', color: 'var(--app-text-primary)' }}>
             <div className="relative z-10 flex flex-col flex-1 min-h-0">
                 <HeaderBar
                     variant="greeting"
@@ -275,7 +285,7 @@ export default function VehicleManagement() {
                 ══════════════════════════════════════════════ */}
                             <section>
                                 <div className="mb-3 flex items-center justify-between px-1">
-                                    <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">Xe của bạn</h3>
+                                    <h3 className={`text-sm font-black uppercase tracking-widest ${textSecondary}`}>Xe của bạn</h3>
                                     <button
                                         onClick={() => navigate('/ev/list')}
                                         className="text-xs font-bold text-blue-600 hover:text-blue-700 active:scale-95 transition-all"
@@ -415,22 +425,22 @@ export default function VehicleManagement() {
                                 <section className="px-1">
                                     <div className="grid grid-cols-2 gap-4">
                                         {/* Total Distance Card */}
-                                        <div className="group relative overflow-hidden rounded-[32px] bg-white p-5 shadow-sm border border-slate-200 transition-all hover:border-blue-200 hover:shadow-md h-[160px] flex flex-col justify-between">
+                                        <div className={`group relative overflow-hidden rounded-[32px] p-5 transition-all hover:shadow-md h-[160px] flex flex-col justify-between ${cardClass}`}>
                                             <div className="absolute right-0 top-0 p-3 opacity-10">
                                                 <Gauge className="h-16 w-16 text-blue-600" />
                                             </div>
                                             <div className="z-10">
-                                                <div className="rounded-2xl bg-blue-50 w-fit p-2.5 text-blue-600 border border-blue-100">
+                                                <div className={`rounded-2xl w-fit p-2.5 border ${isDarkMode ? 'bg-blue-500/20 text-blue-400 border-blue-500/20' : 'bg-blue-50 text-blue-600 border-blue-100'}`}>
                                                     <Gauge className="h-5 w-5" />
                                                 </div>
-                                                <p className="mt-3 text-[11px] font-black uppercase tracking-[0.1em] text-slate-400">Odo hiện tại</p>
+                                                <p className={`mt-3 text-[11px] font-black uppercase tracking-[0.1em] ${textSecondary}`}>Odo hiện tại</p>
                                             </div>
                                             <div className="z-10">
                                                 <div className="flex items-baseline gap-1">
-                                                    <p className="text-3xl font-black text-slate-900 tracking-tight">
+                                                    <p className={`text-3xl font-black tracking-tight ${textPrimary}`}>
                                                         {selectedVehicle.current_odometer.toLocaleString()}
                                                     </p>
-                                                    <span className="text-xs font-bold text-slate-400 uppercase">km</span>
+                                                    <span className={`text-xs font-bold uppercase ${textSecondary}`}>km</span>
                                                 </div>
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); setNewOdo(''); setShowOdoModal(true) }}
@@ -443,22 +453,22 @@ export default function VehicleManagement() {
                                         </div>
 
                                         {/* Energy Stats Card */}
-                                        <div className="group relative overflow-hidden rounded-[32px] bg-white p-5 shadow-sm border border-slate-200 transition-all hover:border-emerald-200 hover:shadow-md h-[160px] flex flex-col justify-between">
+                                        <div className={`group relative overflow-hidden rounded-[32px] p-5 transition-all hover:shadow-md h-[160px] flex flex-col justify-between ${cardClass}`}>
                                             <div className="absolute right-0 top-0 p-3 opacity-10">
                                                 <Zap className="h-16 w-16 text-emerald-600" />
                                             </div>
                                             <div className="z-10">
-                                                <div className="rounded-2xl bg-emerald-50 w-fit p-2.5 text-emerald-600 border border-emerald-100">
+                                                <div className={`rounded-2xl w-fit p-2.5 border ${isDarkMode ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
                                                     <Zap className="h-5 w-5" />
                                                 </div>
-                                                <p className="mt-3 text-[11px] font-black uppercase tracking-[0.1em] text-slate-400">Điện tháng này</p>
+                                                <p className={`mt-3 text-[11px] font-black uppercase tracking-[0.1em] ${textSecondary}`}>Điện tháng này</p>
                                             </div>
                                             <div className="z-10">
                                                 <div className="flex items-baseline gap-1">
-                                                    <p className="text-3xl font-black text-slate-900 tracking-tight">
+                                                    <p className={`text-3xl font-black tracking-tight ${textPrimary}`}>
                                                         {isLoadingStats ? '...' : (stats?.totalKwh ? stats.totalKwh.toLocaleString('vi-VN', { maximumFractionDigits: 3 }) : '0')}
                                                     </p>
-                                                    <span className="text-xs font-bold text-slate-400 uppercase">kWh</span>
+                                                    <span className={`text-xs font-bold uppercase ${textSecondary}`}>kWh</span>
                                                 </div>
                                                 <p className="mt-1 text-[10px] font-bold text-emerald-600 flex items-center gap-1">
                                                     <TrendingUp className="h-2.5 w-2.5" />
@@ -470,22 +480,22 @@ export default function VehicleManagement() {
 
                                     {/* Sub Stats Row */}
                                     <div className="mt-4 grid grid-cols-2 gap-4">
-                                        <div className="rounded-[28px] bg-[#F1F5F9] p-4 flex items-center gap-4 border border-white transition-all hover:bg-white hover:shadow-sm group h-[88px]">
-                                            <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center shadow-sm group-hover:bg-blue-600 transition-all duration-300">
+                                        <div className={`rounded-[28px] p-4 flex items-center gap-4 border transition-all hover:shadow-sm group h-[88px] ${subStatBg}`}>
+                                            <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shadow-sm group-hover:bg-blue-600 transition-all duration-300 ${subStatIconBg}`}>
                                                 <Route className="h-6 w-6 text-slate-600 group-hover:text-white" />
                                             </div>
                                             <div>
-                                                <p className="text-xl font-black text-slate-900 leading-none">{stats?.totalTrips || 0}</p>
-                                                <p className="text-[10px] text-slate-400 font-black uppercase mt-1.5 tracking-widest">Lộ trình</p>
+                                                <p className={`text-xl font-black leading-none ${textPrimary}`}>{stats?.totalTrips || 0}</p>
+                                                <p className={`text-[10px] font-black uppercase mt-1.5 tracking-widest ${textSecondary}`}>Lộ trình</p>
                                             </div>
                                         </div>
-                                        <div className="rounded-[28px] bg-[#F1F5F9] p-4 flex items-center gap-4 border border-white transition-all hover:bg-white hover:shadow-sm group h-[88px]">
-                                            <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center shadow-sm group-hover:bg-emerald-600 transition-all duration-300">
+                                        <div className={`rounded-[28px] p-4 flex items-center gap-4 border transition-all hover:shadow-sm group h-[88px] ${subStatBg}`}>
+                                            <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shadow-sm group-hover:bg-emerald-600 transition-all duration-300 ${subStatIconBg}`}>
                                                 <BatteryCharging className="h-6 w-6 text-slate-600 group-hover:text-white" />
                                             </div>
                                             <div>
-                                                <p className="text-xl font-black text-slate-900 leading-none">{stats?.totalChargeSessions || 0}</p>
-                                                <p className="text-[10px] text-slate-400 font-black uppercase mt-1.5 tracking-widest">Lần sạc</p>
+                                                <p className={`text-xl font-black leading-none ${textPrimary}`}>{stats?.totalChargeSessions || 0}</p>
+                                                <p className={`text-[10px] font-black uppercase mt-1.5 tracking-widest ${textSecondary}`}>Lần sạc</p>
                                             </div>
                                         </div>
                                     </div>
@@ -592,13 +602,13 @@ export default function VehicleManagement() {
                             {selectedVehicle && (maintProgress || maintDateProgress || selectedVehicle.insurance_expiry_date || selectedVehicle.inspection_expiry_date) && (
                                 <section>
                                     <div className="mb-4 flex items-center justify-between px-1">
-                                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">bảo dưỡng, Bảo hiểm, đăng kiểm</h2>
+                                        <h2 className={`text-xs font-black uppercase tracking-[0.2em] ${textSecondary}`}>bảo dưỡng, Bảo hiểm, đăng kiểm</h2>
                                     </div>
 
                                     <div className="space-y-4">
                                         {/* EV Maintenance Progress */}
                                         {maintProgress && (
-                                            <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-200 to-white p-5 border border-slate-300 shadow-md transition-all hover:border-emerald-200">
+                                            <div className={`group relative overflow-hidden rounded-3xl p-5 shadow-md transition-all hover:border-emerald-200 ${isDarkMode ? 'bg-slate-800 border border-slate-700' : 'bg-gradient-to-r from-slate-200 to-white border border-slate-300'}`}>
                                                 <div className="absolute -right-3 -bottom-3 opacity-[0.05] text-slate-500 transition-transform group-hover:scale-110">
                                                     <Wrench className="h-24 w-24" />
                                                 </div>
@@ -608,8 +618,8 @@ export default function VehicleManagement() {
                                                             <Wrench className="h-5 w-5" />
                                                         </div>
                                                         <div>
-                                                            <p className="text-sm font-black text-slate-800">Bảo dưỡng định kỳ</p>
-                                                            <p className="text-[10px] font-bold text-slate-400 tracking-wide uppercase">Dự kiến tại {maintProgress.target.toLocaleString()} km</p>
+                                                            <p className={`text-sm font-black ${textPrimary}`}>Bảo dưỡng định kỳ</p>
+                                                            <p className={`text-[10px] font-bold tracking-wide uppercase ${textSecondary}`}>Dự kiến tại {maintProgress.target.toLocaleString()} km</p>
                                                         </div>
                                                     </div>
                                                     <div className="text-right">
@@ -620,14 +630,14 @@ export default function VehicleManagement() {
                                                 </div>
 
                                                 <div className="mt-4">
-                                                    <div className="h-2 w-full rounded-full bg-slate-50 overflow-hidden ring-1 ring-slate-100/50">
+                                                    <div className={`h-2 w-full rounded-full overflow-hidden ring-1 ${isDarkMode ? 'bg-slate-700 ring-slate-600/50' : 'bg-slate-50 ring-slate-100/50'}`}>
                                                         <div
                                                             className={`h-full rounded-full transition-all duration-1000 ${maintProgress.isOverdue ? 'bg-red-500' : 'bg-gradient-to-r from-emerald-400 to-green-500'}`}
                                                             style={{ width: `${Math.min(100, Math.max(2, maintProgress.pct))}%` }}
                                                         />
                                                     </div>
                                                     <div className="mt-2 flex items-center justify-between">
-                                                        <span className="text-[10px] font-bold text-slate-400">{maintProgress.pct}% tiến độ</span>
+                                                        <span className={`text-[10px] font-bold ${textSecondary}`}>{maintProgress.pct}% tiến độ</span>
                                                         <button onClick={() => navigate('/ev/maintenance')} className="flex items-center gap-1 text-[10px] font-black text-emerald-600 uppercase">
                                                             Cấu hình mốc bảo dưỡng <ChevronRight className="h-3 w-3" />
                                                         </button>
@@ -670,7 +680,7 @@ export default function VehicleManagement() {
                                                             <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-500 text-white shadow-lg shadow-slate-500/20">
                                                                 <ClipboardCheck className="h-5 w-5" />
                                                             </div>
-                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Đăng kiểm</p>
+                                                            <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${textSecondary}`}>Đăng kiểm</p>
                                                             <p className={`text-sm font-black ${days < 30 ? 'text-red-600' : 'text-slate-900'}`}>
                                                                 {days < 0 ? 'Hết hạn' : `Còn ${days} ngày`}
                                                             </p>
@@ -689,7 +699,7 @@ export default function VehicleManagement() {
                             {selectedVehicle && (
                                 <section>
                                     <div className="mb-4 flex items-center justify-between px-1">
-                                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Tiện ích khác</h2>
+                                        <h2 className={`text-xs font-black uppercase tracking-[0.2em] ${textSecondary}`}>Tiện ích khác</h2>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-3">
@@ -703,7 +713,7 @@ export default function VehicleManagement() {
                                             <button
                                                 key={item.id}
                                                 onClick={() => navigate(item.route)}
-                                                className={`group relative overflow-hidden flex flex-col items-center justify-center text-center gap-2 rounded-3xl ${item.bg} p-6 border ${item.border} shadow-md transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95`}
+                                                className={`group relative overflow-hidden flex flex-col items-center justify-center text-center gap-2 rounded-3xl p-6 shadow-md transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95 ${isDarkMode ? 'bg-slate-800 border border-slate-700' : `${item.bg} border ${item.border}`}`}
                                             >
                                                 <div className={`absolute -right-2 -bottom-2 opacity-10 ${item.text} transition-all duration-500 group-hover:scale-110 group-hover:rotate-6`}>
                                                     <item.icon className="h-20 w-20" />
@@ -712,8 +722,8 @@ export default function VehicleManagement() {
                                                     <div className={`h-11 w-11 flex items-center justify-center rounded-2xl ${item.color} text-white shadow-lg mx-auto mb-3 transition-transform group-hover:scale-110`}>
                                                         <item.icon className="h-5 w-5" />
                                                     </div>
-                                                    <p className={`text-sm font-black tracking-tight ${item.text.replace('text-', 'text-')}`}>{item.label}</p>
-                                                    <p className="text-[9px] font-black opacity-50 mt-1 uppercase tracking-widest text-slate-500">{item.sub}</p>
+                                                    <p className={`text-sm font-black tracking-tight ${isDarkMode ? item.text : item.text}`}>{item.label}</p>
+                                                    <p className={`text-[9px] font-black opacity-50 mt-1 uppercase tracking-widest ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{item.sub}</p>
                                                 </div>
                                             </button>
                                         ))}
@@ -752,12 +762,12 @@ export default function VehicleManagement() {
                     onClick={() => setShowOdoModal(false)}
                 >
                     <div
-                        className="w-full max-w-md flex flex-col max-h-[80vh] overflow-hidden rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-300"
+                        className={`w-full max-w-md flex flex-col max-h-[80vh] overflow-hidden rounded-t-3xl sm:rounded-3xl shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 ${isDarkMode ? 'bg-slate-900 border border-slate-700' : 'bg-white'}`}
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Handle */}
                         <div className="flex justify-center pt-3 pb-1 sm:hidden shrink-0">
-                            <div className="h-1.5 w-10 rounded-full bg-slate-200" />
+                            <div className={`h-1.5 w-10 rounded-full ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`} />
                         </div>
 
                         {/* Header */}
@@ -778,16 +788,16 @@ export default function VehicleManagement() {
 
                         {/* Body */}
                         <div className="px-5 py-6 space-y-5 overflow-y-auto">
-                            <div className="flex flex-col items-center rounded-2xl bg-slate-50 border border-slate-200 py-4">
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Hiện tại</p>
+                            <div className={`flex flex-col items-center rounded-2xl border py-4 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                                <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${textSecondary}`}>Hiện tại</p>
                                 <div className="flex items-baseline gap-1">
-                                    <span className="text-3xl font-black text-slate-800">{selectedVehicle.current_odometer.toLocaleString()}</span>
-                                    <span className="text-sm font-bold text-slate-400">km</span>
+                                    <span className={`text-3xl font-black ${textPrimary}`}>{selectedVehicle.current_odometer.toLocaleString()}</span>
+                                    <span className={`text-sm font-bold ${textSecondary}`}>km</span>
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-center text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Nhập số KM mới</label>
+                                <label className={`block text-center text-xs font-bold uppercase tracking-widest mb-2 ${textSecondary}`}>Nhập số KM mới</label>
                                 <input
                                     type="number"
                                     autoFocus
@@ -795,7 +805,7 @@ export default function VehicleManagement() {
                                     value={newOdo}
                                     onChange={e => setNewOdo(e.target.value)}
                                     onKeyDown={e => e.key === 'Enter' && handleSaveOdo()}
-                                    className="w-full rounded-2xl border-2 border-slate-200 bg-white px-4 py-3.5 text-center text-2xl font-black text-slate-800 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 placeholder:text-slate-200"
+                                    className={`w-full rounded-2xl border-2 px-4 py-3.5 text-center text-2xl font-black shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 placeholder:text-slate-200 ${isDarkMode ? 'bg-slate-800 border-slate-600 text-slate-100' : 'bg-white border-slate-200 text-slate-800'}`}
                                 />
                                 {newOdo && Number(newOdo) > 0 && (
                                     <p className={`mt-2 text-center text-xs font-bold ${Number(newOdo) > selectedVehicle.current_odometer ? 'text-green-500' : 'text-red-500'}`}>
@@ -808,9 +818,9 @@ export default function VehicleManagement() {
                         </div>
 
                         {/* Footer */}
-                        <div className="flex gap-3 px-5 pb-6 shrink-0 pt-2 border-t border-slate-100">
+                        <div className={`flex gap-3 px-5 pb-6 shrink-0 pt-2 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
                             <button onClick={() => setShowOdoModal(false)}
-                                className="flex-1 rounded-2xl bg-slate-100 py-3.5 text-sm font-bold text-slate-600 hover:bg-slate-200 transition-all active:scale-95">
+                                className={`flex-1 rounded-2xl py-3.5 text-sm font-bold transition-all active:scale-95 ${isDarkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                                 Hủy
                             </button>
                             <button

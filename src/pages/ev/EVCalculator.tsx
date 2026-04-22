@@ -95,7 +95,7 @@ export default function EVCalculator() {
     const resetCharge = () => { setStartSoc(''); setEndSoc(''); setActualKwh(''); }
 
     return (
-        <div className="flex h-screen flex-col bg-[#F7F9FC] text-slate-900 font-sans selection:bg-blue-100">
+        <div className="flex h-screen flex-col text-slate-900 font-sans selection:bg-blue-100" style={{ backgroundColor: 'var(--app-home-bg)' }}>
             <HeaderBar variant="page" title="Công cụ tính toán" />
 
             <main className="flex-1 overflow-y-auto w-full max-w-md mx-auto px-4 py-4 space-y-4 pb-32">

@@ -63,7 +63,7 @@ export default function VehicleList() {
 
     if (isLoading) {
         return (
-            <div className="flex h-screen flex-col bg-[#F7F9FC]">
+            <div className="flex h-screen flex-col overflow-hidden text-slate-900" style={{ backgroundColor: 'var(--app-home-bg)' }}>
                 <HeaderBar variant="page" title="Danh sách xe" />
                 <div className="flex flex-1 items-center justify-center">
                     <RotateCw className="h-8 w-8 animate-spin text-blue-500" />
@@ -73,7 +73,7 @@ export default function VehicleList() {
     }
 
     return (
-        <div className="flex h-screen flex-col overflow-hidden bg-[#F7F9FC] text-slate-900">
+        <div className="flex h-screen flex-col overflow-hidden text-slate-900" style={{ backgroundColor: 'var(--app-home-bg)' }}>
             <HeaderBar
                 variant="page"
                 title="Quản lý xe"
