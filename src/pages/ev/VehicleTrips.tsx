@@ -11,6 +11,7 @@ import { useVehicles, useVehicleTrips, vehicleKeys } from '../../lib/ev/useVehic
 import { useQueryClient } from '@tanstack/react-query'
 import { useVehicleStore } from '../../store/useVehicleStore'
 import { useNotification } from '../../contexts/notificationContext.helpers'
+import { useAppearance } from '../../contexts/AppearanceContext'
 import { DateTimePickerModal } from '../../components/ui/DateTimePickerModal'
 import { DateRangePickerModal } from '../../components/ui/DateRangePickerModal'
 import { LoadingOverlay } from '../../components/ui/LoadingOverlay'
@@ -21,6 +22,7 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { SimpleLocationInput, type SimpleLocationData } from '../../components/ev/SimpleLocationInput'
 import { TripGPSDisplay, getTripCleanNotes } from '../../components/ev/TripGPSDisplay'
 import { VehicleFooterNav } from '../../components/ev/VehicleFooterNav'
+
 import { forwardGeocode, reverseGeocode, parseCoordinates } from '../../utils/geocoding'
 
 // ─── Trip Type Config ─────────────────────────────────────────────────────────
@@ -193,6 +195,7 @@ function VehicleBodyIcon({ vehicleType, className }: { vehicleType?: string; cla
 
 // ─── Stats Card ───────────────────────────────────────────────────────────────
 function StatsCard({ vehicle, trips }: { vehicle: VehicleRecord; trips: TripRecord[] }) {
+    const { isDarkMode } = useAppearance()
     const totalDistance = trips.reduce((s, t) => s + (t.distance_km || 0), 0)
     const thisMonth = new Date()
     const monthTrips = trips.filter(t => {
@@ -200,7 +203,7 @@ function StatsCard({ vehicle, trips }: { vehicle: VehicleRecord; trips: TripReco
         return d.getMonth() === thisMonth.getMonth() && d.getFullYear() === thisMonth.getFullYear()
     })
     const monthDist = monthTrips.reduce((s, t) => s + (t.distance_km || 0), 0)
-    const accent = 'bg-blue-600 shadow-blue-200'
+    const accent = isDarkMode ? 'bg-blue-600 shadow-none' : 'bg-blue-600 shadow-blue-200'
 
     return (
         <div className={`mb-4 rounded-2xl ${accent} p-4 text-white shadow-lg`}>
@@ -233,7 +236,7 @@ function StatsCard({ vehicle, trips }: { vehicle: VehicleRecord; trips: TripReco
             </div>
 
             {/* Odometer row */}
-            <div className="mt-3 flex items-center justify-between rounded-xl bg-white/10 px-3 py-2">
+            <div className={`mt-3 flex items-center justify-between rounded-xl px-3 py-2 ${isDarkMode ? 'bg-white/5' : 'bg-white/10'}`}>
                 <div className="flex items-center gap-2">
                     <TrendingUp className="h-3.5 w-3.5 opacity-75" />
                     <span className="text-xs opacity-75">Odometer hiện tại</span>
@@ -245,21 +248,21 @@ function StatsCard({ vehicle, trips }: { vehicle: VehicleRecord; trips: TripReco
 }
 
 // ─── Trip Status UX helper ──────────────────────────────────────────────────
-function getTripUXStatus(trip: TripRecord) {
+function getTripUXStatus(trip: TripRecord, isDarkMode: boolean) {
     const meta = parseMeta(trip.notes)
 
     if (meta.status === 'in_progress') {
         return {
             key: 'in_progress', label: 'Đang di chuyển',
-            badgeCls: 'bg-blue-100 text-blue-700 border-blue-200',
+            badgeCls: isDarkMode ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 'bg-blue-100 text-blue-700 border-blue-200',
             dot: 'bg-blue-500 animate-pulse', border: 'border-l-blue-400'
         }
     }
     if (meta.status === 'completed') {
         return {
             key: 'completed', label: 'Hoàn tất',
-            badgeCls: 'bg-green-100 text-green-700 border-green-200',
-            dot: 'bg-green-500', border: 'border-l-green-400'
+            badgeCls: isDarkMode ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-green-100 text-green-700 border-green-200',
+            dot: isDarkMode ? 'bg-emerald-500' : 'bg-green-500', border: isDarkMode ? 'border-l-emerald-400' : 'border-l-green-400'
         }
     }
 
@@ -268,14 +271,14 @@ function getTripUXStatus(trip: TripRecord) {
     if (tripDate > now) {
         return {
             key: 'upcoming', label: 'Sắp tới',
-            badgeCls: 'bg-amber-100 text-amber-700 border-amber-200',
-            dot: 'bg-amber-500', border: 'border-l-amber-200'
+            badgeCls: isDarkMode ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-amber-100 text-amber-700 border-amber-200',
+            dot: 'bg-amber-500', border: isDarkMode ? 'border-l-amber-400' : 'border-l-amber-200'
         }
     }
     return {
         key: 'manual', label: 'Đã lưu',
-        badgeCls: 'bg-slate-100 text-slate-700 border-slate-200',
-        dot: 'bg-slate-500', border: 'border-l-transparent'
+        badgeCls: isDarkMode ? 'bg-slate-800 text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-700 border-slate-200',
+        dot: isDarkMode ? 'bg-slate-600' : 'bg-slate-500', border: 'border-l-transparent'
     }
 }
 
@@ -308,17 +311,18 @@ function TripCard({
 }: {
     trip: TripRecord; pricePerKm: number; onEdit: (trip: TripRecord) => void; onDelete: (id: string) => void; onComplete: (trip: TripRecord) => void; onCheckpoint: (trip: TripRecord) => void; onTogglePin: (trip: TripRecord) => void
 }) {
+    const { isDarkMode } = useAppearance()
     const [expanded, setExpanded] = useState(false)
     const inProgress = isInProgress(trip)
     const { startedAt, completedAt, mins } = getTripDuration(trip)
     const userNotes = getTripCleanNotes(stripMeta(trip.notes))
-    const uxStatus = getTripUXStatus(trip)
+    const uxStatus = getTripUXStatus(trip, isDarkMode)
     const tags = getTripTags(trip)
     const meta = parseMeta(trip.notes)
     const isPinned = meta.pinned === 'true'
 
     return (
-        <div className={`overflow-hidden rounded-2xl bg-white shadow-sm border-l-4 ${isPinned ? 'border-l-yellow-400 border-t border-t-yellow-100' : uxStatus.border} transition-all hover:shadow-md`}>
+        <div className={`overflow-hidden rounded-2xl transition-all border-l-4 ${isDarkMode ? 'bg-slate-800/80 border-slate-700' : 'bg-white shadow-sm border-white'} ${isPinned ? 'border-l-yellow-400 border-t border-t-yellow-400/20' : uxStatus.border} hover:shadow-md hover:scale-[1.01]`}>
             <div className="p-4">
                 <div className="flex items-start justify-between mb-3">
                     <div className="flex-1 min-w-0 pr-2">
@@ -342,16 +346,16 @@ function TripCard({
                         </div>
 
                         {(trip.start_location || trip.end_location) && (
-                            <div className="flex items-center gap-1.5 text-[11px] text-slate-600 font-medium my-1.5 flex-wrap">
+                            <div className={`flex items-center gap-1.5 text-[11px] font-medium my-1.5 flex-wrap ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                                 <div className="flex items-center gap-1.5">
                                     <Navigation className="h-3 w-3 text-blue-500 shrink-0" />
                                     <LocationDisplay locationStr={trip.start_location} fallback="?" />
-                                    <ArrowRight className="h-3 w-3 text-slate-300 shrink-0" />
-                                    <Flag className="h-3 w-3 text-green-500 shrink-0" />
+                                    <ArrowRight className={`h-3 w-3 shrink-0 ${isDarkMode ? 'text-slate-600' : 'text-slate-300'}`} />
+                                    <Flag className={`h-3 w-3 shrink-0 ${isDarkMode ? 'text-emerald-500' : 'text-green-500'}`} />
                                     <LocationDisplay locationStr={trip.end_location} fallback={inProgress ? '...' : '?'} />
                                 </div>
                                 {!inProgress && (
-                                    <span className="ml-1 font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded text-[10px]">
+                                    <span className={`ml-1 font-bold px-1.5 py-0.5 rounded text-[10px] ${isDarkMode ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-600'}`}>
                                         {(trip.distance_km || (trip.end_km - trip.start_km)).toLocaleString()} km
                                     </span>
                                 )}
@@ -371,13 +375,13 @@ function TripCard({
 
                     <div className="flex flex-col gap-1.5 shrink-0 items-end">
                         <div className="flex gap-1">
-                            <button onClick={() => onTogglePin(trip)} className={`rounded-xl p-1.5 transition-colors ${isPinned ? 'text-yellow-500 bg-yellow-50 hover:bg-yellow-100' : 'text-slate-400 bg-slate-50 hover:bg-slate-100 hover:text-yellow-500'}`}>
+                            <button onClick={() => onTogglePin(trip)} className={`rounded-xl p-1.5 transition-colors ${isPinned ? (isDarkMode ? 'text-yellow-400 bg-yellow-500/10' : 'text-yellow-500 bg-yellow-50') : (isDarkMode ? 'text-slate-500 bg-slate-700/50 hover:text-yellow-400' : 'text-slate-400 bg-slate-50 hover:bg-slate-100')}`}>
                                 <Star className={`h-4 w-4 ${isPinned ? 'fill-current' : ''}`} />
                             </button>
-                            <button onClick={() => onEdit(trip)} className="rounded-xl p-1.5 text-blue-500 bg-blue-50 hover:bg-blue-100 transition-colors">
+                            <button onClick={() => onEdit(trip)} className={`rounded-xl p-1.5 transition-colors ${isDarkMode ? 'text-blue-400 bg-blue-500/10 hover:bg-blue-500/20' : 'text-blue-500 bg-blue-50 hover:bg-blue-100'}`}>
                                 <Edit className="h-4 w-4" />
                             </button>
-                            <button onClick={() => onDelete(trip.id)} className="rounded-xl p-1.5 text-red-500 bg-red-50 hover:bg-red-100 transition-colors">
+                            <button onClick={() => onDelete(trip.id)} className={`rounded-xl p-1.5 transition-colors ${isDarkMode ? 'text-red-400 bg-red-500/10 hover:bg-red-500/20' : 'text-red-500 bg-red-50 hover:bg-red-100'}`}>
                                 <Trash2 className="h-4 w-4" />
                             </button>
                         </div>
@@ -615,8 +619,9 @@ export default function VehicleTrips() {
         }
     }
 
+    const { isDarkMode } = useAppearance()
     return (
-        <div className="flex h-screen flex-col overflow-hidden" style={{ backgroundColor: 'var(--app-home-bg)' }}>
+        <div className={`flex h-screen flex-col overflow-hidden transition-colors duration-500`} style={{ backgroundColor: isDarkMode ? '#0F172A' : '#F8FAFC' }}>
             <HeaderBar variant="page" title="Quản Lý Lộ Trình" />
 
             <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 w-full max-w-md mx-auto px-4 pb-28 pt-4">
@@ -630,7 +635,7 @@ export default function VehicleTrips() {
                 <div className="mb-4 flex gap-2">
                     <button
                         onClick={() => setShowAddModal(true)}
-                        className="flex-1 flex justify-center items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-500 py-3.5 text-white shadow-lg shadow-blue-200 transition-all hover:scale-[1.02] active:scale-95"
+                        className="flex-1 flex justify-center items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-500 py-3.5 text-white shadow-md transition-all hover:scale-[1.02] active:scale-95"
                     >
                         <Map className="h-5 w-5" />
                         <span className="text-sm font-bold">Tạo lộ trình di chuyển</span>
@@ -650,7 +655,7 @@ export default function VehicleTrips() {
                 {/* ── FILTER BAR ── */}
                 <div className="mb-3 space-y-2">
                     {/* Period type tabs */}
-                    <div className="flex rounded-xl bg-gray-200 p-1 gap-0.5 shadow-inner">
+                    <div className={`flex rounded-xl p-1 gap-0.5 shadow-inner ${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'}`}>
                         {PERIOD_TABS.map(tab => (
                             <button key={tab.id} type="button"
                                 onClick={() => {
@@ -658,8 +663,8 @@ export default function VehicleTrips() {
                                     setPeriodOffset(0)
                                 }}
                                 className={`flex-1 rounded-lg py-1.5 text-xs font-semibold transition-all ${filterPeriod === tab.id
-                                    ? 'bg-slate-600 text-white shadow-md'
-                                    : 'text-slate-500 hover:text-slate-700'
+                                    ? (isDarkMode ? 'bg-slate-600 text-white shadow-md' : 'bg-slate-600 text-white shadow-md')
+                                    : (isDarkMode ? 'text-slate-500 hover:text-slate-300' : 'text-slate-500 hover:text-slate-700')
                                     }`}>
                                 {tab.label}
                             </button>
@@ -671,26 +676,26 @@ export default function VehicleTrips() {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setPeriodOffset(o => o - 1)}
-                                className="rounded-xl border border-slate-300 bg-white p-1.5 text-slate-600 hover:bg-slate-100 active:scale-95 transition-all"
+                                className={`rounded-xl border p-1.5 transition-all active:scale-95 ${isDarkMode ? 'border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700' : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-100'}`}
                             >
                                 <ChevronLeft className="h-4 w-4" />
                             </button>
                             <div
                                 onClick={() => setIsRangePickerOpen(true)}
-                                className="flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-center cursor-pointer hover:bg-slate-50 transition-colors"
+                                className={`flex-1 rounded-xl border px-3 py-2 text-center cursor-pointer transition-colors ${isDarkMode ? 'border-slate-700 bg-slate-800 hover:bg-slate-700' : 'border-slate-300 bg-white hover:bg-slate-50'}`}
                             >
-                                <p className="text-md font-bold text-slate-700">{periodRange.label}</p>
+                                <p className={`text-md font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-700'}`}>{periodRange.label}</p>
                             </div>
                             <button
                                 onClick={() => setPeriodOffset(o => Math.min(0, o + 1))}
                                 disabled={periodOffset >= 0 && filterPeriod !== 'custom'}
-                                className="rounded-xl border border-slate-300 bg-white p-1.5 text-slate-600 hover:bg-slate-100 active:scale-95 transition-all"
+                                className={`rounded-xl border p-1.5 transition-all active:scale-95 disabled:opacity-30 ${isDarkMode ? 'border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700' : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-100'}`}
                             >
                                 <ChevronRight className="h-4 w-4" />
                             </button>
                             <button
                                 onClick={() => setShowFilter(!showFilter)}
-                                className={`rounded-xl border p-1.5 transition-all ${showFilter ? 'border-blue-400 bg-blue-50 text-blue-600' : 'border-slate-200 bg-white text-slate-400'}`}
+                                className={`rounded-xl border p-1.5 transition-all ${showFilter ? 'border-blue-500 bg-blue-500/10 text-blue-400' : `${isDarkMode ? 'border-slate-700 bg-slate-800 text-slate-500' : 'border-slate-200 bg-white text-slate-400'}`}`}
                             >
                                 <Filter className="h-4 w-4" />
                             </button>
@@ -720,13 +725,13 @@ export default function VehicleTrips() {
 
                     {/* Period summary row */}
                     {trips.length > 0 && (
-                        <div className="flex items-center justify-between rounded-xl bg-white border border-slate-100 px-3 py-2 shadow-md">
+                        <div className={`flex items-center justify-between rounded-xl border px-3 py-2 shadow-sm transition-all ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-100 shadow-md'}`}>
                             <div className="flex items-center gap-3 text-xs text-slate-500">
-                                <span><span className="font-bold text-slate-700">{trips.length}</span> chuyến</span>
-                                <span>·</span>
-                                <span><span className="font-bold text-slate-700">{trips.reduce((s, t) => s + (t.distance_km || 0), 0).toLocaleString()}</span> km</span>
+                                <span><span className={`font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{trips.length}</span> chuyến</span>
+                                <span className="opacity-30">·</span>
+                                <span><span className={`font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{trips.reduce((s, t) => s + (t.distance_km || 0), 0).toLocaleString()}</span> km</span>
                             </div>
-                            <BarChart3 className="h-4 w-4 text-slate-300" />
+                            <BarChart3 className="h-4 w-4 text-slate-500/50" />
                         </div>
                     )}
                 </div>
@@ -745,12 +750,12 @@ export default function VehicleTrips() {
                         ))}
                     </div>
                 ) : trips.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 text-center rounded-3xl bg-white border border-slate-100 py-14 shadow-sm">
-                        <div className={`mb-4 rounded-3xl p-6 bg-blue-100 shadow-md`}>
-                            <Route className={`h-14 w-14 text-blue-600`} />
+                    <div className={`flex flex-col items-center justify-center py-16 text-center rounded-3xl border shadow-sm transition-all ${isDarkMode ? 'bg-slate-800/20 border-slate-700/50' : 'bg-white border-slate-100'}`}>
+                        <div className={`mb-4 rounded-3xl p-6 shadow-md ${isDarkMode ? 'bg-blue-500/10' : 'bg-blue-100'}`}>
+                            <Route className={`h-14 w-14 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                         </div>
-                        <p className="font-semibold text-slate-600">Chưa có lộ trình nào</p>
-                        <p className="mt-1 text-sm text-slate-400">
+                        <p className={`font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>Chưa có lộ trình nào</p>
+                        <p className={`mt-1 text-sm ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>
                             {filterType !== 'all'
                                 ? `Không có lộ trình "${TRIP_TYPES[filterType].label}" trong ${periodRange.label.toLowerCase()}`
                                 : 'Bắt đầu ghi lại lộ trình của bạn'}
@@ -795,16 +800,16 @@ export default function VehicleTrips() {
                                     {/* Date separator */}
                                     <div className="mb-2 flex items-center justify-between px-1">
                                         <div className="flex items-center gap-2">
-                                            <div className={`h-2 w-2 rounded-full bg-blue-400`} />
-                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
+                                            <div className={`h-2 w-2 rounded-full ${isDarkMode ? 'bg-blue-500' : 'bg-blue-400'}`} />
+                                            <span className={`text-xs font-bold uppercase tracking-wide ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                                                 {dayLabel(dateKey)}
                                             </span>
                                         </div>
-                                        <span className="text-xs font-semibold text-slate-400">
+                                        <span className={`text-xs font-semibold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>
                                             {dayDistance.toLocaleString()} km · {dayTrips.length} chuyến
                                         </span>
                                     </div>
-                                    <div className={`space-y-2 pl-4 border-l-2 border-blue-100`}>
+                                    <div className={`space-y-2 pl-4 border-l-2 ${isDarkMode ? 'border-slate-700' : 'border-blue-100'}`}>
                                         {dayTrips.map(trip => (
                                             <TripCard
                                                 key={trip.id}
@@ -826,12 +831,7 @@ export default function VehicleTrips() {
                 <div className="h-[150px] w-full flex-shrink-0"></div>
             </main>
 
-            {/* Footer Nav */}
-            <VehicleFooterNav
-                onAddClick={() => { setShowAddModal(true) }}
-                addLabel="Tạo lộ trình"
-                isElectricVehicle={selectedVehicle?.fuel_type === 'electric'}
-            />
+
 
             {/* Add / Edit Modal */}
             {(showAddModal || editingTrip) && selectedVehicle && (
@@ -905,6 +905,11 @@ export default function VehicleTrips() {
                     onSuccess={(newPrice) => setPricePerKm(newPrice)}
                 />
             )}
+
+            <VehicleFooterNav
+                onAddClick={() => setShowAddModal(true)}
+                addLabel="Lộ trình"
+            />
         </div>
     )
 }
@@ -925,6 +930,7 @@ function TripModal({
 }) {
     const { success, error: showError } = useNotification()
     const [loading, setLoading] = useState(false)
+    const { isDarkMode } = useAppearance()
     const isEdit = !!editingTrip
 
     const [formData, setFormData] = useState({
@@ -1062,14 +1068,14 @@ function TripModal({
         }
     }
 
-    const inputCls = 'w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all'
-    const labelCls = 'mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wide'
+    const inputCls = `w-full rounded-xl border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 focus:border-blue-500 focus:ring-blue-500/20' : 'bg-slate-50 border-slate-200 focus:bg-white focus:border-blue-400 focus:ring-blue-100'}`
+    const labelCls = `mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`
 
     return (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] transition-all duration-300 animate-in fade-in" onClick={onClose}>
             <div className="w-full max-w-md flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl max-h-[80vh] mt-12 sm:mt-0 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300" onClick={e => e.stopPropagation()}>
                 {/* Modal Header */}
-                <div className={`${accentBg} rounded-t-3xl px-5 pt-3 pb-4 text-white`}>
+                <div className={`${isDarkMode ? 'bg-blue-700 shadow-lg shadow-black/20' : accentBg} rounded-t-3xl px-5 pt-3 pb-4 text-white`}>
                     {/* Mobile Handle */}
                     <div className="flex w-full justify-center pb-3 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10">
                         <div className="h-1.5 w-12 rounded-full bg-white/40" />
@@ -1091,7 +1097,7 @@ function TripModal({
                 </div>
 
                 {/* Form */}
-                <div className="flex-1 overflow-y-auto px-5 py-4">
+                <div className={`flex-1 overflow-y-auto px-5 py-4 ${isDarkMode ? 'bg-slate-900' : 'bg-white'}`}>
                     <form id="trip-form" onSubmit={handleSubmit} className="space-y-4">
 
                         {/* Date + Time */}
@@ -1102,17 +1108,17 @@ function TripModal({
                             <button
                                 type="button"
                                 onClick={() => setIsDateTimePickerOpen(true)}
-                                className="relative flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-4 pr-4 text-left transition-all hover:border-slate-300 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/20"
+                                className={`relative flex w-full items-center justify-between rounded-xl border py-3.5 pl-4 pr-4 text-left transition-all hover:border-slate-300 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/20 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`}
                             >
                                 <div className="flex-1 flex items-center gap-3">
-                                    <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
+                                    <div className={`flex items-center gap-1.5 text-sm font-semibold ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>
                                         {(() => {
                                             const [year, month, day] = formData.trip_date.split('-').map(Number)
                                             return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`
                                         })()}
                                     </div>
                                     {formData.trip_time && (
-                                        <div className="flex items-center gap-1.5 text-sm text-slate-500">
+                                        <div className={`flex items-center gap-1.5 text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                                             <Clock className="h-4 w-4 text-slate-400" />
                                             <span className="font-semibold">{formData.trip_time}</span>
                                         </div>
@@ -1180,22 +1186,22 @@ function TripModal({
 
                         {/* Odometer (collapsible) */}
                         <div className="pt-1">
-                            <button type="button" onClick={() => setShowOdo(!showOdo)} className="flex items-center justify-between w-full text-left gap-2 text-[11px] font-bold text-blue-700 bg-blue-50/70 hover:bg-blue-100/50 transition-colors px-3 py-2.5 rounded-xl border border-blue-100 uppercase tracking-wide">
+                            <button type="button" onClick={() => setShowOdo(!showOdo)} className={`flex items-center justify-between w-full text-left gap-2 text-[11px] font-bold transition-colors px-3 py-2.5 rounded-xl border uppercase tracking-wide ${isDarkMode ? 'text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/20' : 'text-blue-700 bg-blue-50/70 hover:bg-blue-100/50 border-blue-100'}`}>
                                 <span className="flex items-center gap-1.5"><Gauge className="h-4 w-4" /> {showOdo ? 'Ẩn thông tin Odometer' : 'Mở rộng: Cập nhật Odometer & Thành tiền'}</span>
                                 <ChevronDown className={`h-4 w-4 transition-transform ${showOdo ? 'rotate-180' : ''}`} />
                             </button>
                             {showOdo && (
-                                <div className="mt-3 p-3 bg-slate-50 border border-slate-100 rounded-xl animate-in fade-in slide-in-from-top-2 space-y-3">
+                                <div className={`mt-3 p-3 border rounded-xl animate-in fade-in slide-in-from-top-2 space-y-3 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-100'}`}>
                                     <div className="grid grid-cols-2 gap-3">
                                         <div>
-                                            <p className="text-xs text-slate-500 mb-1 font-semibold">Odo Bắt đầu <span className="font-normal italic">(km)</span></p>
+                                            <p className={`text-xs mb-1 font-semibold ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Odo Bắt đầu <span className="font-normal italic">(km)</span></p>
                                             <input type="number" min={0} value={formData.start_km}
                                                 onChange={e => setFormData({ ...formData, start_km: e.target.value })}
                                                 placeholder={`VD: ${vehicle.current_odometer}`}
                                                 className={inputCls} />
                                         </div>
                                         <div>
-                                            <p className="text-xs text-slate-500 mb-1 font-semibold">Odo Kết thúc <span className="font-normal italic">(km)</span></p>
+                                            <p className={`text-xs mb-1 font-semibold ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Odo Kết thúc <span className="font-normal italic">(km)</span></p>
                                             <input type="number" min={formData.start_km} value={formData.end_km}
                                                 onChange={e => setFormData({ ...formData, end_km: e.target.value })}
                                                 placeholder={`VD: ${formData.start_km}`}
@@ -1205,14 +1211,14 @@ function TripModal({
 
                                     {validDist && calcDist > 0 && (
                                         <div className="space-y-2">
-                                            <div className="flex items-center justify-between rounded-xl px-3 py-2 bg-blue-100/40 border border-blue-200/50 shadow-sm">
-                                                <span className="text-[11px] font-semibold text-blue-700 uppercase tracking-wide">Quãng đường</span>
-                                                <span className="text-[13px] font-black text-blue-600">{calcDist.toLocaleString()} km</span>
+                                            <div className={`flex items-center justify-between rounded-xl px-3 py-2 border shadow-sm ${isDarkMode ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-100/40 border-blue-200/50'}`}>
+                                                <span className={`text-[11px] font-semibold uppercase tracking-wide ${isDarkMode ? 'text-blue-400' : 'text-blue-700'}`}>Quãng đường</span>
+                                                <span className={`text-[13px] font-black ${isDarkMode ? 'text-blue-300' : 'text-blue-600'}`}>{calcDist.toLocaleString()} km</span>
                                             </div>
                                             {pricePerKm > 0 && (
-                                                <div className="flex items-center justify-between rounded-xl px-3 py-2 bg-green-100/40 border border-green-200/50 shadow-sm">
-                                                    <span className="text-[11px] font-semibold text-green-700 uppercase tracking-wide">Thành tiền ({pricePerKm.toLocaleString()} đ/km)</span>
-                                                    <span className="text-[14px] font-black text-green-600">{(calcDist * pricePerKm).toLocaleString()} ₫</span>
+                                                <div className={`flex items-center justify-between rounded-xl px-3 py-2 border shadow-sm ${isDarkMode ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-green-100/40 border-green-200/50'}`}>
+                                                    <span className={`text-[11px] font-semibold uppercase tracking-wide ${isDarkMode ? 'text-emerald-400' : 'text-green-700'}`}>Thành tiền ({pricePerKm.toLocaleString()} đ/km)</span>
+                                                    <span className={`text-[14px] font-black ${isDarkMode ? 'text-emerald-300' : 'text-green-600'}`}>{(calcDist * pricePerKm).toLocaleString()} ₫</span>
                                                 </div>
                                             )}
                                         </div>
@@ -1224,11 +1230,11 @@ function TripModal({
                 </div>
 
                 {/* Footer Buttons */}
-                <div className="px-5 py-4 border-t border-slate-100 flex gap-2">
+                <div className={`px-5 py-4 border-t flex gap-2 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'}`}>
                     <button
                         type="button"
                         onClick={onClose}
-                        className="flex-1 rounded-xl border border-slate-200 bg-slate-50 py-3 text-sm font-semibold text-slate-600 transition-all hover:bg-slate-100"
+                        className={`flex-1 rounded-xl border py-3 text-sm font-semibold transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}`}
                     >
                         Hủy
                     </button>
@@ -1298,6 +1304,7 @@ function CheckpointTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
     onClose: () => void
     onSuccess: () => void
 }) {
+    const { isDarkMode } = useAppearance()
     const { success, error: showError } = useNotification()
     const [loading, setLoading] = useState(false)
     const [waypointLocData, setWaypointLocData] = useState<SimpleLocationData | null>(null)
@@ -1306,6 +1313,9 @@ function CheckpointTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
         end_location: '',
         notes: '',
     })
+
+    const inputCls = `w-full rounded-xl border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 focus:border-blue-500 focus:ring-blue-500/20' : 'bg-slate-50 border-slate-200 focus:bg-white focus:border-blue-400 focus:ring-blue-100'}`
+    const labelCls = `mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`
 
     // Auto location fetch on open
     useEffect(() => {
@@ -1379,8 +1389,6 @@ function CheckpointTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
     const parsedEndKm = form.end_km === '' ? (trip.end_km || trip.start_km) : Number(form.end_km)
     const calcDist = parsedEndKm - (trip.end_km || trip.start_km)
     const validDist = parsedEndKm >= (trip.end_km || trip.start_km)
-    const inputCls = 'w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all'
-    const labelCls = 'mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wide'
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -1413,8 +1421,8 @@ function CheckpointTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
 
     return (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] transition-all duration-300 animate-in fade-in" onClick={onClose}>
-            <div className="w-full max-w-md flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl max-h-[80vh] mt-12 sm:mt-0 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300" onClick={e => e.stopPropagation()}>
-                <div className="bg-cyan-500 rounded-t-3xl px-5 pt-3 pb-4 text-white">
+            <div className={`w-full max-w-md flex flex-col rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[80vh] mt-12 sm:mt-0 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300 ${isDarkMode ? 'bg-slate-900' : 'bg-white'}`} onClick={e => e.stopPropagation()}>
+                <div className={`rounded-t-3xl px-5 pt-3 pb-4 text-white ${isDarkMode ? 'bg-cyan-600 shadow-lg shadow-black/20' : 'bg-cyan-500'}`}>
                     {/* Mobile Handle */}
                     <div className="flex w-full justify-center pb-3 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10">
                         <div className="h-1.5 w-12 rounded-full bg-white/40" />
@@ -1427,16 +1435,16 @@ function CheckpointTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
                         <button onClick={onClose} className="rounded-full bg-white/20 p-1.5 hover:bg-white/30"><X className="h-4 w-4" /></button>
                     </div>
                 </div>
-                <div className="flex-1 overflow-y-auto px-5 py-4">
-                    <div className="mb-4 rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-sm">
+                <div className={`flex-1 overflow-y-auto px-5 py-4 ${isDarkMode ? 'bg-slate-900' : 'bg-white'}`}>
+                    <div className={`mb-4 rounded-xl border px-4 py-3 text-sm ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                         <div className="flex justify-between w-full">
                             <div>
-                                <p className="text-xs text-slate-400">Odo hiện tại</p>
-                                <p className="font-bold text-slate-700">{(trip.end_km || trip.start_km).toLocaleString()} km</p>
+                                <p className={`text-xs ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>Odo hiện tại</p>
+                                <p className={`font-bold ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>{(trip.end_km || trip.start_km).toLocaleString()} km</p>
                             </div>
                             <div className="text-right">
-                                <p className="text-xs text-slate-400">Vị trí hiện tại</p>
-                                <p className="font-bold text-slate-700 truncate max-w-[150px]">{trip.end_location || trip.start_location}</p>
+                                <p className={`text-xs ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>Vị trí hiện tại</p>
+                                <p className={`font-bold truncate max-w-[150px] ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>{trip.end_location || trip.start_location}</p>
                             </div>
                         </div>
                     </div>
@@ -1470,11 +1478,11 @@ function CheckpointTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
                         </div>
                     </form>
                 </div>
-                <div className="px-5 py-4 border-t border-slate-100 flex gap-3">
+                <div className={`px-5 py-4 border-t flex gap-3 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'}`}>
                     <button type="button" onClick={onClose}
-                        className="flex-1 rounded-xl border border-slate-200 bg-slate-50 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100">Hủy</button>
+                        className={`flex-1 rounded-xl border py-3 text-sm font-semibold transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}`}>Hủy</button>
                     <button type="submit" form="checkpoint-form" disabled={loading}
-                        className="flex-[2] flex items-center justify-center gap-2 rounded-xl bg-cyan-500 py-3 text-sm font-bold text-white shadow-lg hover:bg-cyan-600 disabled:opacity-50 active:scale-95 transition-all">
+                        className={`flex-[2] flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white shadow-lg disabled:opacity-50 active:scale-95 transition-all ${isDarkMode ? 'bg-cyan-600 hover:bg-cyan-700' : 'bg-cyan-500 hover:bg-cyan-600'}`}>
                         <MapPin className="h-4 w-4" />
                         Lưu điểm dừng
                     </button>
@@ -1492,6 +1500,7 @@ function CompleteTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
     onClose: () => void
     onSuccess: () => void
 }) {
+    const { isDarkMode } = useAppearance()
     const { success, error: showError } = useNotification()
     const [loading, setLoading] = useState(false)
     const [endLocData, setEndLocData] = useState<SimpleLocationData | null>(null)
@@ -1503,6 +1512,9 @@ function CompleteTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
         end_location: '',
         notes: getTripCleanNotes(stripMeta(trip.notes)),
     })
+
+    const inputCls = `w-full rounded-xl border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 focus:border-blue-500 focus:ring-blue-500/20' : 'bg-slate-50 border-slate-200 focus:bg-white focus:border-blue-400 focus:ring-blue-100'}`
+    const labelCls = `mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`
 
     useEffect(() => {
         let isSubscribed = true;
@@ -1554,8 +1566,6 @@ function CompleteTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
     const parsedEndKm = form.end_km === '' ? (trip.end_km || trip.start_km) : Number(form.end_km)
     const calcDist = parsedEndKm - trip.start_km
     const validDist = parsedEndKm >= (trip.end_km || trip.start_km)
-    const inputCls = 'w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all'
-    const labelCls = 'mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wide'
 
     const handleComplete = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -1583,8 +1593,8 @@ function CompleteTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
 
     return (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] transition-all duration-300 animate-in fade-in" onClick={onClose}>
-            <div className="w-full max-w-md flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl max-h-[80vh] mt-12 sm:mt-0 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300" onClick={e => e.stopPropagation()}>
-                <div className="bg-green-500 rounded-t-3xl px-5 pt-3 pb-4 text-white">
+            <div className={`w-full max-w-md flex flex-col rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[80vh] mt-12 sm:mt-0 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300 ${isDarkMode ? 'bg-slate-900' : 'bg-white'}`} onClick={e => e.stopPropagation()}>
+                <div className={`rounded-t-3xl px-5 pt-3 pb-4 text-white ${isDarkMode ? 'bg-emerald-600 shadow-lg shadow-black/20' : 'bg-green-500'}`}>
                     {/* Mobile Handle */}
                     <div className="flex w-full justify-center pb-3 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10">
                         <div className="h-1.5 w-12 rounded-full bg-white/40" />
@@ -1605,18 +1615,18 @@ function CompleteTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
                         )}
                     </div>
                 </div>
-                <div className="flex-1 overflow-y-auto px-5 py-4">
-                    <div className="mb-4 rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
-                        <p className="text-xs font-semibold text-slate-500 mb-1.5">Điểm xuất phát (đã lưu)</p>
+                <div className={`flex-1 overflow-y-auto px-5 py-4 ${isDarkMode ? 'bg-slate-900' : 'bg-white'}`}>
+                    <div className={`mb-4 rounded-xl border px-4 py-3 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                        <p className={`text-xs font-semibold mb-1.5 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Điểm xuất phát (đã lưu)</p>
                         <div className="flex gap-6 text-sm">
                             <div>
-                                <p className="text-xs text-slate-400">Odo bắt đầu</p>
-                                <p className="font-bold text-slate-700">{trip.start_km.toLocaleString()} km</p>
+                                <p className="text-xs text-slate-500/60">Odo bắt đầu</p>
+                                <p className={`font-bold ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>{trip.start_km.toLocaleString()} km</p>
                             </div>
                             {trip.start_location && (
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-xs text-slate-400">Địa điểm</p>
-                                    <p className="font-bold text-slate-700 truncate">{trip.start_location}</p>
+                                    <p className="text-xs text-slate-500/60">Địa điểm</p>
+                                    <p className={`font-bold truncate ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>{trip.start_location}</p>
                                 </div>
                             )}
                         </div>
@@ -1628,9 +1638,9 @@ function CompleteTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
                                 onChange={e => setForm({ ...form, end_km: e.target.value })}
                                 placeholder={`(Tùy chọn) Bỏ trống = ${(trip.end_km || trip.start_km).toLocaleString()}`} className={inputCls} />
                             {validDist && (
-                                <div className="mt-2 flex items-center justify-between rounded-xl bg-green-50 border border-green-200 px-3 py-2">
-                                    <span className="text-xs font-medium text-green-700">Quãng đường di chuyển</span>
-                                    <span className="text-base font-black text-green-600">{calcDist.toLocaleString()} km</span>
+                                <div className={`mt-2 flex items-center justify-between rounded-xl border px-3 py-2 ${isDarkMode ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-green-50 border-green-200'}`}>
+                                    <span className={`text-xs font-medium ${isDarkMode ? 'text-emerald-400' : 'text-green-700'}`}>Quãng đường di chuyển</span>
+                                    <span className={`text-base font-black ${isDarkMode ? 'text-emerald-300' : 'text-green-600'}`}>{calcDist.toLocaleString()} km</span>
                                 </div>
                             )}
                         </div>
@@ -1647,11 +1657,11 @@ function CompleteTripModal({ vehicle: _vehicle, trip, onClose, onSuccess }: {
                         </div>
                     </form>
                 </div>
-                <div className="px-5 py-4 border-t border-slate-100 flex gap-3">
+                <div className={`px-5 py-4 border-t flex gap-3 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'}`}>
                     <button type="button" onClick={onClose}
-                        className="flex-1 rounded-xl border border-slate-200 bg-slate-50 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100">Hủy</button>
+                        className={`flex-1 rounded-xl border py-3 text-sm font-semibold transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}`}>Hủy</button>
                     <button type="submit" form="complete-trip-form" disabled={loading}
-                        className="flex-[2] flex items-center justify-center gap-2 rounded-xl bg-green-500 py-3 text-sm font-bold text-white shadow-lg hover:bg-green-600 disabled:opacity-50 active:scale-95 transition-all">
+                        className={`flex-[2] flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white shadow-lg disabled:opacity-50 active:scale-95 transition-all ${isDarkMode ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-green-500 hover:bg-green-600'}`}>
                         <CheckCircle2 className="h-4 w-4" />
                         Hoàn tất lộ trình
                     </button>

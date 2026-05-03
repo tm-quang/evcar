@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Home, Settings, LayoutList, Zap } from 'lucide-react'
 import { LuClipboardPen } from 'react-icons/lu'
 import { useAppearance } from '../../contexts/AppearanceContext'
+import { VehicleFooterNavPill } from './VehicleFooterNavPill'
 
 type VehicleFooterNavProps = {
     onAddClick?: () => void
@@ -25,9 +26,31 @@ export function VehicleFooterNav({
 }: VehicleFooterNavProps) {
     const navigate = useNavigate()
     const location = useLocation()
-    const { isDarkMode } = useAppearance()
+    const { isDarkMode, navStyle } = useAppearance()
     const [addAnimating, setAddAnimating] = useState(false)
     const [animatingTab, setAnimatingTab] = useState<string | null>(null)
+
+    const [isVisible, setIsVisible] = useState(true)
+
+    // Auto-hide when modals are open
+    useEffect(() => {
+        const checkModals = () => {
+            const overlays = document.querySelectorAll('.fixed.inset-0, [class*="backdrop-blur"], [class*="z-50"], [class*="z-[60]"], [class*="z-[9999]"], [role="dialog"]')
+            const activeModals = Array.from(overlays).filter(el => {
+                if (el.classList.contains('footer-nav-container') || el.querySelector('.footer-nav-container')) return false
+                const style = window.getComputedStyle(el)
+                const zIndex = parseInt(style.zIndex) || 0
+                return style.display !== 'none' && parseFloat(style.opacity) > 0 && zIndex >= 50 && el.getBoundingClientRect().width > 100
+            })
+            setIsVisible(activeModals.length === 0)
+        }
+
+        const observer = new MutationObserver(checkModals)
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] })
+        checkModals()
+        const interval = setInterval(checkModals, 500)
+        return () => { observer.disconnect(); clearInterval(interval) }
+    }, [])
 
     useEffect(() => {
         if (location.state?.animateTab) {
@@ -82,8 +105,16 @@ export function VehicleFooterNav({
         }
     }
 
+    if (navStyle === 'pill') {
+        return <VehicleFooterNavPill onAddClick={onAddClick} addLabel={addLabel} />
+    }
+
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none">
+        <div className={`
+            fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none footer-nav-container
+            transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1)
+            ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-24 opacity-0 pointer-events-none'}
+        `}>
             <div className="relative w-full max-w-md pointer-events-auto">
 
                 {/* Center Add Button */}

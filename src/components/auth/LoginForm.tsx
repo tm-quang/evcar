@@ -1,5 +1,5 @@
 import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react'
-import { FaEye, FaEyeSlash, FaLock, FaEnvelope, FaCheckCircle } from 'react-icons/fa'
+import { FaEye, FaEyeSlash, FaLock, FaUser, FaCheckCircle } from 'react-icons/fa'
 
 import { getSupabaseClient } from '../../lib/supabaseClient'
 import { useNotification } from '../../contexts/notificationContext.helpers'
@@ -78,10 +78,40 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
     try {
       const supabase = getSupabaseClient()
 
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email: formData.email.trim(),
+      const identifier = formData.email.trim();
+      const isEmail = identifier.includes('@');
+
+      let loginEmail = identifier;
+
+      // Nếu là số điện thoại, tìm email tương ứng trong bảng profiles để đăng nhập "miễn phí"
+      if (!isEmail && /^[0-9+\-\s()]+$/.test(identifier)) {
+        const phoneClean = identifier.replace(/[\s()-]/g, '');
+        console.log('🔍 Đang tìm email cho SĐT:', phoneClean);
+
+        const { data: profile, error: pError } = await supabase
+          .from('profiles')
+          .select('email')
+          .or(`phone.eq.${phoneClean},phone.eq.0${phoneClean.slice(-9)},phone.eq.+84${phoneClean.slice(-9)}`)
+          .maybeSingle();
+
+        if (pError) {
+          console.error('❌ Lỗi truy vấn dữ liệu:', pError.message);
+        }
+
+        if (profile?.email) {
+          console.log('✅ Tìm thấy email liên kết:', profile.email);
+          loginEmail = profile.email;
+        } else {
+          console.warn('⚠️ Không tìm thấy email liên kết với SĐT này.');
+        }
+      }
+
+      const res = await supabase.auth.signInWithPassword({
+        email: loginEmail,
         password: formData.password,
-      })
+      });
+
+      const { data, error: authError } = res;
 
       // Log full response để debug
       console.log('Login response:', { data: data ? 'session exists' : 'no session', error: authError })
@@ -99,7 +129,7 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
 
       // Kiểm tra xem có session không
       if (!data?.session) {
-        throw new Error('Đăng nhập thất bại. Không nhận được session.')
+        throw new Error('Đăng nhập thất bại.')
       }
 
       // Update auth singleton TRƯỚC KHI navigate để ProtectedRoute thấy user ngay
@@ -176,16 +206,16 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
         <div className="space-y-2">
           <div className="relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-              <FaEnvelope className="h-5 w-5 text-slate-400" />
+              <FaUser className="h-5 w-5 text-slate-400" />
             </div>
             <input
               id="email"
               name="email"
-              type="email"
+              type="text"
               required
               autoComplete="username"
               className="block w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 transition-all focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
-              placeholder="Nhập địa chỉ Email"
+              placeholder="Nhập Email hoặc Số điện thoại"
               value={formData.email}
               onChange={(e) => { handleChange('email')(e); setHasRememberedCredentials(false) }}
             />

@@ -8,13 +8,14 @@ import {
 import { createExpense, deleteExpense, type VehicleRecord } from '../../lib/ev/vehicleService'
 import { useVehicles, useVehicleExpenses, vehicleKeys } from '../../lib/ev/useVehicleQueries'
 import { useQueryClient } from '@tanstack/react-query'
+import { useVehicleStore } from '../../store/useVehicleStore'
+import { NumberPadModal } from '../../components/ui/NumberPadModal'
+import { useAppearance } from '../../contexts/AppearanceContext'
 import { useNotification } from '../../contexts/notificationContext.helpers'
 import HeaderBar from '../../components/layout/HeaderBar'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { LoadingOverlay } from '../../components/ui/LoadingOverlay'
 import { VehicleFooterNav } from '../../components/ev/VehicleFooterNav'
-import { useVehicleStore } from '../../store/useVehicleStore'
-import { NumberPadModal } from '../../components/ui/NumberPadModal'
 
 const fmt = (v: number) =>
     new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 0 }).format(v) + ' đ'
@@ -90,14 +91,21 @@ export default function VehicleExpenses() {
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
     const [deleting, setDeleting] = useState(false)
     const [expandedId, setExpandedId] = useState<string | null>(null)
-    const [filterType, setFilterType] = useState<string>('all')
     const [filterPeriod, setFilterPeriod] = useState<FilterPeriod>('month')
-    const [periodOffset] = useState(0) // Still maintain this but inside the UI maybe simplified
+    const [periodOffset] = useState(0)
+    const [filterType, setFilterType] = useState<string>('all')
+    const { isDarkMode } = useAppearance()
 
-    const effectiveId = selectedVehicleId || vehicles.find(v => v.is_default)?.id || vehicles[0]?.id || ''
-    const { data: logs = [], isLoading: loading } = useVehicleExpenses(effectiveId || undefined)
+    const effectiveId = selectedVehicleId || vehicles[0]?.id
+    const { data: logs = [], isLoading: loading } = useVehicleExpenses(effectiveId)
     const selectedVehicle = vehicles.find(v => v.id === effectiveId)
     const isMoto = selectedVehicle?.vehicle_type === 'motorcycle'
+
+    const cardClass = isDarkMode
+        ? 'bg-[#1E293B] border-slate-700 shadow-none'
+        : 'bg-white border-slate-100 shadow-md'
+    const textPrimary = isDarkMode ? 'text-slate-100' : 'text-slate-900'
+    const textSecondary = isDarkMode ? 'text-slate-400' : 'text-slate-500'
 
     // Stats tổng
     const totalCost = useMemo(() => logs.reduce((s, l) => s + l.amount, 0), [logs])
@@ -152,14 +160,18 @@ export default function VehicleExpenses() {
     const appliedFilterCount = (filterPeriod !== 'month' ? 1 : 0) + (filterType !== 'all' ? 1 : 0)
 
     return (
-        <div className="flex h-screen flex-col overflow-hidden text-slate-900" style={{ backgroundColor: 'var(--app-home-bg)' }}>
+        <div className={`flex h-screen flex-col overflow-hidden ${textPrimary} transition-colors duration-500`} style={{ backgroundColor: isDarkMode ? '#0F172A' : '#F8FAFC' }}>
             <HeaderBar
                 variant="page"
                 title="Chi Phí Khác"
                 customContent={
                     <button
                         onClick={() => setShowFilterModal(true)}
-                        className={`relative flex items-center justify-center rounded-full p-2 shadow-sm transition-all active:scale-95 ${appliedFilterCount > 0 ? 'bg-rose-100 text-rose-600 border border-rose-200' : 'bg-white text-slate-600 border border-slate-200'}`}
+                        className={`relative flex items-center justify-center rounded-full p-2 transition-all active:scale-95 ${
+                            appliedFilterCount > 0 
+                                ? 'bg-rose-100 text-rose-600 border border-rose-200' 
+                                : `${isDarkMode ? 'bg-slate-800 text-slate-300 border-slate-700' : 'bg-white text-slate-600 border-slate-200 shadow-sm'}`
+                        }`}
                     >
                         <Filter className="h-5 w-5" />
                         {appliedFilterCount > 0 && (
@@ -176,8 +188,8 @@ export default function VehicleExpenses() {
                 {/* ── Hero Stats Card ───────────────────────────────────── */}
                 {selectedVehicle && (
                     <div className="mb-4 space-y-3">
-                        {/* Main card - solid blue */}
-                        <div className="rounded-3xl bg-rose-500 p-5 text-white shadow-lg shadow-rose-200 overflow-hidden relative">
+                        {/* Main card - solid rose */}
+                        <div className={`rounded-3xl bg-rose-500 p-5 text-white shadow-lg ${isDarkMode ? 'shadow-none' : 'shadow-rose-200'} overflow-hidden relative`}>
                             {/* Decorative background shapes */}
                             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
                             <div className="absolute bottom-0 left-0 w-24 h-24 bg-rose-400/50 rounded-full translate-y-1/2 -translate-x-1/2 blur-xl"></div>
@@ -207,28 +219,28 @@ export default function VehicleExpenses() {
 
                         {/* Mini stats row */}
                         <div className="grid grid-cols-3 gap-2.5">
-                            <div className="flex flex-col items-center justify-center rounded-2xl bg-white p-3.5 shadow-md shadow-slate-200/60 border border-slate-100">
-                                <div className="mb-2 rounded-full bg-blue-50 p-2">
-                                    <Activity className="h-4 w-4 text-blue-500" />
+                            <div className={`flex flex-col items-center justify-center rounded-2xl p-3.5 ${cardClass}`}>
+                                <div className={`mb-2 rounded-full p-2 ${isDarkMode ? 'bg-blue-500/10' : 'bg-blue-50'}`}>
+                                    <Activity className={`h-4 w-4 ${isDarkMode ? 'text-blue-400' : 'text-blue-500'}`} />
                                 </div>
-                                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-0.5">Tháng này</p>
-                                <p className="text-base font-black text-slate-800">{thisMonthLogs.length}</p>
+                                <p className={`text-[10px] uppercase font-bold tracking-wider mb-0.5 ${textSecondary}`}>Tháng này</p>
+                                <p className={`text-base font-black ${textPrimary}`}>{thisMonthLogs.length}</p>
                             </div>
-                            <div className="flex flex-col items-center justify-center rounded-2xl bg-white p-3.5 shadow-md shadow-slate-200/60 border border-slate-100">
-                                <div className="mb-2 rounded-full bg-green-50 p-2">
-                                    <TrendingUp className="h-4 w-4 text-green-500" />
+                            <div className={`flex flex-col items-center justify-center rounded-2xl p-3.5 ${cardClass}`}>
+                                <div className={`mb-2 rounded-full p-2 ${isDarkMode ? 'bg-green-500/10' : 'bg-green-50'}`}>
+                                    <TrendingUp className={`h-4 w-4 ${isDarkMode ? 'text-green-400' : 'text-green-500'}`} />
                                 </div>
-                                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-0.5">Chi tháng</p>
-                                <p className="text-base font-black text-slate-800">
+                                <p className={`text-[10px] uppercase font-bold tracking-wider mb-0.5 ${textSecondary}`}>Chi tháng</p>
+                                <p className={`text-base font-black ${textPrimary}`}>
                                     {thisMonthCost > 0 ? `${Math.round(thisMonthCost / 1000)}k` : '--'}
                                 </p>
                             </div>
-                            <div className="flex flex-col items-center justify-center rounded-2xl bg-white p-3.5 shadow-md shadow-slate-200/60 border border-slate-100">
-                                <div className="mb-2 rounded-full bg-sky-50 p-2">
-                                    <Receipt className="h-4 w-4 text-sky-500" />
+                            <div className={`flex flex-col items-center justify-center rounded-2xl p-3.5 ${cardClass}`}>
+                                <div className={`mb-2 rounded-full p-2 ${isDarkMode ? 'bg-sky-500/10' : 'bg-sky-50'}`}>
+                                    <Receipt className={`h-4 w-4 ${isDarkMode ? 'text-sky-400' : 'text-sky-500'}`} />
                                 </div>
-                                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-0.5">TB/khoản</p>
-                                <p className="text-base font-black text-slate-800">
+                                <p className={`text-[10px] uppercase font-bold tracking-wider mb-0.5 ${textSecondary}`}>TB/khoản</p>
+                                <p className={`text-base font-black ${textPrimary}`}>
                                     {avgCost > 0 ? `${Math.round(avgCost / 1000)}k` : '--'}
                                 </p>
                             </div>
@@ -239,21 +251,21 @@ export default function VehicleExpenses() {
                 {/* ── Filter Result Bar (Chỉ hiển thị khi đang lọc) ───────────────────────────────────────── */}
                 <div className="mb-4">
                     {(filterPeriod !== 'all' || filterType !== 'all') ? (
-                        <div className="flex items-center justify-between rounded-xl bg-rose-50/80 border border-rose-100 px-4 py-3 shadow-sm shadow-rose-100/50">
+                        <div className={`flex items-center justify-between rounded-xl px-4 py-3 shadow-sm ${isDarkMode ? 'bg-rose-900/20 border border-rose-900/30 text-rose-300 shadow-none' : 'bg-rose-50/80 border border-rose-100 text-rose-800 shadow-rose-100/50'}`}>
                             <div className="flex flex-col">
-                                <span className="text-xs font-semibold text-rose-800 mb-0.5">
+                                <span className={`text-xs font-semibold mb-0.5 ${isDarkMode ? 'text-rose-300' : 'text-rose-800'}`}>
                                     {filterPeriod !== 'all' ? periodRange.label : 'Tất cả thời gian'}
                                     {filterType !== 'all' && ` • ${EXPENSE_TYPES[filterType]?.label || 'Khác'}`}
                                 </span>
-                                <span className="text-[11px] text-rose-600/80">
+                                <span className={`text-[11px] ${isDarkMode ? 'text-rose-400/60' : 'text-rose-600/80'}`}>
                                     Tìm thấy <span className="font-bold">{periodFilteredLogs.length}</span> giao dịch
                                 </span>
                             </div>
-                            <span className="text-base font-black text-rose-700">{fmt(periodTotalCost)}</span>
+                            <span className={`text-base font-black ${isDarkMode ? 'text-rose-400' : 'text-rose-700'}`}>{fmt(periodTotalCost)}</span>
                         </div>
                     ) : periodFilteredLogs.length > 0 ? (
                         <div className="flex items-center gap-2 mb-2">
-                            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Tất cả chi phí</h3>
+                            <h3 className={`text-sm font-bold uppercase tracking-wide ${textPrimary}`}>Tất cả chi phí</h3>
                         </div>
                     ) : null}
                 </div>
@@ -262,26 +274,26 @@ export default function VehicleExpenses() {
                 {loading ? (
                     <div className="space-y-3">
                         {[1, 2, 3].map(i => (
-                            <div key={i} className="animate-pulse flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm border border-slate-100">
-                                <div className="h-12 w-12 rounded-xl bg-slate-100 shrink-0" />
+                            <div key={i} className={`animate-pulse flex items-center gap-3 rounded-2xl p-3 border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100 shadow-sm'}`}>
+                                <div className={`h-12 w-12 rounded-xl shrink-0 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-100'}`} />
                                 <div className="flex-1 space-y-2">
-                                    <div className="h-4 w-1/2 rounded bg-slate-100" />
-                                    <div className="h-3 w-1/3 rounded bg-slate-50" />
+                                    <div className={`h-4 w-1/2 rounded ${isDarkMode ? 'bg-slate-700' : 'bg-slate-100'}`} />
+                                    <div className={`h-3 w-1/3 rounded ${isDarkMode ? 'bg-slate-700/50' : 'bg-slate-50'}`} />
                                 </div>
                             </div>
                         ))}
                     </div>
                 ) : periodFilteredLogs.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center rounded-3xl bg-white border border-slate-100 py-14 shadow-sm">
-                        <div className="mb-4 rounded-full bg-slate-50 p-6">
-                            <Receipt className="h-10 w-10 text-slate-300" />
+                    <div className={`flex flex-col items-center justify-center rounded-3xl py-14 ${cardClass}`}>
+                        <div className={`mb-4 rounded-full p-6 ${isDarkMode ? 'bg-slate-700/50' : 'bg-slate-50'}`}>
+                            <Receipt className={`h-10 w-10 ${isDarkMode ? 'text-slate-600' : 'text-slate-300'}`} />
                         </div>
-                        <p className="font-semibold text-slate-600">
+                        <p className={`font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                             {filterPeriod === 'all' && filterType === 'all'
                                 ? 'Chưa có chi phí nào'
                                 : 'Không tìm thấy chi phí'}
                         </p>
-                        <p className="mt-1 text-sm text-slate-400 text-center px-6">
+                        <p className={`mt-1 text-sm text-center px-6 ${textSecondary}`}>
                             {(filterPeriod !== 'all' || filterType !== 'all')
                                 ? 'Thử thay đổi bộ lọc hoặc chọn khu vực thời gian khác'
                                 : 'Các chi phí phát sinh như gửi xe, rửa xe sẽ hiển thị ở đây'}
@@ -289,7 +301,7 @@ export default function VehicleExpenses() {
                         {(filterPeriod !== 'all' || filterType !== 'all') && (
                             <button
                                 onClick={() => { setFilterPeriod('all'); setFilterType('all'); }}
-                                className="mt-4 text-sm font-bold text-rose-500 hover:text-rose-600 px-4 py-2 bg-rose-50 rounded-xl"
+                                className={`mt-4 text-sm font-bold px-4 py-2 rounded-xl transition-all ${isDarkMode ? 'text-rose-400 bg-rose-500/10 hover:bg-rose-500/20' : 'text-rose-500 bg-rose-50 hover:text-rose-600'}`}
                             >
                                 Xóa bộ lọc
                             </button>
@@ -322,7 +334,11 @@ export default function VehicleExpenses() {
                                             const isExpanded = expandedId === log.id
                                             return (
                                                 <div key={log.id}
-                                                    className={`overflow-hidden rounded-2xl bg-white shadow-md shadow-slate-200/50 border transition-all ${isExpanded ? 'border-slate-300 shadow-lg shadow-slate-300/50 scale-[1.01]' : 'border-slate-100 hover:border-slate-200'} `}>
+                                                    className={`overflow-hidden rounded-2xl transition-all border ${
+                                                        isExpanded 
+                                                            ? `${isDarkMode ? 'border-slate-500 bg-slate-800 scale-[1.01] shadow-xl shadow-black/20' : 'border-slate-300 bg-white scale-[1.01] shadow-lg shadow-slate-300/50'}` 
+                                                            : `${isDarkMode ? 'border-slate-700 bg-[#1E293B] hover:border-slate-600' : 'border-slate-100 bg-white shadow-md shadow-slate-200/50 hover:border-slate-200'}`
+                                                    } `}>
 
                                                     <button
                                                         onClick={() => setExpandedId(isExpanded ? null : log.id)}
@@ -332,29 +348,29 @@ export default function VehicleExpenses() {
                                                         <div className={`absolute left-0 top-3 bottom-3 w-1 rounded-r-full ${t.accentBar}`} />
 
                                                         {/* Icon */}
-                                                        <div className={`flex items-center justify-center p-2.5 rounded-xl ml-2 ${t.bg}`}>
-                                                            {t.label === 'Gửi xe' ? <MapPin className={`h-4 w-4 ${t.text}`} />
-                                                                : t.label === 'Rửa xe' ? <Activity className={`h-4 w-4 ${t.text}`} />
-                                                                    : <Receipt className={`h-4 w-4 ${t.text}`} />}
+                                                        <div className={`flex items-center justify-center p-2.5 rounded-xl ml-2 transition-colors ${isDarkMode ? 'bg-slate-700/50' : t.bg}`}>
+                                                            {t.label === 'Gửi xe' ? <MapPin className={`h-4 w-4 ${isDarkMode ? 'text-blue-400' : t.text}`} />
+                                                                : t.label === 'Rửa xe' ? <Activity className={`h-4 w-4 ${isDarkMode ? 'text-cyan-400' : t.text}`} />
+                                                                    : <Receipt className={`h-4 w-4 ${isDarkMode ? 'text-rose-400' : t.text}`} />}
                                                         </div>
 
                                                         {/* Info */}
                                                         <div className="ml-3 flex-1 min-w-0">
                                                             <div className="flex items-center gap-2 mb-0.5">
-                                                                <span className="text-sm font-bold text-slate-800">{t.label}</span>
+                                                                <span className={`text-sm font-bold ${textPrimary}`}>{t.label}</span>
                                                             </div>
                                                             <div className="flex items-center gap-1.5 text-xs text-slate-500">
                                                                 {log.description ? (
-                                                                    <span className="truncate max-w-[140px]">{log.description}</span>
+                                                                    <span className="truncate max-w-[140px] opacity-80">{log.description}</span>
                                                                 ) : (
-                                                                    <span>Tùy chọn khác</span>
+                                                                    <span className="opacity-60">Tùy chọn khác</span>
                                                                 )}
                                                             </div>
                                                         </div>
 
                                                         {/* Amount */}
                                                         <div className="flex flex-col items-end shrink-0 ml-2">
-                                                            <span className={`text-sm font-black ${t.text}`}>{fmt(log.amount)}</span>
+                                                            <span className={`text-sm font-black ${isDarkMode ? 'text-rose-400' : t.text}`}>{fmt(log.amount)}</span>
                                                             {isExpanded
                                                                 ? <span className="text-[10px] text-slate-400 mt-1 uppercase tracking-wide flex items-center gap-1">Đóng <ChevronUp className="h-3 w-3" /></span>
                                                                 : <span className="text-[10px] text-slate-400 mt-1 uppercase tracking-wide flex items-center gap-1">Chi tiết <ChevronDown className="h-3 w-3" /></span>}
@@ -363,27 +379,31 @@ export default function VehicleExpenses() {
 
                                                     {isExpanded && (
                                                         <div className="px-3 pb-3 pt-0">
-                                                            <div className="rounded-xl bg-slate-50 p-3 space-y-2.5">
+                                                            <div className={`rounded-xl p-3 space-y-2.5 ${isDarkMode ? 'bg-slate-700/50' : 'bg-slate-50'}`}>
                                                                 {log.description && (
                                                                     <div className="flex items-start gap-2">
                                                                         <FileText className="h-3.5 w-3.5 text-slate-400 mt-0.5 shrink-0" />
-                                                                        <p className="text-xs font-medium text-slate-700">{log.description}</p>
+                                                                        <p className={`text-xs font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{log.description}</p>
                                                                     </div>
                                                                 )}
                                                                 {log.location && (
                                                                     <div className="flex items-start gap-2">
                                                                         <MapPin className="h-3.5 w-3.5 text-blue-400 mt-0.5 shrink-0" />
-                                                                        <p className="text-xs font-medium text-slate-700">{log.location}</p>
+                                                                        <p className={`text-xs font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{log.location}</p>
                                                                     </div>
                                                                 )}
                                                                 {log.notes && (
-                                                                    <p className="text-xs text-slate-400 italic border-t border-slate-200/60 pt-2 mt-2">Ghi chú: {log.notes}</p>
+                                                                    <p className={`text-xs italic border-t pt-2 mt-2 ${isDarkMode ? 'text-slate-400 border-slate-600' : 'text-slate-400 border-slate-200/60'}`}>Ghi chú: {log.notes}</p>
                                                                 )}
 
-                                                                <div className="flex justify-end pt-1 mt-1 border-t border-red-100/50">
+                                                                <div className={`flex justify-end pt-1 mt-1 border-t ${isDarkMode ? 'border-slate-600' : 'border-red-100/50'}`}>
                                                                     <button
                                                                         onClick={() => setDeleteConfirmId(log.id)}
-                                                                        className="flex items-center justify-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-red-500 hover:bg-red-50 hover:text-red-600 transition-all shadow-sm border border-red-100"
+                                                                        className={`flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all border ${
+                                                                            isDarkMode 
+                                                                                ? 'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20' 
+                                                                                : 'bg-white text-red-500 hover:bg-red-50 hover:text-red-600 shadow-sm border-red-100'
+                                                                        }`}
                                                                     >
                                                                         <Trash2 className="h-3.5 w-3.5" /> Xóa
                                                                     </button>
@@ -404,7 +424,7 @@ export default function VehicleExpenses() {
                 <div className="h-[120px] w-full flex-shrink-0"></div>
             </main>
 
-            <VehicleFooterNav onAddClick={() => setShowAddModal(true)} addLabel="Chi phí" isElectricVehicle={selectedVehicle?.fuel_type === 'electric'} />
+
 
             {/* Filter Modal */}
             <FilterModal
@@ -437,31 +457,41 @@ export default function VehicleExpenses() {
                 cancelText="Hủy"
                 isLoading={deleting}
             />
+
+            <VehicleFooterNav
+                onAddClick={() => setShowAddModal(true)}
+                addLabel="Chi phí"
+            />
         </div>
     )
 }
 
 // ─── Filter Modal ───────────────────────────────────────────────────────────
 function FilterModal({
-    isOpen, onClose,
-    filterType, setFilterType,
-    filterPeriod, setFilterPeriod
+    isOpen,
+    onClose,
+    filterType,
+    setFilterType,
+    filterPeriod,
+    setFilterPeriod,
 }: {
     isOpen: boolean
     onClose: () => void
     filterType: string
-    setFilterType: (v: string) => void
-    filterPeriod: FilterPeriod
-    setFilterPeriod: (v: FilterPeriod) => void
+    setFilterType: (type: any) => void
+    filterPeriod: string
+    setFilterPeriod: (period: any) => void
 }) {
+    const { isDarkMode } = useAppearance()
+
     if (!isOpen) return null
 
     return (
         <div className="fixed inset-0 z-50 flex flex-col justify-end bg-black/60 backdrop-blur-[3px] transition-all duration-300 animate-in fade-in sm:items-center sm:justify-center" onClick={onClose}>
-            <div className="w-full rounded-t-3xl bg-white shadow-2xl sm:max-w-md max-h-[80vh] flex flex-col sm:rounded-3xl p-5 mb-0 sm:mb-8 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300" onClick={e => e.stopPropagation()}>
+            <div className={`w-full rounded-t-3xl shadow-2xl sm:max-w-md max-h-[80vh] flex flex-col sm:rounded-3xl p-5 mb-0 sm:mb-8 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300 ${isDarkMode ? 'bg-slate-900 border border-slate-700' : 'bg-white'}`} onClick={e => e.stopPropagation()}>
                 <div className="mb-4 flex items-center justify-between shrink-0">
-                    <h3 className="text-lg font-bold text-slate-800">Bộ lọc chi phí</h3>
-                    <button onClick={onClose} className="rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200">
+                    <h3 className={`text-lg font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>Bộ lọc chi phí</h3>
+                    <button onClick={onClose} className={`rounded-full p-2 transition-colors ${isDarkMode ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
                         <X className="h-4 w-4" />
                     </button>
                 </div>
@@ -475,8 +505,8 @@ function FilterModal({
                                 <button key={tab.id} type="button"
                                     onClick={() => setFilterPeriod(tab.id)}
                                     className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all flex items-center gap-1.5 ${filterPeriod === tab.id
-                                        ? 'bg-rose-500 text-white shadow-md shadow-rose-200'
-                                        : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
+                                        ? 'bg-rose-500 text-white shadow-md'
+                                        : `${isDarkMode ? 'bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700' : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'}`
                                         }`}>
                                     {filterPeriod === tab.id && <Check className="h-3.5 w-3.5" />}
                                     {tab.label}
@@ -491,16 +521,16 @@ function FilterModal({
                         <div className="flex flex-wrap gap-2">
                             <button onClick={() => setFilterType('all')}
                                 className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all flex items-center gap-1.5 ${filterType === 'all'
-                                    ? 'bg-rose-500 text-white shadow-md shadow-rose-200'
-                                    : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'}`}>
+                                    ? 'bg-rose-500 text-white shadow-md'
+                                    : `${isDarkMode ? 'bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700' : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'}`}`}>
                                 {filterType === 'all' && <Check className="h-3.5 w-3.5" />}
                                 Tất cả
                             </button>
-                            {Object.entries(EXPENSE_TYPES).map(([key, t]) => (
+                             {Object.entries(EXPENSE_TYPES).map(([key, t]) => (
                                 <button key={key} onClick={() => setFilterType(key)}
                                     className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all flex items-center gap-1.5 ${filterType === key
-                                        ? `${t.bg} ${t.text} border-transparent ring-2 ring-current ring-opacity-20`
-                                        : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'}`}>
+                                        ? (isDarkMode ? 'bg-rose-500 text-white shadow-md' : `${t.bg} ${t.text} border-transparent ring-2 ring-current ring-opacity-20`)
+                                        : `${isDarkMode ? 'bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700' : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'}`}`}>
                                     {filterType === key && <Check className="h-3.5 w-3.5" />}
                                     {t.label}
                                 </button>
@@ -511,11 +541,11 @@ function FilterModal({
 
                 <div className="mt-8 flex gap-3 shrink-0">
                     <button onClick={() => { setFilterType('all'); setFilterPeriod('month'); }}
-                        className="flex-1 rounded-2xl border-2 border-slate-200 bg-white py-3.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all">
+                        className={`flex-1 rounded-2xl border-2 py-3.5 text-sm font-bold transition-all ${isDarkMode ? 'border-slate-700 bg-slate-800 text-slate-400 hover:bg-slate-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>
                         Đặt lại bộ lọc
                     </button>
                     <button onClick={onClose}
-                        className="flex-1 rounded-2xl bg-rose-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-rose-200 hover:bg-rose-700 active:scale-95 transition-all">
+                        className={`flex-1 rounded-2xl bg-rose-600 py-3.5 text-sm font-bold text-white shadow-lg transition-all hover:bg-rose-700 active:scale-95 ${isDarkMode ? 'shadow-none' : 'shadow-rose-200'}`}>
                         Xem kết quả
                     </button>
                 </div>
@@ -530,6 +560,7 @@ function AddExpenseModal({ vehicle, onClose, onSuccess }: {
     onClose: () => void
     onSuccess: () => void
 }) {
+    const { isDarkMode } = useAppearance()
     const { success, error: showError } = useNotification()
     const [loading, setLoading] = useState(false)
     const [isNumberPadOpen, setIsNumberPadOpen] = useState(false)
@@ -576,19 +607,19 @@ function AddExpenseModal({ vehicle, onClose, onSuccess }: {
     return (
         <>
             <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] transition-all duration-300 animate-in fade-in" onClick={onClose}>
-                <div className="w-full max-w-md max-h-[80vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl mt-12 sm:mt-0 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300 border border-slate-100/50" onClick={e => e.stopPropagation()}>
+                <div className={`w-full max-w-md max-h-[80vh] flex flex-col rounded-t-3xl sm:rounded-3xl shadow-2xl mt-12 sm:mt-0 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300 border ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100/50'}`} onClick={e => e.stopPropagation()}>
                     {/* Header */}
-                    <div className="bg-white px-5 pt-4 pb-3 border-b border-slate-100 relative">
+                    <div className={`px-5 pt-4 pb-3 border-b relative ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'}`}>
                         {/* Mobile Handle */}
-                        <div className="absolute top-2 left-1/2 -translate-x-1/2 h-1.5 w-12 rounded-full bg-slate-200 sm:hidden" />
+                        <div className={`absolute top-2 left-1/2 -translate-x-1/2 h-1.5 w-12 rounded-full sm:hidden ${isDarkMode ? 'bg-slate-800' : 'bg-slate-200'}`} />
 
                         <div className="flex items-center justify-between mt-2">
-                            <h3 className="text-lg font-black text-slate-800 tracking-tight">Thêm chi phí xe</h3>
-                            <button onClick={onClose} className="rounded-full bg-slate-100 p-2 hover:bg-slate-200 text-slate-500 transition-colors">
+                            <h3 className={`text-lg font-black tracking-tight ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>Thêm chi phí xe</h3>
+                            <button onClick={onClose} className={`rounded-full p-2 transition-colors ${isDarkMode ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
                                 <X className="h-4 w-4" />
                             </button>
                         </div>
-                        <p className="text-xs font-medium text-slate-500 mt-1 flex items-center gap-1.5">
+                        <p className={`text-xs font-medium mt-1 flex items-center gap-1.5 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                             <span className="w-2 h-2 rounded-full bg-blue-500"></span>
                             {selectedType.label} • {vehicle.license_plate}
                         </p>
@@ -601,12 +632,15 @@ function AddExpenseModal({ vehicle, onClose, onSuccess }: {
                             <button
                                 type="button"
                                 onClick={() => setIsNumberPadOpen(true)}
-                                className={`w-full relative flex items-center justify-between rounded-2xl border-2 px-4 py-4 text-left transition-all ${!form.amount ? 'border-orange-300 bg-orange-50/50' : 'border-rose-500 bg-rose-50'}`}
+                                className={`w-full relative flex items-center justify-between rounded-2xl border-2 px-4 py-4 text-left transition-all ${
+                                    !form.amount 
+                                        ? (isDarkMode ? 'border-orange-500/30 bg-orange-500/10' : 'border-orange-300 bg-orange-50/50') 
+                                        : 'border-rose-500 bg-rose-500/10'}`}
                             >
-                                <span className={`text-2xl font-black tracking-tight ${!form.amount ? 'text-orange-500' : 'text-rose-600'}`}>
+                                <span className={`text-2xl font-black tracking-tight ${!form.amount ? 'text-orange-500' : (isDarkMode ? 'text-rose-400' : 'text-rose-600')}`}>
                                     {displayAmount}
                                 </span>
-                                <div className={`flex items-center justify-center rounded-xl p-2 ${!form.amount ? 'bg-orange-100 text-orange-600' : 'bg-rose-100 text-rose-600'}`}>
+                                <div className={`flex items-center justify-center rounded-xl p-2 ${!form.amount ? 'bg-orange-500/20 text-orange-400' : 'bg-rose-500/20 text-rose-400'}`}>
                                     <DollarSign className="h-5 w-5" />
                                 </div>
                             </button>
@@ -615,12 +649,12 @@ function AddExpenseModal({ vehicle, onClose, onSuccess }: {
                         {/* Expense type grid (Scrollable horizontally) */}
                         <div>
                             <label className="mb-2 block text-xs font-bold text-slate-400 uppercase tracking-widest">Loại chi phí</label>
-                            <div className="flex gap-2.5 overflow-x-auto pt-1 pb-2 scrollbar-hide -mx-5 px-5">
+                             <div className="flex gap-2.5 overflow-x-auto pt-1 pb-2 scrollbar-hide -mx-5 px-5">
                                 {Object.entries(EXPENSE_TYPES).map(([key, t]) => (
                                     <button key={key} onClick={() => setForm({ ...form, expense_type: key as any })}
                                         className={`shrink-0 flex items-center gap-1 rounded-2xl border px-3.5 py-2.5 transition-all ${form.expense_type === key
-                                            ? `${t.bg} ${t.text} border-transparent shadow-md ring-2 ring-current ring-opacity-20`
-                                            : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100'}`}>
+                                            ? (isDarkMode ? 'bg-rose-500 text-white shadow-md' : `${t.bg} ${t.text} border-transparent shadow-md ring-2 ring-current ring-opacity-20`)
+                                            : `${isDarkMode ? 'border-slate-700 bg-slate-800 text-slate-500 hover:border-slate-600' : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100'}`}`}>
                                         <div className={`w-2 h-2 rounded-full ${t.accentBar}`}></div>
                                         <span className="text-xs font-bold whitespace-nowrap">{t.label}</span>
                                     </button>
@@ -635,7 +669,7 @@ function AddExpenseModal({ vehicle, onClose, onSuccess }: {
                                 <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                 <input type="date" value={form.expense_date}
                                     onChange={e => setForm({ ...form, expense_date: e.target.value })}
-                                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm font-semibold focus:border-rose-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-100 transition-all" />
+                                    className={`w-full rounded-2xl border pl-10 pr-4 py-3 text-sm font-semibold focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-100 transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 focus:bg-slate-800' : 'bg-slate-50 border-slate-200 focus:bg-white'}`} />
                             </div>
                         </div>
 
@@ -649,7 +683,7 @@ function AddExpenseModal({ vehicle, onClose, onSuccess }: {
                                     <input type="text" value={form.description}
                                         onChange={e => setForm({ ...form, description: e.target.value })}
                                         placeholder="Tên phí..."
-                                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 pl-9 pr-3 py-3 text-sm font-medium focus:border-rose-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-100 transition-all" />
+                                        className={`w-full rounded-2xl border pl-9 pr-3 py-3 text-sm font-medium focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-100 transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 focus:bg-slate-800' : 'bg-slate-50 border-slate-200 focus:bg-white'}`} />
                                 </div>
                             </div>
 
@@ -661,7 +695,7 @@ function AddExpenseModal({ vehicle, onClose, onSuccess }: {
                                     <input type="text" value={form.location}
                                         onChange={e => setForm({ ...form, location: e.target.value })}
                                         placeholder="Nơi trả..."
-                                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 pl-9 pr-3 py-3 text-sm font-medium focus:border-rose-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-100 transition-all" />
+                                        className={`w-full rounded-2xl border pl-9 pr-3 py-3 text-sm font-medium focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-100 transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 focus:bg-slate-800' : 'bg-slate-50 border-slate-200 focus:bg-white'}`} />
                                 </div>
                             </div>
                         </div>
@@ -671,15 +705,19 @@ function AddExpenseModal({ vehicle, onClose, onSuccess }: {
                             <label className="mb-2 block text-xs font-bold text-slate-400 uppercase tracking-widest">Ghi chú thêm</label>
                             <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })}
                                 rows={2} placeholder="Không bắt buộc..."
-                                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-rose-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-100 transition-all resize-none" />
+                                className={`w-full rounded-2xl border px-4 py-3 text-sm font-medium focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-100 transition-all resize-none ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 focus:bg-slate-800' : 'bg-slate-50 border-slate-200 focus:bg-white'}`} />
                         </div>
 
                     </div>
 
                     {/* Actions */}
-                    <div className="bg-white border-t border-slate-100 p-4">
+                    <div className={`border-t p-4 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'}`}>
                         <button onClick={handleSubmit} disabled={loading || !form.amount}
-                            className={`w-full flex items-center justify-center gap-2 rounded-2xl py-4 text-sm font-black text-white shadow-xl transition-all shadow-rose-200 ${loading || !form.amount ? 'bg-slate-300 opacity-60 shadow-none' : 'bg-rose-600 hover:bg-rose-700 active:scale-[0.98]'}`}>
+                            className={`w-full flex items-center justify-center gap-2 rounded-2xl py-4 text-sm font-black text-white shadow-xl transition-all ${
+                                loading || !form.amount 
+                                    ? 'bg-slate-300 opacity-60 shadow-none' 
+                                    : `bg-rose-600 hover:bg-rose-700 active:scale-[0.98] ${isDarkMode ? 'shadow-none' : 'shadow-rose-200'}`
+                            }`}>
                             {loading ? 'Đang lưu...' : <><Save className="h-5 w-5" /> Xác nhận lưu chi phí</>}
                         </button>
                     </div>

@@ -29,7 +29,7 @@ import type { VehicleAlert } from '../../lib/ev/vehicleService'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNotification } from '../../contexts/notificationContext.helpers'
 import HeaderBar from '../../components/layout/HeaderBar'
-import { VehicleFooterNav } from '../../components/ev/VehicleFooterNav'
+
 import { useProfile } from '../../lib/profileQueries'
 import { useVehicleStore } from '../../store/useVehicleStore'
 import { useAuthState } from '../../hooks/useAuthState'
@@ -164,23 +164,23 @@ export default function VehicleManagement() {
 
 
     const cardClass = isDarkMode
-        ? 'bg-slate-800 border border-slate-700 shadow-xl shadow-black/20'
-        : 'bg-white border border-slate-200 shadow-sm'
+        ? 'bg-[#1E293B] border border-slate-700 shadow-none'
+        : 'bg-white border border-slate-200 shadow-md shadow-slate-200/50'
     const textPrimary = isDarkMode ? 'text-slate-100' : 'text-slate-900'
-    const textSecondary = isDarkMode ? 'text-slate-400' : 'text-slate-400'
-    const subStatBg = isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-[#F1F5F9] border-white'
-    const subStatIconBg = isDarkMode ? 'bg-slate-700' : 'bg-white'
+    const textSecondary = isDarkMode ? 'text-slate-400' : 'text-slate-500'
+    const subStatBg = isDarkMode ? 'bg-[#1E293B] border-slate-700 shadow-none' : 'bg-[#F1F5F9] border-white shadow-sm shadow-slate-200/50'
+    const subStatIconBg = isDarkMode ? 'bg-slate-800' : 'bg-white shadow-inner'
 
     if (loading) {
         return (
-            <div className="flex h-screen flex-col overflow-hidden transition-colors duration-500" style={{ backgroundColor: 'var(--app-home-bg)' }}>
+            <div className={`flex h-screen flex-col overflow-hidden transition-colors duration-500 ${isDarkMode ? 'bg-slate-950' : 'bg-slate-50'}`}>
                 <HeaderBar variant="page" title="Phương tiện" />
                 <main className="flex-1 overflow-y-auto w-full max-w-md mx-auto px-4 pt-4 space-y-4">
-                    <div className={`h-56 rounded-3xl animate-pulse ${isDarkMode ? 'bg-slate-700' : 'bg-gradient-to-br from-slate-200 to-slate-300'}`} />
+                    <div className={`h-56 rounded-[32px] animate-pulse ${isDarkMode ? 'bg-slate-800' : 'bg-gradient-to-br from-slate-200 to-slate-300'}`} />
                     <div className="grid grid-cols-3 gap-3">
-                        {[1, 2, 3].map(i => <div key={i} className={`h-24 rounded-2xl animate-pulse ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`} />)}
+                        {[1, 2, 3].map(i => <div key={i} className={`h-24 rounded-2xl animate-pulse ${isDarkMode ? 'bg-slate-800' : 'bg-slate-200'}`} />)}
                     </div>
-                    <div className={`h-40 rounded-3xl animate-pulse ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`} />
+                    <div className={`h-40 rounded-[32px] animate-pulse ${isDarkMode ? 'bg-slate-800' : 'bg-slate-200'}`} />
                 </main>
             </div>
         )
@@ -213,66 +213,66 @@ export default function VehicleManagement() {
                     {isEmpty ? (
                         <div className="flex-1 flex flex-col items-center justify-center px-2 py-4 animate-in fade-in zoom-in-95 duration-1000 relative">
                             {/* Decorative background glow */}
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-blue-400/10 blur-[100px] rounded-full pointer-events-none" />
+                            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 blur-[100px] rounded-full pointer-events-none ${isDarkMode ? 'bg-blue-500/10' : 'bg-blue-500/10'}`} />
 
-                            <div className="relative w-full max-w-sm bg-white rounded-3xl p-4 shadow-md flex flex-col items-center">
+                            <div className={`relative w-full max-w-sm rounded-[32px] p-6 shadow-2xl flex flex-col items-center ${isDarkMode ? 'bg-slate-800 border border-slate-700 shadow-black/40' : 'bg-white shadow-blue-900/5'}`}>
                                 {/* Badge */}
-                                <div className="rounded-full bg-emerald-50 px-4 py-1.5 border border-emerald-100/50">
-                                    <span className="text-[13px] font-black uppercase tracking-[0.2em] text-emerald-600">EVNGo - Quản lý xe của bạn</span>
+                                <div className={`rounded-full px-4 py-1.5 border ${isDarkMode ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-emerald-50 border-emerald-100/50'}`}>
+                                    <span className={`text-[11px] font-black uppercase tracking-[0.2em] ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>EVNGo - Quản lý xe của bạn</span>
                                 </div>
 
                                 {/* Main Illustration Container */}
-                                <div className="relative w-full aspect-square rounded-3xl overflow-hidden flex items-center justify-center">
+                                <div className="relative w-full aspect-square rounded-3xl overflow-hidden flex items-center justify-center mt-4">
                                     <img
                                         src="/EVGo-Logo.png"
                                         alt="Dashboard Preview"
-                                        className="max-h-[220px] max-w-[220px] object-contain transition-transform duration-1000 hover:scale-105"
+                                        className="max-h-[180px] max-w-[180px] object-contain transition-transform duration-1000 hover:scale-105"
                                     />
 
                                     {/* Floating chips for visual context */}
-                                    <div className="absolute top-6 left-6 h-11 w-11 bg-white shadow-[0_8px_20px_rgba(0,0,0,0.06)] rounded-3xl flex items-center justify-center animate-bounce duration-[4000ms] border border-slate-50">
-                                        <Zap className="h-5.5 w-5.5 text-yellow-500" />
+                                    <div className={`absolute top-6 left-6 h-12 w-12 shadow-xl rounded-2xl flex items-center justify-center animate-bounce duration-[4000ms] border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-50'}`}>
+                                        <Zap className="h-6 w-6 text-yellow-500" />
                                     </div>
-                                    <div className="absolute bottom-12 right-6 h-11 w-11 bg-white shadow-[0_8px_20px_rgba(0,0,0,0.06)] rounded-3xl flex items-center justify-center animate-bounce duration-[5000ms] border border-slate-50">
-                                        <TrendingUp className="h-5.5 w-5.5 text-emerald-500" />
+                                    <div className={`absolute bottom-12 right-6 h-12 w-12 shadow-xl rounded-2xl flex items-center justify-center animate-bounce duration-[5000ms] border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-50'}`}>
+                                        <TrendingUp className="h-6 w-6 text-emerald-500" />
                                     </div>
                                 </div>
 
                                 {/* Text Content */}
-                                <div className="text-center space-y-3 px-1">
-                                    <p className="text-[13px] font-medium text-slate-500 leading-relaxed max-w-[240px] mx-auto">
-                                        Thêm xe của bạn để tự động hóa việc theo dõi <span className="text-emerald-600 font-bold">Sạc pin</span>, <span className="text-blue-600 font-bold">Chi phí</span> và <span className="text-amber-600 font-bold">Bảo dưỡng</span>.
+                                <div className="text-center space-y-3 px-1 mt-2">
+                                    <p className={`text-sm font-medium leading-relaxed max-w-[260px] mx-auto ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                                        Thêm xe của bạn để tự động hóa việc theo dõi <span className={isDarkMode ? 'text-emerald-400' : 'text-emerald-600 font-bold'}>Sạc pin</span>, <span className={isDarkMode ? 'text-blue-400' : 'text-blue-600 font-bold'}>Chi phí</span> và <span className={isDarkMode ? 'text-amber-400' : 'text-amber-600 font-bold'}>Bảo dưỡng</span>.
                                     </p>
                                 </div>
 
                                 {/* Action Area */}
-                                <div className="mt-9 w-full">
+                                <div className="mt-8 w-full">
                                     <button
                                         onClick={() => navigate('/ev/add')}
-                                        className="w-full py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 text-white font-black text-base shadow-[0_15px_30px_-8px_rgba(37,99,235,0.45)] active:scale-[0.97] transition-all flex items-center justify-center gap-3 group"
+                                        className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 text-white font-black text-base shadow-[0_15px_30px_-8px_rgba(37,99,235,0.45)] active:scale-[0.97] transition-all flex items-center justify-center gap-3 group"
                                     >
-                                        <div className="bg-white/20 p-1.5 rounded-2xl border border-white/10 group-hover:rotate-12 transition-transform">
-                                            <Plus className="h-4 w-4 text-white" />
+                                        <div className="bg-white/20 p-2 rounded-xl border border-white/10 group-hover:rotate-12 transition-transform">
+                                            <Plus className="h-5 w-5 text-white" />
                                         </div>
                                         <span className="tracking-wide">Thêm phương tiện</span>
                                     </button>
                                 </div>
 
                                 {/* Micro-stats/Features hint */}
-                                <div className="mt-6 pt-2 border-t border-slate-50 flex justify-between w-full opacity-60">
-                                    <div className="flex flex-col items-center gap-1">
-                                        <BarChart3 className="h-4 w-4 text-red-500" />
-                                        <span className="text-[9px] font-black uppercase tracking-tighter text-red-500">Báo cáo</span>
+                                <div className={`mt-8 pt-6 border-t flex justify-between w-full ${isDarkMode ? 'border-slate-700 opacity-80' : 'border-slate-100 opacity-60'}`}>
+                                    <div className="flex flex-col items-center gap-1.5">
+                                        <BarChart3 className="h-4 w-4 text-rose-500" />
+                                        <span className={`text-[9px] font-black uppercase tracking-tighter ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Báo cáo</span>
                                     </div>
-                                    <div className="h-6 w-px bg-slate-200" />
-                                    <div className="flex flex-col items-center gap-1">
-                                        <Wrench className="h-4 w-4 text-slate-700" />
-                                        <span className="text-[9px] font-black uppercase tracking-tighter text-slate-700">Bảo trì</span>
+                                    <div className={`h-8 w-px ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`} />
+                                    <div className="flex flex-col items-center gap-1.5">
+                                        <Wrench className="h-4 w-4 text-blue-500" />
+                                        <span className={`text-[9px] font-black uppercase tracking-tighter ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Bảo trì</span>
                                     </div>
-                                    <div className="h-6 w-px bg-slate-200" />
-                                    <div className="flex flex-col items-center gap-1">
-                                        <Shield className="h-4 w-4 text-blue-500" />
-                                        <span className="text-[9px] font-black uppercase tracking-tighter text-blue-500">Bảo mật</span>
+                                    <div className={`h-8 w-px ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`} />
+                                    <div className="flex flex-col items-center gap-1.5">
+                                        <Shield className="h-4 w-4 text-emerald-500" />
+                                        <span className={`text-[9px] font-black uppercase tracking-tighter ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Bảo mật</span>
                                     </div>
                                 </div>
                             </div>
@@ -288,7 +288,7 @@ export default function VehicleManagement() {
                                     <h3 className={`text-sm font-black uppercase tracking-widest ${textSecondary}`}>Xe của bạn</h3>
                                     <button
                                         onClick={() => navigate('/ev/list')}
-                                        className="text-xs font-bold text-blue-600 hover:text-blue-700 active:scale-95 transition-all"
+                                        className={`text-xs font-bold transition-all active:scale-95 ${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
                                     >
                                         Xem tất cả ({vehicles.length})
                                     </button>
@@ -304,14 +304,14 @@ export default function VehicleManagement() {
                                             <div
                                                 key={vehicle.id}
                                                 onClick={() => setSelectedId(vehicle.id)}
-                                                className="group relative flex min-w-[calc(100%-1rem)] flex-shrink-0 snap-center rounded-3xl overflow-hidden cursor-pointer transition-all duration-300"
+                                                className="group relative flex min-w-[calc(100%-1rem)] flex-shrink-0 snap-center rounded-[32px] overflow-hidden cursor-pointer transition-all duration-300"
                                             >
                                                 {/* Background */}
-                                                <div className={`relative h-52 w-full overflow-hidden rounded-3xl p-4 ${!vehicle.image_url ? `bg-gradient-to-br ${grad}` : 'bg-white'}`}>
+                                                <div className={`relative h-52 w-full overflow-hidden rounded-[32px] p-4 ${!vehicle.image_url ? `bg-gradient-to-br ${grad}` : (isDarkMode ? 'bg-slate-900' : 'bg-white')}`}>
                                                     {vehicle.image_url ? (
                                                         <div className="absolute inset-0 z-0">
                                                             <img src={vehicle.image_url} alt={vehicle.license_plate} className="h-full w-full object-cover opacity-90" />
-                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40" />
+                                                            <div className={`absolute inset-0 ${isDarkMode ? 'bg-gradient-to-t from-slate-900 via-slate-900/40 to-slate-900/40' : 'bg-gradient-to-t from-black/80 via-black/20 to-black/40'}`} />
                                                         </div>
                                                     ) : (
                                                         <div className="absolute inset-0 z-0 overflow-hidden">
@@ -393,7 +393,7 @@ export default function VehicleManagement() {
 
                                                     {/* Selected ring */}
                                                     {isSelected && (
-                                                        <div className="absolute inset-0 rounded-3xl ring-2 ring-white/30 ring-inset pointer-events-none" />
+                                                        <div className="absolute inset-0 rounded-[32px] ring-2 ring-white/30 ring-inset pointer-events-none" />
                                                     )}
                                                 </div>
                                             </div>
@@ -408,7 +408,9 @@ export default function VehicleManagement() {
                                             <button
                                                 key={v.id}
                                                 onClick={() => setSelectedId(v.id)}
-                                                className={`rounded-full transition-all duration-300 ${selectedVehicle?.id === v.id ? 'w-5 h-1.5 bg-blue-500' : 'w-1.5 h-1.5 bg-slate-300 hover:bg-slate-400'}`}
+                                                className={`rounded-full transition-all duration-300 ${selectedVehicle?.id === v.id 
+                                                    ? (isDarkMode ? 'w-5 h-1.5 bg-blue-400' : 'w-5 h-1.5 bg-blue-500') 
+                                                    : (isDarkMode ? 'w-1.5 h-1.5 bg-slate-700' : 'w-1.5 h-1.5 bg-slate-300 hover:bg-slate-400')}`}
                                             />
                                         ))}
                                     </div>
@@ -444,7 +446,7 @@ export default function VehicleManagement() {
                                                 </div>
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); setNewOdo(''); setShowOdoModal(true) }}
-                                                    className="mt-1 text-[10px] font-bold text-blue-600 flex items-center gap-1 hover:underline"
+                                                    className={`mt-1 text-[10px] font-bold flex items-center gap-1 hover:underline ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}
                                                 >
                                                     <Edit className="h-2.5 w-2.5" />
                                                     Cập nhật số km
@@ -470,7 +472,7 @@ export default function VehicleManagement() {
                                                     </p>
                                                     <span className={`text-xs font-bold uppercase ${textSecondary}`}>kWh</span>
                                                 </div>
-                                                <p className="mt-1 text-[10px] font-bold text-emerald-600 flex items-center gap-1">
+                                                <p className={`mt-1 text-[10px] font-bold flex items-center gap-1 ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
                                                     <TrendingUp className="h-2.5 w-2.5" />
                                                     Năng lượng sạch
                                                 </p>
@@ -495,68 +497,64 @@ export default function VehicleManagement() {
                                             </div>
                                             <div>
                                                 <p className={`text-xl font-black leading-none ${textPrimary}`}>{stats?.totalChargeSessions || 0}</p>
-                                                <p className={`text-[10px] font-black uppercase mt-1.5 tracking-widest ${textSecondary}`}>Lần sạc</p>
+                                                <p className={`text-[10px] font-black uppercase mt-1.5 tracking-widest ${textSecondary}`}>Lượt sạc</p>
                                             </div>
                                         </div>
                                     </div>
-                                </section>
-                            )}
 
-                            {/* ══════════════════════════════════════════════
-                    SUMMARY EXPENSES (REPORT STYLE)
-                ══════════════════════════════════════════════ */}
-                            {selectedVehicle && stats && !isLoadingStats && (
-                                <section className="px-1">
-                                    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 p-7 text-white shadow-2xl shadow-slate-900/20">
-                                        {/* Background Orbs */}
-                                        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-blue-500/10 blur-[80px]" />
-                                        <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-emerald-500/10 blur-[80px]" />
+                                    {/* Monthly Expenses Overview */}
+                                    <div className="mt-4">
+                                        <div className={`relative overflow-hidden rounded-[40px] p-7 text-white shadow-2xl ${isDarkMode ? 'bg-[#1E293B] shadow-none border border-slate-700' : 'bg-gradient-to-br from-slate-900 to-slate-800 shadow-xl shadow-slate-900/20'}`}>
+                                            {/* Background Orbs */}
+                                            <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-blue-500/10 blur-[80px]" />
+                                            <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-emerald-500/10 blur-[80px]" />
 
-                                        <div className="relative z-10">
-                                            <div className="flex items-center justify-between mb-8">
-                                                <div>
-                                                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1.5">Chi phí tháng này</p>
-                                                    <h2 className="text-3xl font-black tracking-tight">
-                                                        {formatCurrency(stats.totalFuelCost + stats.totalMaintenanceCost + stats.totalOtherExpenses)}
-                                                    </h2>
-                                                </div>
-                                                <div className="h-14 w-14 rounded-[22px] bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-center">
-                                                    <TrendingUp className="h-7 w-7 text-emerald-400" />
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-5">
-                                                {[
-                                                    { label: 'Tiền sạc pin', val: stats.totalFuelCost, icon: <Zap className="h-4 w-4" />, color: 'emerald' },
-                                                    { label: 'Bảo dưỡng xe', val: stats.totalMaintenanceCost, icon: <Wrench className="h-4 w-4" />, color: 'amber' },
-                                                    { label: 'Chi phí khác', val: stats.totalOtherExpenses, icon: <LayoutList className="h-4 w-4" />, color: 'rose' },
-                                                ].map((item, idx) => (
-                                                    <div key={idx} className="flex items-center justify-between group">
-                                                        <div className="flex items-center gap-4">
-                                                            <div className={`h-11 w-11 rounded-2xl flex items-center justify-center border transition-all duration-300 ${item.color === 'emerald' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
-                                                                item.color === 'amber' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
-                                                                    'bg-rose-500/10 border-rose-500/20 text-rose-400'
-                                                                }`}>
-                                                                {item.icon}
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-xs font-bold text-slate-400 group-hover:text-white transition-colors">{item.label}</p>
-                                                                <p className="text-[10px] font-medium opacity-40 uppercase tracking-tighter">Thanh toán định kỳ</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <p className="text-sm font-black group-hover:text-white transition-colors">{formatCurrency(item.val)}</p>
-                                                        </div>
+                                            <div className="relative z-10">
+                                                <div className="flex items-center justify-between mb-8">
+                                                    <div>
+                                                        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1.5">Chi phí tháng này</p>
+                                                        <h2 className="text-3xl font-black tracking-tight">
+                                                            {stats ? formatCurrency((stats.totalFuelCost || 0) + (stats.totalMaintenanceCost || 0) + (stats.totalOtherExpenses || 0)) : '0 đ'}
+                                                        </h2>
                                                     </div>
-                                                ))}
-                                            </div>
+                                                    <div className={`h-14 w-14 rounded-[22px] border backdrop-blur-md flex items-center justify-center ${isDarkMode ? 'bg-slate-700/50 border-slate-600' : 'bg-white/5 border-white/10 shadow-lg shadow-black/20'}`}>
+                                                        <TrendingUp className="h-7 w-7 text-emerald-400" />
+                                                    </div>
+                                                </div>
 
-                                            <button
-                                                onClick={() => navigate('/ev/reports')}
-                                                className="mt-8 w-full py-4 rounded-3xl bg-white/10 border border-white/10 hover:bg-white/10 transition-all font-black text-xs uppercase tracking-[0.2em]"
-                                            >
-                                                Xem báo cáo chi tiết
-                                            </button>
+                                                <div className="space-y-5">
+                                                    {[
+                                                        { label: 'Tiền sạc pin', val: stats?.totalFuelCost || 0, icon: <Zap className="h-4 w-4" />, color: 'emerald' },
+                                                        { label: 'Bảo dưỡng xe', val: stats?.totalMaintenanceCost || 0, icon: <Wrench className="h-4 w-4" />, color: 'amber' },
+                                                        { label: 'Chi phí khác', val: stats?.totalOtherExpenses || 0, icon: <LayoutList className="h-4 w-4" />, color: 'rose' },
+                                                    ].map((item, idx) => (
+                                                        <div key={idx} className="flex items-center justify-between group">
+                                                            <div className="flex items-center gap-4">
+                                                                <div className={`h-11 w-11 rounded-2xl flex items-center justify-center border transition-all duration-300 ${item.color === 'emerald' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
+                                                                    item.color === 'amber' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
+                                                                        'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                                                                    }`}>
+                                                                    {item.icon}
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-xs font-bold text-slate-400 group-hover:text-white transition-colors">{item.label}</p>
+                                                                    <p className="text-[10px] font-medium opacity-40 uppercase tracking-tighter">Thanh toán định kỳ</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="text-right">
+                                                                <p className="text-sm font-black group-hover:text-white transition-colors">{formatCurrency(item.val)}</p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                <button
+                                                    onClick={() => navigate('/ev/reports')}
+                                                    className={`mt-8 w-full py-4 rounded-[32px] border transition-all font-black text-[10px] uppercase tracking-[0.2em] active:scale-95 ${isDarkMode ? 'bg-slate-800/50 border-slate-700 hover:bg-slate-700/50' : 'bg-white/10 border-white/10 hover:bg-white/10'}`}
+                                                >
+                                                    Xem báo cáo chi tiết
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </section>
@@ -573,22 +571,32 @@ export default function VehicleManagement() {
                                         return (
                                             <div
                                                 key={index}
-                                                className={`flex items-start gap-3 rounded-2xl p-4 border ${isCritical
-                                                    ? 'bg-red-50 border-red-100 shadow-sm shadow-red-100'
-                                                    : 'bg-amber-50 border-amber-100 shadow-sm shadow-amber-100'
+                                                className={`flex items-start gap-3 rounded-2xl p-4 border transition-all ${isCritical
+                                                    ? (isDarkMode ? 'bg-red-500/10 border-red-500/20' : 'bg-red-50 border-red-100 shadow-sm shadow-red-100')
+                                                    : (isDarkMode ? 'bg-amber-500/10 border-amber-500/20' : 'bg-amber-50 border-amber-100 shadow-sm shadow-amber-100')
                                                     }`}
                                             >
-                                                <div className={`shrink-0 mt-0.5 rounded-xl p-2 ${isCritical ? 'bg-red-100' : 'bg-amber-100'}`}>
-                                                    <AlertTriangle className={`h-4 w-4 ${isCritical ? 'text-red-600' : 'text-amber-600'}`} />
+                                                <div className={`shrink-0 mt-0.5 rounded-xl p-2 ${isCritical 
+                                                    ? (isDarkMode ? 'bg-red-500/20' : 'bg-red-100') 
+                                                    : (isDarkMode ? 'bg-amber-500/20' : 'bg-amber-100')}`}>
+                                                    <AlertTriangle className={`h-4 w-4 ${isCritical 
+                                                        ? (isDarkMode ? 'text-red-400' : 'text-red-600') 
+                                                        : (isDarkMode ? 'text-amber-400' : 'text-amber-600')}`} />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center justify-between gap-2">
-                                                        <p className={`text-sm font-black ${isCritical ? 'text-red-700' : 'text-amber-700'}`}>{title}</p>
-                                                        <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase ${isCritical ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                                                        <p className={`text-sm font-black ${isCritical 
+                                                            ? (isDarkMode ? 'text-red-400' : 'text-red-700') 
+                                                            : (isDarkMode ? 'text-amber-400' : 'text-amber-700')}`}>{title}</p>
+                                                        <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase ${isCritical 
+                                                            ? (isDarkMode ? 'bg-red-500/20 text-red-400' : 'bg-red-100 text-red-700') 
+                                                            : (isDarkMode ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-100 text-amber-700')}`}>
                                                             {remainingText}
                                                         </span>
                                                     </div>
-                                                    <p className={`text-xs mt-0.5 ${isCritical ? 'text-red-500' : 'text-amber-500'}`}>{alert.message}</p>
+                                                    <p className={`text-xs mt-0.5 ${isCritical 
+                                                        ? (isDarkMode ? 'text-red-500/70' : 'text-red-500') 
+                                                        : (isDarkMode ? 'text-amber-500/70' : 'text-amber-500')}`}>{alert.message}</p>
                                                 </div>
                                             </div>
                                         )
@@ -608,13 +616,15 @@ export default function VehicleManagement() {
                                     <div className="space-y-4">
                                         {/* EV Maintenance Progress */}
                                         {maintProgress && (
-                                            <div className={`group relative overflow-hidden rounded-3xl p-5 shadow-md transition-all hover:border-emerald-200 ${isDarkMode ? 'bg-slate-800 border border-slate-700' : 'bg-gradient-to-r from-slate-200 to-white border border-slate-300'}`}>
+                                            <div className={`group relative overflow-hidden rounded-[32px] p-5 shadow-md transition-all hover:border-emerald-200 ${isDarkMode ? 'bg-[#1E293B] border border-slate-700 shadow-none' : 'bg-gradient-to-r from-slate-50 to-white border border-slate-200 shadow-sm shadow-slate-100'}`}>
                                                 <div className="absolute -right-3 -bottom-3 opacity-[0.05] text-slate-500 transition-transform group-hover:scale-110">
                                                     <Wrench className="h-24 w-24" />
                                                 </div>
                                                 <div className="relative z-10 flex items-center justify-between">
                                                     <div className="flex items-center gap-3">
-                                                        <div className={`rounded-3xl p-2 ${maintProgress.isOverdue ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}`}>
+                                                        <div className={`rounded-3xl p-2 ${maintProgress.isOverdue 
+                                                            ? (isDarkMode ? 'bg-red-500/20 text-red-400' : 'bg-red-100 text-red-600') 
+                                                            : (isDarkMode ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-600')}`}>
                                                             <Wrench className="h-5 w-5" />
                                                         </div>
                                                         <div>
@@ -623,7 +633,7 @@ export default function VehicleManagement() {
                                                         </div>
                                                     </div>
                                                     <div className="text-right">
-                                                        <p className={`text-sm font-black ${maintProgress.isOverdue ? 'text-red-500' : 'text-red-500'}`}>
+                                                        <p className={`text-sm font-black ${maintProgress.isOverdue ? (isDarkMode ? 'text-red-400' : 'text-red-500') : (isDarkMode ? 'text-red-400' : 'text-red-500')}`}>
                                                             {maintProgress.isOverdue ? `Quá mốc!` : `Còn ${maintProgress.kmLeft.toLocaleString()} km`}
                                                         </p>
                                                     </div>
@@ -638,7 +648,7 @@ export default function VehicleManagement() {
                                                     </div>
                                                     <div className="mt-2 flex items-center justify-between">
                                                         <span className={`text-[10px] font-bold ${textSecondary}`}>{maintProgress.pct}% tiến độ</span>
-                                                        <button onClick={() => navigate('/ev/maintenance')} className="flex items-center gap-1 text-[10px] font-black text-emerald-600 uppercase">
+                                                        <button onClick={() => navigate('/ev/maintenance')} className={`flex items-center gap-1 text-[10px] font-black uppercase ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
                                                             Cấu hình mốc bảo dưỡng <ChevronRight className="h-3 w-3" />
                                                         </button>
                                                     </div>
@@ -652,16 +662,16 @@ export default function VehicleManagement() {
                                                 const d = new Date(selectedVehicle.insurance_expiry_date)
                                                 const days = Math.ceil((d.getTime() - Date.now()) / 86400000)
                                                 return (
-                                                    <div className="relative group overflow-hidden rounded-3xl bg-blue-50 p-5 border border-blue-100 shadow-sm transition-all hover:bg-white hover:shadow-md">
-                                                        <div className="absolute -right-3 -bottom-3 opacity-[0.08] text-blue-600 transition-transform group-hover:scale-110">
+                                                    <div className={`relative group overflow-hidden rounded-[32px] p-5 border shadow-sm transition-all hover:shadow-md ${isDarkMode ? 'bg-[#1E293B] border-slate-700 shadow-none' : 'bg-blue-50 border-blue-100 hover:bg-white'}`}>
+                                                        <div className={`absolute -right-3 -bottom-3 opacity-[0.08] transition-transform group-hover:scale-110 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
                                                             <Shield className="h-20 w-20" />
                                                         </div>
                                                         <div className="relative z-10">
-                                                            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-500/20">
+                                                            <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-2xl text-white shadow-lg ${isDarkMode ? 'bg-blue-600/80 shadow-black/20' : 'bg-blue-600 shadow-blue-500/20'}`}>
                                                                 <Shield className="h-5 w-5" />
                                                             </div>
-                                                            <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">Bảo hiểm</p>
-                                                            <p className={`text-sm font-black ${days < 30 ? 'text-red-500' : 'text-slate-800'}`}>
+                                                            <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${isDarkMode ? 'text-blue-400' : 'text-blue-400'}`}>Bảo hiểm</p>
+                                                            <p className={`text-sm font-black ${days < 30 ? (isDarkMode ? 'text-red-400' : 'text-red-500') : (isDarkMode ? 'text-slate-100' : 'text-slate-800')}`}>
                                                                 {days < 0 ? 'Hết hạn' : `Còn ${days} ngày`}
                                                             </p>
                                                         </div>
@@ -672,16 +682,16 @@ export default function VehicleManagement() {
                                                 const d = new Date(selectedVehicle.inspection_expiry_date)
                                                 const days = Math.ceil((d.getTime() - Date.now()) / 86400000)
                                                 return (
-                                                    <div className="relative group overflow-hidden rounded-3xl bg-slate-50 p-5 border border-slate-200 shadow-sm transition-all hover:bg-white hover:shadow-md">
-                                                        <div className="absolute -right-3 -bottom-3 opacity-[0.08] text-slate-500 transition-transform group-hover:scale-110">
+                                                    <div className={`relative group overflow-hidden rounded-[32px] p-5 border shadow-sm transition-all hover:shadow-md ${isDarkMode ? 'bg-[#1E293B] border-slate-700 shadow-none' : 'bg-slate-50 border-slate-200 hover:bg-white'}`}>
+                                                        <div className={`absolute -right-3 -bottom-3 opacity-[0.08] transition-transform group-hover:scale-110 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                                                             <ClipboardCheck className="h-20 w-20" />
                                                         </div>
                                                         <div className="relative z-10">
-                                                            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-500 text-white shadow-lg shadow-slate-500/20">
+                                                            <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-2xl text-white shadow-lg ${isDarkMode ? 'bg-slate-600/80 shadow-black/20' : 'bg-slate-500 shadow-slate-500/20'}`}>
                                                                 <ClipboardCheck className="h-5 w-5" />
                                                             </div>
                                                             <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${textSecondary}`}>Đăng kiểm</p>
-                                                            <p className={`text-sm font-black ${days < 30 ? 'text-red-600' : 'text-slate-900'}`}>
+                                                            <p className={`text-sm font-black ${days < 30 ? (isDarkMode ? 'text-red-400' : 'text-red-600') : (isDarkMode ? 'text-slate-100' : 'text-slate-900')}`}>
                                                                 {days < 0 ? 'Hết hạn' : `Còn ${days} ngày`}
                                                             </p>
                                                         </div>
@@ -713,7 +723,7 @@ export default function VehicleManagement() {
                                             <button
                                                 key={item.id}
                                                 onClick={() => navigate(item.route)}
-                                                className={`group relative overflow-hidden flex flex-col items-center justify-center text-center gap-2 rounded-3xl p-6 shadow-md transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95 ${isDarkMode ? 'bg-slate-800 border border-slate-700' : `${item.bg} border ${item.border}`}`}
+                                                className={`group relative overflow-hidden flex flex-col items-center justify-center text-center gap-2 rounded-[32px] p-6 shadow-md transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95 ${isDarkMode ? 'bg-[#1E293B] border border-slate-700 shadow-none' : `${item.bg} border ${item.border} shadow-slate-100`}`}
                                             >
                                                 <div className={`absolute -right-2 -bottom-2 opacity-10 ${item.text} transition-all duration-500 group-hover:scale-110 group-hover:rotate-6`}>
                                                     <item.icon className="h-20 w-20" />
@@ -722,7 +732,7 @@ export default function VehicleManagement() {
                                                     <div className={`h-11 w-11 flex items-center justify-center rounded-2xl ${item.color} text-white shadow-lg mx-auto mb-3 transition-transform group-hover:scale-110`}>
                                                         <item.icon className="h-5 w-5" />
                                                     </div>
-                                                    <p className={`text-sm font-black tracking-tight ${isDarkMode ? item.text : item.text}`}>{item.label}</p>
+                                                    <p className={`text-sm font-black tracking-tight ${isDarkMode ? 'text-slate-100' : item.text}`}>{item.label}</p>
                                                     <p className={`text-[9px] font-black opacity-50 mt-1 uppercase tracking-widest ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{item.sub}</p>
                                                 </div>
                                             </button>
@@ -731,7 +741,7 @@ export default function VehicleManagement() {
                                         {/* EV Calculator */}
                                         <button
                                             onClick={() => navigate('/ev/calculator')}
-                                            className="group relative overflow-hidden flex flex-col items-center justify-center text-center gap-2 rounded-3xl bg-[#059669] p-6 shadow-xl shadow-emerald-200 transition-all hover:-translate-y-1 hover:shadow-2xl active:scale-95"
+                                            className="group relative overflow-hidden flex flex-col items-center justify-center text-center gap-2 rounded-[32px] bg-[#059669] p-6 shadow-md transition-all hover:-translate-y-1 hover:shadow-2xl active:scale-95"
                                         >
                                             <div className="absolute -right-2 -bottom-2 opacity-20 text-white transition-all duration-500 group-hover:scale-110 group-hover:-rotate-6">
                                                 <Calculator className="h-20 w-20" />
@@ -774,14 +784,14 @@ export default function VehicleManagement() {
                         <div className={`px-5 py-5 text-white flex items-center justify-between shrink-0`}>
                             <div className="flex items-center gap-3">
                                 <div className="rounded-3xl bg-blue-600 p-2.5">
-                                    <Gauge className="h-5 w-5" />
+                                    <Gauge className="h-5 w-5 text-white" />
                                 </div>
                                 <div>
-                                    <h3 className="text-base font-bold text-slate-800">Cập nhật số km</h3>
-                                    <p className="text-xs text-slate-800">{selectedVehicle.license_plate}</p>
+                                    <h3 className={`text-base font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>Cập nhật số km</h3>
+                                    <p className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>{selectedVehicle.license_plate}</p>
                                 </div>
                             </div>
-                            <button onClick={() => setShowOdoModal(false)} className="rounded-full bg-slate-300 p-1.5 hover:bg-slate-400 transition-all">
+                            <button onClick={() => setShowOdoModal(false)} className={`rounded-full p-1.5 transition-all ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700 text-slate-400' : 'bg-slate-100 hover:bg-slate-200 text-slate-500'}`}>
                                 <X className="h-4 w-4" />
                             </button>
                         </div>
@@ -835,12 +845,7 @@ export default function VehicleManagement() {
                 </div>
             )}
 
-            <VehicleFooterNav
-                onAddClick={() => navigate('/ev/charging')}
-                isElectricVehicle={isElectric}
-                addLabel="Ghi chép"
-                isMainPage={true}
-            />
+
         </div>
     )
 }

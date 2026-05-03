@@ -37,6 +37,7 @@ import {
 } from 'recharts'
 import { useVehicles, useVehicleStats, useVehicleMonthlyStats } from '../../lib/ev/useVehicleQueries'
 import { useVehicleStore } from '../../store/useVehicleStore'
+import { useAppearance } from '../../contexts/AppearanceContext'
 import HeaderBar from '../../components/layout/HeaderBar'
 import { VehicleFooterNav } from '../../components/ev/VehicleFooterNav'
 
@@ -55,12 +56,15 @@ const compactFormat = (value: number) => {
 
 // ── Diff badge component ────────────────────────────────────────────────────
 function DiffBadge({ diff, inverse = false, small = false }: { diff: number; inverse?: boolean; small?: boolean }) {
+    const { isDarkMode } = useAppearance()
     if (diff === 0) return <span className={`${small ? 'text-[9px]' : 'text-[10px]'} font-black text-slate-400`}>–</span>
     const isPositive = diff > 0
     // For costs, inverse=true means up is bad (red), down is good (green)
     const isGood = inverse ? !isPositive : isPositive
     return (
-        <span className={`inline-flex items-center gap-0.5 ${small ? 'text-[9px] px-1 py-0' : 'text-[10px] px-1.5 py-0.5'} font-black rounded-full ${isGood ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+        <span className={`inline-flex items-center gap-0.5 ${small ? 'text-[9px] px-1 py-0' : 'text-[10px] px-1.5 py-0.5'} font-black rounded-full ${isGood
+            ? (isDarkMode ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-50 text-emerald-600')
+            : (isDarkMode ? 'bg-rose-500/20 text-rose-400' : 'bg-rose-50 text-rose-600')}`}>
             {isPositive ? <ArrowUpRight className={`${small ? 'h-2.5 w-2.5' : 'h-3 w-3'}`} /> : <ArrowDownRight className={`${small ? 'h-2.5 w-2.5' : 'h-3 w-3'}`} />}
             {Math.abs(diff).toFixed(1)}%
         </span>
@@ -89,25 +93,26 @@ function CompareRow({
     inverse?: boolean
     highlight?: boolean
 }) {
+    const { isDarkMode } = useAppearance()
     const diff = prev > 0 ? ((curr - prev) / prev) * 100 : curr > 0 ? 100 : 0
     return (
-        <div className={`grid grid-cols-[1fr_1px_1fr] gap-0 ${highlight ? 'bg-blue-50/50 rounded-2xl' : ''}`}>
+        <div className={`grid grid-cols-[1fr_1px_1fr] gap-0 ${highlight ? (isDarkMode ? 'bg-blue-500/5 rounded-2xl' : 'bg-blue-50/50 rounded-2xl') : ''}`}>
             <div className="p-3 text-right">
-                <p className="text-[11px] font-black text-slate-800 leading-tight">
+                <p className={`text-[11px] font-black leading-tight ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
                     {formatNumber(curr, decimals)}{suffix}
                 </p>
                 <p className="text-[9px] font-bold text-slate-400 mt-0.5">{currLabel}</p>
             </div>
-            <div className="bg-slate-100 my-2" />
+            <div className={`${isDarkMode ? 'bg-slate-700' : 'bg-slate-100'} my-2`} />
             <div className="p-3 text-left">
-                <p className="text-[11px] font-black text-slate-500 leading-tight">
+                <p className={`text-[11px] font-black leading-tight ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                     {formatNumber(prev, decimals)}{suffix}
                 </p>
                 <p className="text-[9px] font-bold text-slate-400 mt-0.5">{prevLabel}</p>
             </div>
             {/* Label row spans under */}
             <div className="col-span-3 px-3 pb-2 flex items-center justify-between">
-                <span className="text-[10px] font-bold text-slate-500">{label}</span>
+                <span className={`text-[10px] font-bold ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{label}</span>
                 <DiffBadge diff={diff} inverse={inverse} small />
             </div>
         </div>
@@ -121,6 +126,8 @@ export default function VehicleReports() {
 
     const effectiveId = selectedVehicleId || vehicles.find(v => v.is_default)?.id || vehicles[0]?.id || ''
     const selectedVehicle = vehicles.find(v => v.id === effectiveId)
+
+    const { isDarkMode } = useAppearance()
 
     const [timeRange, setTimeRange] = useState<'6m' | '3m' | 'all'>('6m')
     const [statsPeriod, setStatsPeriod] = useState<'day' | 'week' | 'month' | 'quarter' | 'year' | 'all'>('month')
@@ -358,7 +365,7 @@ export default function VehicleReports() {
     }
 
     return (
-        <div className="flex h-[100dvh] flex-col overflow-hidden" style={{ backgroundColor: 'var(--app-home-bg)' }}>
+        <div className={`flex h-[100dvh] flex-col overflow-hidden transition-colors duration-500 ${isDarkMode ? '' : ''}`}>
             <HeaderBar variant="page" title="Báo cáo chi tiết" />
 
             <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 w-full max-w-md mx-auto px-4 pb-28 pt-4">
@@ -479,7 +486,7 @@ export default function VehicleReports() {
                 </section>
 
                 {/* ── Tab Navigator ──────────────────────────────────────────────── */}
-                <div className="flex gap-1 bg-slate-100 p-1 rounded-2xl mb-5">
+                <div className={`flex gap-1 p-1 rounded-2xl mb-5 ${isDarkMode ? 'bg-slate-800 border border-slate-700' : 'bg-slate-100'}`}>
                     {([
                         { key: 'overview', label: 'Tổng quan' },
                         { key: 'comparison', label: 'So sánh' },
@@ -488,7 +495,9 @@ export default function VehicleReports() {
                         <button
                             key={tab.key}
                             onClick={() => setActiveTab(tab.key)}
-                            className={`flex-1 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${activeTab === tab.key ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                            className={`flex-1 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${activeTab === tab.key
+                                ? (isDarkMode ? 'bg-slate-700 text-blue-400 shadow-sm shadow-black/20' : 'bg-white text-slate-900 shadow-sm')
+                                : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             {tab.label}
                         </button>
@@ -506,7 +515,7 @@ export default function VehicleReports() {
                             <div className="mb-3 px-1">
                                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Phân loại chi phí</h3>
                             </div>
-                            <div className="rounded-[32px] bg-white p-6 shadow-sm border border-slate-100 flex items-center gap-6 mb-3">
+                            <div className={`rounded-[32px] p-6 border flex items-center gap-6 mb-3 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100 shadow-sm'}`}>
                                 <div className="h-[110px] w-[110px] shrink-0">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
@@ -523,9 +532,9 @@ export default function VehicleReports() {
                                         <div key={idx} className="flex items-center justify-between">
                                             <div className="flex items-center gap-2">
                                                 <div className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
-                                                <span className="text-xs font-bold text-slate-600">{item.name}</span>
+                                                <span className={`text-xs font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>{item.name}</span>
                                             </div>
-                                            <span className="text-xs font-black text-slate-900">
+                                            <span className={`text-xs font-black ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>
                                                 {totalCost > 0 ? Math.round((item.value / totalCost) * 100) : 0}%
                                             </span>
                                         </div>
@@ -533,20 +542,20 @@ export default function VehicleReports() {
                                 </div>
                             </div>
 
-                            <div className="rounded-[32px] bg-white p-2 shadow-sm border border-slate-100">
+                            <div className={`rounded-[32px] p-2 border ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100 shadow-sm'}`}>
                                 {[
-                                    { label: 'Sạc pin & Nhiên liệu', value: stats?.totalFuelCost || 0, icon: <Zap />, color: 'text-emerald-500', bg: 'bg-emerald-50', d: diff.fuel },
-                                    { label: 'Bảo dưỡng & Sửa chữa', value: stats?.totalMaintenanceCost || 0, icon: <Wrench />, color: 'text-amber-500', bg: 'bg-amber-50', d: diff.maintenance },
-                                    { label: 'Phí cố định & Khác', value: stats?.totalOtherExpenses || 0, icon: <LayoutList />, color: 'text-rose-500', bg: 'bg-rose-50', d: diff.other },
+                                    { label: 'Sạc pin & Nhiên liệu', value: stats?.totalFuelCost || 0, icon: <Zap />, color: 'text-emerald-500', bg: isDarkMode ? 'bg-emerald-500/10' : 'bg-emerald-50', d: diff.fuel },
+                                    { label: 'Bảo dưỡng & Sửa chữa', value: stats?.totalMaintenanceCost || 0, icon: <Wrench />, color: 'text-amber-500', bg: isDarkMode ? 'bg-amber-500/10' : 'bg-amber-50', d: diff.maintenance },
+                                    { label: 'Phí cố định & Khác', value: stats?.totalOtherExpenses || 0, icon: <LayoutList />, color: 'text-rose-500', bg: isDarkMode ? 'bg-rose-500/10' : 'bg-rose-50', d: diff.other },
                                 ].map((item, i) => (
-                                    <div key={i} className={`flex items-center justify-between p-4 rounded-[24px] ${i !== 2 ? 'border-b border-slate-50' : ''}`}>
+                                    <div key={i} className={`flex items-center justify-between p-4 rounded-[24px] ${i !== 2 ? (isDarkMode ? 'border-b border-slate-800' : 'border-b border-slate-50') : ''}`}>
                                         <div className="flex items-center gap-3">
                                             <div className={`h-11 w-11 rounded-2xl ${item.bg} ${item.color} flex items-center justify-center shrink-0`}>
                                                 {item.icon}
                                             </div>
                                             <div>
                                                 <div className="flex items-center gap-1.5 mb-0.5">
-                                                    <p className="text-sm font-black text-slate-800">{item.label}</p>
+                                                    <p className={`text-sm font-black ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>{item.label}</p>
                                                     <DiffBadge diff={item.d} inverse small />
                                                 </div>
                                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
@@ -554,7 +563,7 @@ export default function VehicleReports() {
                                                 </p>
                                             </div>
                                         </div>
-                                        <p className="text-sm font-black text-slate-900 text-right">{formatNumber(item.value)} đ</p>
+                                        <p className={`text-sm font-black text-right ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>{formatNumber(item.value)} đ</p>
                                     </div>
                                 ))}
                             </div>
@@ -566,13 +575,14 @@ export default function VehicleReports() {
                                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Hiệu suất vận hành</h3>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
+                                {/* Efficiency cards */}
                                 {[
-                                    { label: 'Số chuyến đi', value: stats?.totalTrips || 0, unit: 'chuyến', icon: <Route className="h-5 w-5" />, bg: 'bg-indigo-50', color: 'text-indigo-600', d: diff.trips, inv: false },
-                                    { label: isElectric ? 'Tiêu thụ điện' : 'Tiêu thụ TB', value: stats?.averageFuelConsumption || 0, unit: isElectric ? 'kWh/100km' : 'L/100km', icon: <Zap className="h-5 w-5" />, bg: 'bg-emerald-50', color: 'text-emerald-600', d: diff.consumption, inv: true },
-                                    { label: 'Chuyến dài nhất', value: stats?.longestTrip || 0, unit: 'km', icon: <MapPin className="h-5 w-5" />, bg: 'bg-sky-50', color: 'text-sky-600', d: diff.longestTrip, inv: false },
-                                    { label: 'TB/chuyến', value: stats?.avgTripDistance || 0, unit: 'km', icon: <Route className="h-5 w-5" />, bg: 'bg-violet-50', color: 'text-violet-600', d: diff.avgTrip, inv: false },
+                                    { label: 'Số chuyến đi', value: stats?.totalTrips || 0, unit: 'chuyến', icon: <Route className="h-5 w-5" />, bg: isDarkMode ? 'bg-indigo-500/10' : 'bg-indigo-50', color: 'text-indigo-600', d: diff.trips, inv: false },
+                                    { label: isElectric ? 'Tiêu thụ điện' : 'Tiêu thụ TB', value: stats?.averageFuelConsumption || 0, unit: isElectric ? 'kWh/100km' : 'L/100km', icon: <Zap className="h-5 w-5" />, bg: isDarkMode ? 'bg-emerald-500/10' : 'bg-emerald-50', color: 'text-emerald-600', d: diff.consumption, inv: true },
+                                    { label: 'Chuyến dài nhất', value: stats?.longestTrip || 0, unit: 'km', icon: <MapPin className="h-5 w-5" />, bg: isDarkMode ? 'bg-sky-500/10' : 'bg-sky-50', color: 'text-sky-600', d: diff.longestTrip, inv: false },
+                                    { label: 'TB/chuyến', value: stats?.avgTripDistance || 0, unit: 'km', icon: <Route className="h-5 w-5" />, bg: isDarkMode ? 'bg-violet-500/10' : 'bg-violet-50', color: 'text-violet-600', d: diff.avgTrip, inv: false },
                                 ].map((card, i) => (
-                                    <div key={i} className="rounded-[28px] bg-white p-4 border border-slate-100 shadow-sm">
+                                    <div key={i} className={`rounded-[28px] p-4 border ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100 shadow-sm'}`}>
                                         <div className="flex items-center justify-between mb-3">
                                             <div className={`h-9 w-9 rounded-xl ${card.bg} ${card.color} flex items-center justify-center`}>
                                                 {card.icon}
@@ -581,7 +591,7 @@ export default function VehicleReports() {
                                         </div>
                                         <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{card.label}</p>
                                         <div className="flex items-baseline gap-1">
-                                            <span className="text-xl font-black text-slate-900">{formatNumber(card.value, 1)}</span>
+                                            <span className={`text-xl font-black ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>{formatNumber(card.value, 1)}</span>
                                             <span className="text-[9px] font-bold text-slate-400 uppercase">{card.unit}</span>
                                         </div>
                                     </div>
@@ -595,33 +605,33 @@ export default function VehicleReports() {
                                 <div className="mb-3 px-1">
                                     <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Thông số sạc điện</h3>
                                 </div>
-                                <div className="rounded-[32px] bg-white p-5 shadow-sm border border-slate-100">
+                                <div className={`rounded-[32px] p-5 border ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100 shadow-sm'}`}>
                                     <div className="grid grid-cols-2 gap-4">
                                         {[
-                                            { label: 'Số lần sạc', value: stats?.totalChargeSessions || 0, unit: 'lần', d: diff.sessions, inv: false, icon: <BatteryCharging className="h-4 w-4" />, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                                            { label: 'Tổng điện tiêu thụ', value: stats?.totalKwh || 0, unit: 'kWh', d: diff.kwh, inv: true, icon: <Zap className="h-4 w-4" />, color: 'text-yellow-600', bg: 'bg-yellow-50' },
-                                            { label: 'kWh TB/lần', value: stats?.avgKwhPerSession || 0, unit: 'kWh', d: diff.avgKwh, inv: true, icon: <Activity className="h-4 w-4" />, color: 'text-blue-600', bg: 'bg-blue-50' },
-                                            { label: 'Chi phí TB/lần', value: stats?.avgCostPerSession || 0, unit: 'đ', d: diff.avgSession, inv: true, icon: <DollarSign className="h-4 w-4" />, color: 'text-rose-600', bg: 'bg-rose-50' },
+                                            { label: 'Số lần sạc', value: stats?.totalChargeSessions || 0, unit: 'lần', d: diff.sessions, inv: false, icon: <BatteryCharging className="h-4 w-4" />, color: 'text-emerald-600', bg: isDarkMode ? 'bg-emerald-500/10' : 'bg-emerald-50' },
+                                            { label: 'Tổng điện tiêu thụ', value: stats?.totalKwh || 0, unit: 'kWh', d: diff.kwh, inv: true, icon: <Zap className="h-4 w-4" />, color: 'text-yellow-600', bg: isDarkMode ? 'bg-yellow-500/10' : 'bg-yellow-50' },
+                                            { label: 'kWh TB/lần', value: stats?.avgKwhPerSession || 0, unit: 'kWh', d: diff.avgKwh, inv: true, icon: <Activity className="h-4 w-4" />, color: 'text-blue-600', bg: isDarkMode ? 'bg-blue-500/10' : 'bg-blue-50' },
+                                            { label: 'Chi phí TB/lần', value: stats?.avgCostPerSession || 0, unit: 'đ', d: diff.avgSession, inv: true, icon: <DollarSign className="h-4 w-4" />, color: 'text-rose-600', bg: isDarkMode ? 'bg-rose-500/10' : 'bg-rose-50' },
                                         ].map((item, i) => (
-                                            <div key={i} className={`p-3 rounded-2xl ${item.bg}/50 border border-slate-100`}>
+                                            <div key={i} className={`p-3 rounded-2xl border ${isDarkMode ? 'bg-slate-800/40 border-slate-700/50' : 'bg-slate-50 border-slate-100'}`}>
                                                 <div className="flex items-center justify-between mb-2">
                                                     <div className={`h-7 w-7 rounded-lg ${item.bg} ${item.color} flex items-center justify-center`}>{item.icon}</div>
                                                     <DiffBadge diff={item.d} inverse={item.inv} small />
                                                 </div>
                                                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-wide mb-0.5">{item.label}</p>
-                                                <p className="text-base font-black text-slate-900">{formatNumber(item.value, 1)} <span className="text-[9px] font-medium text-slate-400">{item.unit}</span></p>
+                                                <p className={`text-base font-black ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>{formatNumber(item.value, 1)} <span className="text-[9px] font-medium text-slate-400">{item.unit}</span></p>
                                             </div>
                                         ))}
                                     </div>
                                     {(stats?.avgChargeMinutes || 0) > 0 && (
-                                        <div className="mt-4 pt-4 border-t border-slate-50 flex items-center justify-between">
+                                        <div className={`mt-4 pt-4 border-t flex items-center justify-between ${isDarkMode ? 'border-slate-800' : 'border-slate-50'}`}>
                                             <div className="flex items-center gap-2">
-                                                <div className="h-8 w-8 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center">
+                                                <div className={`h-8 w-8 rounded-xl flex items-center justify-center ${isDarkMode ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-600'}`}>
                                                     <Timer className="h-4 w-4" />
                                                 </div>
                                                 <div>
                                                     <p className="text-[10px] font-black text-slate-500 uppercase">Thời gian sạc TB</p>
-                                                    <p className="text-sm font-black text-slate-900">{Math.round(stats?.avgChargeMinutes || 0)} phút / lần</p>
+                                                    <p className={`text-sm font-black ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>{Math.round(stats?.avgChargeMinutes || 0)} phút / lần</p>
                                                 </div>
                                             </div>
                                             <DiffBadge diff={calcDiff(stats?.avgChargeMinutes || 0, prevStats?.avgChargeMinutes || 0)} inverse small />
@@ -633,7 +643,7 @@ export default function VehicleReports() {
 
                         {/* Annual forecast */}
                         <section className="mb-5">
-                            <div className="rounded-[32px] bg-gradient-to-br from-blue-600 to-blue-800 p-6 text-white shadow-xl shadow-blue-500/20">
+                            <div className="rounded-[32px] bg-gradient-to-br from-blue-600 to-blue-800 p-6 text-white shadow-md">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="h-10 w-10 rounded-2xl bg-white/10 flex items-center justify-center">
                                         <TrendingUp className="h-5 w-5" />
@@ -669,13 +679,14 @@ export default function VehicleReports() {
                 {activeTab === 'comparison' && (
                     <>
                         {/* Comparison mode selector */}
-                        <div className="rounded-[28px] bg-white p-4 shadow-sm border border-slate-100 mb-4">
+                        {/* Comparison mode selector */}
+                        <div className={`rounded-[28px] p-4 border mb-4 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100 shadow-sm'}`}>
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-2">
-                                    <div className="h-8 w-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                                    <div className={`h-8 w-8 rounded-xl flex items-center justify-center ${isDarkMode ? 'bg-slate-800 text-slate-400' : 'bg-blue-50 text-blue-600'}`}>
                                         <Settings className="h-4 w-4" />
                                     </div>
-                                    <p className="text-sm font-black text-slate-800">Chế độ so sánh</p>
+                                    <p className={`text-sm font-black ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>Chế độ so sánh</p>
                                 </div>
                                 {(isLoadingStats || isLoadingPrev) && (
                                     <div className="h-4 w-4 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
@@ -684,13 +695,13 @@ export default function VehicleReports() {
                             <div className="grid grid-cols-2 gap-2">
                                 <button
                                     onClick={() => setComparisonMode('previous')}
-                                    className={`py-2.5 px-3 rounded-xl text-[10px] font-black uppercase text-center transition-all ${comparisonMode === 'previous' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}
+                                    className={`py-2.5 px-3 rounded-xl text-[10px] font-black uppercase text-center transition-all ${comparisonMode === 'previous' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30' : (isDarkMode ? 'bg-slate-800 text-slate-500' : 'bg-slate-50 text-slate-500 hover:bg-slate-100')}`}
                                 >
                                     Kỳ liền trước
                                 </button>
                                 <button
                                     onClick={() => setComparisonMode('same_period')}
-                                    className={`py-2.5 px-3 rounded-xl text-[10px] font-black uppercase text-center transition-all ${comparisonMode === 'same_period' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}
+                                    className={`py-2.5 px-3 rounded-xl text-[10px] font-black uppercase text-center transition-all ${comparisonMode === 'same_period' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30' : (isDarkMode ? 'bg-slate-800 text-slate-500' : 'bg-slate-50 text-slate-500 hover:bg-slate-100')}`}
                                 >
                                     Cùng kỳ NNT
                                 </button>
@@ -698,37 +709,45 @@ export default function VehicleReports() {
                         </div>
 
                         {/* Bar chart comparison */}
-                        <div className="rounded-[32px] bg-white p-5 shadow-sm border border-slate-100 mb-4">
+                        <div className={`rounded-[32px] p-5 border mb-4 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100 shadow-sm'}`}>
                             <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Biểu đồ so sánh chi phí</p>
                             <div className="h-[200px]">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={comparisonBarData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDarkMode ? '#1e293b' : '#f1f5f9'} />
                                         <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 700, fill: '#94a3b8' }} />
                                         <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 700, fill: '#94a3b8' }} tickFormatter={compactFormat} />
                                         <Tooltip
-                                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 8px 20px rgba(0,0,0,0.1)', fontSize: '11px', fontWeight: 800 }}
+                                            contentStyle={{
+                                                backgroundColor: isDarkMode ? '#1e293b' : '#ffffff',
+                                                borderRadius: '12px',
+                                                border: isDarkMode ? '1px solid #334155' : 'none',
+                                                boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
+                                                fontSize: '11px',
+                                                fontWeight: 800,
+                                                color: isDarkMode ? '#f1f5f9' : '#0f172a'
+                                            }}
                                             formatter={(v: any, name?: string) => [formatNumber(v) + ' đ', name === 'curr' ? periodLabel : compPeriodLabel] as [string, string]}
                                         />
                                         <Legend formatter={(v) => v === 'curr' ? periodLabel : compPeriodLabel} wrapperStyle={{ fontSize: '10px', fontWeight: 800 }} />
                                         <Bar dataKey="curr" name="curr" fill="#3b82f6" radius={[6, 6, 0, 0]} />
-                                        <Bar dataKey="prev" name="prev" fill="#cbd5e1" radius={[6, 6, 0, 0]} />
+                                        <Bar dataKey="prev" name="prev" fill={isDarkMode ? '#334155' : '#cbd5e1'} radius={[6, 6, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
                         </div>
 
                         {/* Side-by-side detail table */}
-                        <div className="rounded-[32px] bg-white shadow-sm border border-slate-100 mb-4 overflow-hidden">
+                        <div className={`rounded-[32px] border mb-4 overflow-hidden ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100 shadow-sm'}`}>
                             {/* Header */}
-                            <div className="grid grid-cols-[1fr_1px_1fr] bg-slate-50 border-b border-slate-100">
+                            <div className={`grid grid-cols-[1fr_1px_1fr] border-b ${isDarkMode ? 'bg-slate-800/50 border-slate-800' : 'bg-slate-50 border-slate-100'}`}>
                                 <div className="p-3 text-center">
                                     <p className="text-[10px] font-black uppercase text-blue-600">{periodLabel}</p>
                                     <p className="text-[9px] text-slate-400 font-bold mt-0.5">
                                         {statsDateRange.start ? `${statsDateRange.start} → ${statsDateRange.end}` : 'Tất cả'}
                                     </p>
                                 </div>
-                                <div className="bg-slate-200" />
+                                <div className={isDarkMode ? 'bg-slate-700' : 'bg-slate-200'} />
                                 <div className="p-3 text-center">
                                     <p className="text-[10px] font-black uppercase text-slate-500">{compPeriodLabel}</p>
                                     <p className="text-[9px] text-slate-400 font-bold mt-0.5">
@@ -741,7 +760,7 @@ export default function VehicleReports() {
                             <div className="px-4 pt-4 pb-1">
                                 <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">💰 Chi phí</p>
                             </div>
-                            <div className="divide-y divide-slate-50">
+                            <div className={`divide-y ${isDarkMode ? 'divide-slate-800' : 'divide-slate-50'}`}>
                                 <CompareRow label="Tổng chi phí" curr={totalCost} prev={prevTotalCost} currLabel={periodLabel || ''} prevLabel={compPeriodLabel || ''} suffix=" đ" decimals={0} inverse highlight />
                                 <CompareRow label="Sạc điện / Nhiên liệu" curr={stats?.totalFuelCost || 0} prev={prevStats?.totalFuelCost || 0} currLabel={periodLabel || ''} prevLabel={compPeriodLabel || ''} suffix=" đ" decimals={0} inverse />
                                 <CompareRow label="Bảo dưỡng & Sửa chữa" curr={stats?.totalMaintenanceCost || 0} prev={prevStats?.totalMaintenanceCost || 0} currLabel={periodLabel || ''} prevLabel={compPeriodLabel || ''} suffix=" đ" decimals={0} inverse />
@@ -750,10 +769,10 @@ export default function VehicleReports() {
                             </div>
 
                             {/* Section: Vận hành */}
-                            <div className="px-4 pt-4 pb-1 border-t border-slate-100 mt-2">
+                            <div className={`px-4 pt-4 pb-1 border-t mt-2 ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
                                 <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">🚗 Lộ trình & Quãng đường</p>
                             </div>
-                            <div className="divide-y divide-slate-50">
+                            <div className={`divide-y ${isDarkMode ? 'divide-slate-800' : 'divide-slate-50'}`}>
                                 <CompareRow label="Số chuyến đi" curr={stats?.totalTrips || 0} prev={prevStats?.totalTrips || 0} currLabel={periodLabel || ''} prevLabel={compPeriodLabel || ''} suffix=" chuyến" />
                                 <CompareRow label="Tổng quãng đường" curr={stats?.totalDistance || 0} prev={prevStats?.totalDistance || 0} currLabel={periodLabel || ''} prevLabel={compPeriodLabel || ''} suffix=" km" decimals={1} />
                                 <CompareRow label="TB/chuyến" curr={stats?.avgTripDistance || 0} prev={prevStats?.avgTripDistance || 0} currLabel={periodLabel || ''} prevLabel={compPeriodLabel || ''} suffix=" km" decimals={1} />
@@ -763,10 +782,10 @@ export default function VehicleReports() {
                             {/* Section: Sạc điện (chỉ hiện nếu EV) */}
                             {isElectric && (
                                 <>
-                                    <div className="px-4 pt-4 pb-1 border-t border-slate-100 mt-2">
+                                    <div className={`px-4 pt-4 pb-1 border-t mt-2 ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
                                         <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">⚡ Sạc điện</p>
                                     </div>
-                                    <div className="divide-y divide-slate-50">
+                                    <div className={`divide-y ${isDarkMode ? 'divide-slate-800' : 'divide-slate-50'}`}>
                                         <CompareRow label="Số lần sạc" curr={stats?.totalChargeSessions || 0} prev={prevStats?.totalChargeSessions || 0} currLabel={periodLabel || ''} prevLabel={compPeriodLabel || ''} suffix=" lần" />
                                         <CompareRow label="Tổng kWh tiêu thụ" curr={stats?.totalKwh || 0} prev={prevStats?.totalKwh || 0} currLabel={periodLabel || ''} prevLabel={compPeriodLabel || ''} suffix=" kWh" decimals={1} inverse />
                                         <CompareRow label="kWh TB mỗi lần sạc" curr={stats?.avgKwhPerSession || 0} prev={prevStats?.avgKwhPerSession || 0} currLabel={periodLabel || ''} prevLabel={compPeriodLabel || ''} suffix=" kWh" decimals={1} inverse />
@@ -777,10 +796,10 @@ export default function VehicleReports() {
                             )}
 
                             {/* Section: Bảo dưỡng */}
-                            <div className="px-4 pt-4 pb-1 border-t border-slate-100 mt-2">
+                            <div className={`px-4 pt-4 pb-1 border-t mt-2 ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
                                 <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">🔧 Bảo dưỡng & Chi phí khác</p>
                             </div>
-                            <div className="divide-y divide-slate-50 mb-3">
+                            <div className={`divide-y mb-3 ${isDarkMode ? 'divide-slate-800' : 'divide-slate-50'}`}>
                                 <CompareRow label="Số lần bảo dưỡng" curr={stats?.totalMaintenanceCount || 0} prev={prevStats?.totalMaintenanceCount || 0} currLabel={periodLabel || ''} prevLabel={compPeriodLabel || ''} suffix=" lần" inverse />
                                 <CompareRow label="Số phiên chi phí khác" curr={stats?.totalExpenseCount || 0} prev={prevStats?.totalExpenseCount || 0} currLabel={periodLabel || ''} prevLabel={compPeriodLabel || ''} suffix=" lần" inverse />
                             </div>
@@ -881,7 +900,7 @@ export default function VehicleReports() {
                 <div className="h-20" />
             </main>
 
-            <VehicleFooterNav isElectricVehicle={isElectric} />
+            <VehicleFooterNav />
         </div>
     )
 }

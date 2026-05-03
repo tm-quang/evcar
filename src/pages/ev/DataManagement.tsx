@@ -15,9 +15,10 @@ import {
 import { AlertCircle } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import HeaderBar from '../../components/layout/HeaderBar'
-import VehicleFooterNav from '../../components/ev/VehicleFooterNav'
+
 import { useNotification } from '../../contexts/notificationContext.helpers'
 import { getSupabaseClient } from '../../lib/supabaseClient'
+import { useAppearance } from '../../contexts/AppearanceContext'
 
 type BackupRecord = {
     id: string
@@ -37,6 +38,7 @@ export default function DataManagementPage() {
     const navigate = useNavigate()
     const queryClient = useQueryClient()
     const { success, error: showError } = useNotification()
+    const { isDarkMode } = useAppearance()
     const [isBackingUp, setIsBackingUp] = useState(false)
     const [isRestoring, setIsRestoring] = useState(false)
     const [lastSyncTime, setLastSyncTime] = useState<string | null>(new Date().toLocaleString('vi-VN'))
@@ -321,22 +323,22 @@ export default function DataManagementPage() {
     }
 
     return (
-        <div className="flex h-[100dvh] flex-col overflow-hidden" style={{ backgroundColor: 'var(--app-home-bg)' }}>
+        <div className={`flex h-[100dvh] flex-col overflow-hidden ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`} style={{ backgroundColor: isDarkMode ? '#0F172A' : '#F8FAFC' }}>
             <HeaderBar variant="page" title="Quản lý dữ liệu" onBack={() => navigate('/settings')} />
 
             <main className="flex-1 overflow-y-auto min-h-0 w-full max-w-md mx-auto px-4 pt-4 pb-28 space-y-6">
 
                 {/* Status Hero Card */}
-                <div className="rounded-3xl bg-white p-8 shadow-md border border-slate-300 overflow-hidden relative group">
-                    <div className="absolute top-0 right-0 -mt-12 -mr-12 h-48 w-48 rounded-full bg-emerald-50 opacity-50 blur-3xl group-hover:bg-emerald-100 transition-colors" />
+                <div className={`rounded-3xl p-8 shadow-md border overflow-hidden relative group ${isDarkMode ? 'bg-slate-900 border-slate-800 shadow-none' : 'bg-white border-slate-300 shadow-slate-100'}`}>
+                    <div className={`absolute top-0 right-0 -mt-12 -mr-12 h-48 w-48 rounded-full opacity-50 blur-3xl transition-colors ${isDarkMode ? 'bg-emerald-500/10 group-hover:bg-emerald-500/20' : 'bg-emerald-50 group-hover:bg-emerald-100'}`} />
 
                     <div className="relative z-10 flex flex-col items-center text-center">
-                        <div className="h-20 w-20 flex items-center justify-center rounded-full bg-emerald-500 text-white shadow- shadow-emerald-200 mb-4 animate-in zoom-in duration-500">
+                        <div className={`h-20 w-20 flex items-center justify-center rounded-full text-white shadow-md mb-4 animate-in zoom-in duration-500 ${isDarkMode ? 'bg-emerald-600 shadow-none' : 'bg-emerald-500 shadow-emerald-200'}`}>
                             <LuCloud className="h-10 w-10" />
                         </div>
 
-                        <h2 className="text-2xl font-black text-slate-800 tracking-tight">Trạng thái dữ liệu</h2>
-                        <p className="text-sm font-medium text-slate-500 mt-2">Dữ liệu của bạn hiện đã được đồng bộ trên máy chủ EVNGo.</p>
+                        <h2 className={`text-2xl font-black tracking-tight ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>Trạng thái dữ liệu</h2>
+                        <p className={`text-sm font-medium mt-2 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Dữ liệu của bạn hiện đã được đồng bộ trên máy chủ EVNGo.</p>
 
                         <div className="mt-6 flex flex-col gap-1 items-center">
                             <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100/50">
@@ -352,7 +354,7 @@ export default function DataManagementPage() {
                         <button
                             onClick={handleCloudSync}
                             disabled={isBackingUp}
-                            className="mt-8 w-full py-4 rounded-3xl bg-blue-500 text-white font-black text-sm shadow-xl hover:shadow-2xl transition-all active:scale-95 disabled:opacity-50"
+                            className={`mt-8 w-full py-4 rounded-3xl font-black text-sm shadow-xl transition-all active:scale-95 disabled:opacity-50 ${isDarkMode ? 'bg-blue-600 text-white shadow-none' : 'bg-blue-500 text-white shadow-blue-200'}`}
                         >
                             {isBackingUp ? 'Đang cập nhật...' : 'Đồng bộ ngay'}
                         </button>
@@ -365,13 +367,13 @@ export default function DataManagementPage() {
                     <button
                         onClick={handleCloudBackup}
                         disabled={isBackingUp}
-                        className="flex flex-col items-center justify-center gap-4 rounded-3xl bg-white p-6 shadow-md border border-slate-300 transition-all hover:bg-slate-50 active:scale-95"
+                        className={`flex flex-col items-center justify-center gap-4 rounded-3xl p-6 shadow-md border transition-all active:scale-95 ${isDarkMode ? 'bg-slate-900 border-slate-800 shadow-none hover:bg-slate-800' : 'bg-white border-slate-300 shadow-slate-100 hover:bg-slate-50'}`}
                     >
-                        <div className="h-14 w-14 flex items-center justify-center rounded-3xl bg-blue-100 text-blue-600 shadow-inner">
+                        <div className={`h-14 w-14 flex items-center justify-center rounded-3xl shadow-inner ${isDarkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-600'}`}>
                             <LuDownload className="h-7 w-7" />
                         </div>
                         <div className="text-center">
-                            <span className="block text-sm font-black text-slate-800">Sao lưu</span>
+                            <span className={`block text-sm font-black ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>Sao lưu</span>
                             <span className="block text-[10px] font-bold text-slate-400 uppercase mt-0.5">Lưu lên máy chủ</span>
                         </div>
                     </button>
@@ -380,24 +382,24 @@ export default function DataManagementPage() {
                     <button
                         onClick={openRestoreModal}
                         disabled={isRestoring}
-                        className="flex flex-col items-center justify-center gap-4 rounded-3xl bg-white p-6 shadow-md border border-slate-300 transition-all hover:bg-slate-50 group active:scale-95"
+                        className={`flex flex-col items-center justify-center gap-4 rounded-3xl p-6 shadow-md border transition-all active:scale-95 group ${isDarkMode ? 'bg-slate-900 border-slate-800 shadow-none hover:bg-slate-800' : 'bg-white border-slate-300 shadow-slate-100 hover:bg-slate-50'}`}
                     >
-                        <div className="h-14 w-14 flex items-center justify-center rounded-3xl bg-rose-100 text-rose-600 shadow-inner">
+                        <div className={`h-14 w-14 flex items-center justify-center rounded-3xl shadow-inner ${isDarkMode ? 'bg-rose-500/20 text-rose-400' : 'bg-rose-100 text-rose-600'}`}>
                             <LuUpload className={`h-7 w-7 ${isRestoring ? 'animate-bounce' : ''}`} />
                         </div>
                         <div className="text-center">
-                            <span className="block text-sm font-black text-slate-800">Khôi phục</span>
+                            <span className={`block text-sm font-black ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>Khôi phục</span>
                             <span className="block text-[10px] font-bold text-slate-400 uppercase mt-0.5">Tải về máy</span>
                         </div>
                     </button>
                 </div>
 
                 {/* Information Card */}
-                <div className="rounded-3xl bg-amber-50 p-6 border border-amber-100 flex gap-4">
+                <div className={`rounded-3xl p-6 border flex gap-4 ${isDarkMode ? 'bg-amber-500/10 border-amber-500/20 shadow-none' : 'bg-amber-50 border-amber-100'}`}>
                     <AlertCircle className="h-6 w-6 text-amber-500 shrink-0 mt-0.5" />
                     <div>
-                        <h4 className="text-sm font-black text-amber-900">Bảo vệ quyền riêng tư</h4>
-                        <p className="text-xs text-amber-700/80 mt-1 leading-relaxed">
+                        <h4 className={`text-sm font-black ${isDarkMode ? 'text-amber-400' : 'text-amber-900'}`}>Bảo vệ quyền riêng tư</h4>
+                        <p className={`text-xs mt-1 leading-relaxed ${isDarkMode ? 'text-amber-500/80' : 'text-amber-700/80'}`}>
                             Bản sao lưu chứa toàn bộ thông tin phương tiện, chi phí và lộ trình của bạn. Hãy bảo quản tệp này ở nơi an toàn.
                             Dữ liệu phục hồi sẽ ghi đè các bản ghi.
                         </p>
@@ -406,24 +408,24 @@ export default function DataManagementPage() {
 
 
                 {/* Advanced Settings */}
-                <div className="bg-white rounded-3xl overflow-hidden border border-slate-300 shadow-sm mt-8">
-                    <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+                <div className={`rounded-3xl overflow-hidden border shadow-sm mt-8 ${isDarkMode ? 'bg-slate-900 border-slate-800 shadow-none' : 'bg-white border-slate-300'}`}>
+                    <div className={`px-6 py-5 border-b flex items-center justify-between ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
                         <div className="flex items-center gap-3">
                             <LuHistory className="h-5 w-5 text-slate-400" />
-                            <span className="text-sm font-black text-slate-800">Tùy chọn nâng cao</span>
+                            <span className={`text-sm font-black ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>Tùy chọn nâng cao</span>
                         </div>
                     </div>
                     <div className="p-2">
                         <button
                             onClick={() => setShowDeleteModal(true)}
-                            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 active:bg-slate-100 transition-all rounded-2xl group"
+                            className={`w-full flex items-center justify-between p-4 transition-all rounded-2xl group ${isDarkMode ? 'hover:bg-slate-800 active:bg-slate-700' : 'hover:bg-slate-50 active:bg-slate-100'}`}
                         >
                             <div className="flex items-center gap-4">
-                                <div className="h-10 w-10 flex items-center justify-center rounded-2xl bg-rose-50 text-rose-600 transition-colors group-hover:bg-rose-100">
+                                <div className={`h-10 w-10 flex items-center justify-center rounded-2xl transition-colors ${isDarkMode ? 'bg-rose-500/20 text-rose-400 group-hover:bg-rose-500/30' : 'bg-rose-50 text-rose-600 group-hover:bg-rose-100'}`}>
                                     <LuTrash2 className="h-5 w-5" />
                                 </div>
                                 <div className="text-left">
-                                    <p className="text-sm font-black text-slate-800">Xóa dữ liệu</p>
+                                    <p className={`text-sm font-black ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>Xóa dữ liệu</p>
                                     <p className="text-[11px] text-slate-500 font-medium">Xóa tùy chọn hoặc toàn bộ dữ liệu</p>
                                 </div>
                             </div>
@@ -434,21 +436,21 @@ export default function DataManagementPage() {
                 <div className="h-10" />
             </main>
 
-            <VehicleFooterNav isMainPage={false} />
+
 
             {/* Restore Modal */}
             {showRestoreModal && (
                 <div className="fixed inset-0 z-[100] flex flex-col justify-end bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
                     <div className="absolute inset-0 z-0" onClick={() => setShowRestoreModal(false)} />
-                    <div className="relative z-10 w-full max-w-md mx-auto bg-white rounded-t-3xl pt-4 pb-12 px-6 shadow-2xl animate-in slide-in-from-bottom-full duration-300">
+                    <div className={`relative z-10 w-full max-w-md mx-auto rounded-t-3xl pt-4 pb-12 px-6 shadow-2xl animate-in slide-in-from-bottom-full duration-300 border-x border-t ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-white'}`}>
                         {/* Drag Handle */}
-                        <div className="mx-auto h-1.5 w-12 rounded-full bg-slate-200 mb-6" />
+                        <div className={`mx-auto h-1.5 w-12 rounded-full mb-6 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`} />
 
                         <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-xl font-black text-slate-800">Chọn bản ghi để phục hồi</h3>
+                            <h3 className={`text-xl font-black ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>Chọn bản ghi để phục hồi</h3>
                             <button
                                 onClick={() => setShowRestoreModal(false)}
-                                className="h-8 w-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                className={`h-8 w-8 flex items-center justify-center rounded-full transition-colors ${isDarkMode ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
                             >
                                 <LuX className="h-5 w-5" />
                             </button>
@@ -458,22 +460,22 @@ export default function DataManagementPage() {
                             {isLoadingBackups ? (
                                 <div className="py-8 text-center text-slate-500 font-medium">Đang tải danh sách...</div>
                             ) : backups.length === 0 ? (
-                                <div className="py-8 text-center text-slate-500 font-medium bg-slate-50 rounded-2xl border border-slate-100">
+                                <div className={`py-8 text-center font-medium rounded-2xl border ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-500' : 'bg-slate-50 border-slate-100 text-slate-500'}`}>
                                     Không tìm thấy bản sao lưu nào gắn với tài khoản của bạn.
                                 </div>
                             ) : (
                                 backups.map((backup, index) => (
                                     <div
                                         key={backup.id}
-                                        className="flex items-center justify-between p-4 rounded-3xl border border-slate-200 bg-white shadow-sm hover:border-emerald-300 hover:shadow-md transition-all cursor-pointer group"
+                                        className={`flex items-center justify-between p-4 rounded-3xl border shadow-sm transition-all cursor-pointer group ${isDarkMode ? 'bg-slate-800 border-slate-700 hover:border-emerald-500/50 hover:bg-slate-700 shadow-none' : 'bg-white border-slate-200 hover:border-emerald-300 hover:shadow-md'}`}
                                         onClick={() => performRestore(backup.id)}
                                     >
                                         <div className="flex gap-4 items-center">
-                                            <div className="h-10 w-10 flex items-center justify-center rounded-3xl bg-emerald-50 text-emerald-600">
+                                            <div className={`h-10 w-10 flex items-center justify-center rounded-3xl ${isDarkMode ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}>
                                                 <LuClock className="h-5 w-5" />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-bold text-slate-800">
+                                                <p className={`text-sm font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
                                                     Bản sao lưu #{backups.length - index}
                                                 </p>
                                                 <p className="text-xs text-slate-500 mt-0.5">
@@ -484,12 +486,12 @@ export default function DataManagementPage() {
                                         <div className="flex items-center gap-2">
                                             <button
                                                 onClick={(e) => deleteBackupRecord(e, backup.id)}
-                                                className="h-8 w-8 flex items-center justify-center rounded-xl text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                                                className={`h-8 w-8 flex items-center justify-center rounded-xl transition-colors ${isDarkMode ? 'text-rose-400 hover:bg-rose-500/20' : 'text-rose-400 hover:bg-rose-50 hover:text-rose-600'}`}
                                                 title="Xóa bản ghi"
                                             >
                                                 <LuTrash2 className="h-4 w-4" />
                                             </button>
-                                            <div className="h-8 px-3 flex items-center justify-center rounded-xl bg-slate-200 text-slate-600 font-bold text-xs group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                                            <div className={`h-8 px-3 flex items-center justify-center rounded-xl font-bold text-xs group-hover:bg-emerald-500 group-hover:text-white transition-colors ${isDarkMode ? 'bg-slate-700 text-slate-400' : 'bg-slate-200 text-slate-600'}`}>
                                                 Chọn
                                             </div>
                                         </div>
@@ -505,14 +507,14 @@ export default function DataManagementPage() {
             {showDeleteModal && (
                 <div className="fixed inset-0 z-[100] flex flex-col justify-end bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
                     <div className="absolute inset-0 z-0" onClick={() => setShowDeleteModal(false)} />
-                    <div className="relative z-10 w-full max-w-md mx-auto bg-white rounded-t-3xl pt-4 pb-12 px-6 shadow-2xl animate-in slide-in-from-bottom-full duration-300">
-                        <div className="mx-auto h-1.5 w-12 rounded-full bg-slate-200 mb-6" />
+                    <div className={`relative z-10 w-full max-w-md mx-auto rounded-t-3xl pt-4 pb-12 px-6 shadow-2xl animate-in slide-in-from-bottom-full duration-300 border-x border-t ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-white'}`}>
+                        <div className={`mx-auto h-1.5 w-12 rounded-full mb-6 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`} />
 
                         <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-xl font-black text-slate-800">Xóa dữ liệu</h3>
+                            <h3 className={`text-xl font-black ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>Xóa dữ liệu</h3>
                             <button
                                 onClick={() => setShowDeleteModal(false)}
-                                className="h-8 w-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                className={`h-8 w-8 flex items-center justify-center rounded-full transition-colors ${isDarkMode ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
                             >
                                 <LuX className="h-5 w-5" />
                             </button>
@@ -524,14 +526,14 @@ export default function DataManagementPage() {
                                 <button
                                     key={opt.id}
                                     onClick={() => handleSelectDeleteOption(opt.id)}
-                                    className="w-full flex items-center justify-between p-4 rounded-3xl border border-slate-200 bg-white shadow-sm hover:border-slate-300 hover:shadow-md transition-all active:scale-[0.98] group"
+                                    className={`w-full flex items-center justify-between p-4 rounded-3xl border shadow-sm transition-all active:scale-[0.98] group ${isDarkMode ? 'bg-slate-800 border-slate-700 hover:bg-slate-700 hover:border-slate-600 shadow-none' : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-md'}`}
                                 >
                                     <div className="flex gap-4 items-center">
-                                        <div className={`h-11 w-11 flex items-center justify-center rounded-2xl ${opt.bg} ${opt.color}`}>
+                                        <div className={`h-11 w-11 flex items-center justify-center rounded-2xl ${isDarkMode ? 'bg-rose-500/10 text-rose-400' : `${opt.bg} ${opt.color}`}`}>
                                             <LuTrash2 className="h-5 w-5" />
                                         </div>
                                         <div className="text-left">
-                                            <p className="text-sm font-bold text-slate-800">
+                                            <p className={`text-sm font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
                                                 {opt.label}
                                             </p>
                                             <p className="text-[11px] text-slate-500 mt-0.5">
@@ -539,7 +541,7 @@ export default function DataManagementPage() {
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="h-8 px-3 flex items-center justify-center rounded-xl bg-slate-100 text-slate-500 font-bold text-xs group-hover:bg-rose-500 group-hover:text-white transition-colors">
+                                    <div className={`h-8 px-3 flex items-center justify-center rounded-xl font-bold text-xs group-hover:bg-rose-500 group-hover:text-white transition-colors ${isDarkMode ? 'bg-slate-700 text-slate-400' : 'bg-slate-100 text-slate-500'}`}>
                                         Chọn
                                     </div>
                                 </button>
@@ -553,14 +555,14 @@ export default function DataManagementPage() {
             {showPasswordModal && (
                 <div className="fixed inset-0 z-[110] flex flex-col justify-center items-center px-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
                     <div className="absolute inset-0 z-0" onClick={() => { if (!isDeleting) { setShowPasswordModal(false); setPassword(''); } }} />
-                    <div className="relative z-10 w-full max-w-sm bg-white rounded-[32px] p-6 shadow-2xl animate-in zoom-in-95 duration-300">
+                    <div className={`relative z-10 w-full max-w-sm rounded-[32px] p-6 shadow-2xl animate-in zoom-in-95 duration-300 border ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-white'}`}>
                         <div className="flex justify-center mb-4">
-                            <div className="h-16 w-16 rounded-3xl bg-rose-50 text-rose-500 flex items-center justify-center shadow-inner">
+                            <div className={`h-16 w-16 rounded-3xl flex items-center justify-center shadow-inner ${isDarkMode ? 'bg-rose-500/20 text-rose-400' : 'bg-rose-50 text-rose-500'}`}>
                                 <LuShieldCheck className="h-8 w-8" />
                             </div>
                         </div>
                         
-                        <h3 className="text-xl font-black text-center text-slate-800 mb-2">Xác nhận bảo mật</h3>
+                        <h3 className={`text-xl font-black text-center mb-2 ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>Xác nhận bảo mật</h3>
                         <p className="text-sm text-center text-slate-500 mb-6 px-2">
                             Bạn đang chọn <strong>{deleteOption && DELETE_OPTIONS.find(o => o.id === deleteOption)?.label.toLowerCase()}</strong>. Vui lòng nhập mật khẩu tài khoản để xác nhận hành động này.
                         </p>
@@ -571,7 +573,7 @@ export default function DataManagementPage() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="Nhập mật khẩu..."
-                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500/50 transition-all pr-12"
+                                className={`w-full border rounded-2xl px-4 py-4 text-sm font-bold transition-all pr-12 focus:outline-none focus:ring-2 focus:ring-rose-500/50 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 focus:border-rose-500' : 'bg-slate-50 border-slate-200 text-slate-800 focus:bg-white focus:border-rose-500'}`}
                             />
                             <button 
                                 type="button"
@@ -586,7 +588,7 @@ export default function DataManagementPage() {
                             <button 
                                 onClick={() => { setShowPasswordModal(false); setPassword(''); }}
                                 disabled={isDeleting}
-                                className="flex-1 py-3.5 rounded-2xl bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-colors disabled:opacity-50"
+                                className={`flex-1 py-3.5 rounded-2xl font-bold text-sm transition-colors disabled:opacity-50 ${isDarkMode ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
                             >
                                 Hủy
                             </button>

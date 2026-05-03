@@ -18,6 +18,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { useVehicles, useVehicleCharging, vehicleKeys } from '../../lib/ev/useVehicleQueries'
 import { createFuelLog, updateFuelLog, type FuelLogRecord } from '../../lib/ev/vehicleService'
+import { useAppearance } from '../../contexts/AppearanceContext'
 import HeaderBar from '../../components/layout/HeaderBar'
 
 const formatCurrency = (value: number) =>
@@ -37,6 +38,7 @@ export default function VehicleChargingHistory() {
     const electricVehicles = vehicles.filter(v => v.fuel_type === 'electric')
     const selectedVehicle = electricVehicles[0] // Simple approach for now
 
+    const { isDarkMode } = useAppearance()
     const { data: allLogs = [], isLoading, refetch } = useVehicleCharging(selectedVehicle?.id)
 
     const queryClient = useQueryClient()
@@ -338,7 +340,7 @@ export default function VehicleChargingHistory() {
 
     if (isLoading) {
         return (
-            <div className="flex h-screen items-center justify-center bg-white">
+            <div className={`flex h-screen items-center justify-center ${isDarkMode ? 'bg-slate-950' : 'bg-white'}`}>
                 <RotateCw className="h-8 w-8 animate-spin text-blue-500" />
             </div>
         )
@@ -403,8 +405,8 @@ export default function VehicleChargingHistory() {
                                 key={year}
                                 onClick={() => setFilterYear(year)}
                                 className={`px-5 py-2.5 rounded-3xl text-[11px] font-black uppercase tracking-widest transition-all shrink-0 ${filterYear === year
-                                    ? 'bg-[#0F172A] text-white shadow-md'
-                                    : 'bg-white text-slate-400 border border-slate-200'
+                                    ? (isDarkMode ? 'bg-slate-100 text-slate-900 shadow-md' : 'bg-[#0F172A] text-white shadow-md')
+                                    : (isDarkMode ? 'bg-slate-800 text-slate-400 border border-slate-700' : 'bg-white text-slate-400 border border-slate-200')
                                     }`}
                             >
                                 {year}
@@ -414,7 +416,7 @@ export default function VehicleChargingHistory() {
                     {/* Filter Icon Button */}
                     <button
                         onClick={() => setIsFilterModalOpen(true)}
-                        className={`h-10 w-10 flex items-center justify-center rounded-3xl transition-all shrink-0 border ${searchTerm ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300 shadow-sm'
+                        className={`h-10 w-10 flex items-center justify-center rounded-3xl transition-all shrink-0 border ${searchTerm ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20' : (isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600 shadow-sm' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300 shadow-sm')
                             }`}
                         title="Tìm kiếm & Cấu hình lọc"
                     >
@@ -427,8 +429,8 @@ export default function VehicleChargingHistory() {
                         <button
                             onClick={() => setFilterMonth('all')}
                             className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${filterMonth === 'all'
-                                ? 'bg-blue-50 text-blue-700 border-blue-200 shadow-sm'
-                                : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50'
+                                ? (isDarkMode ? 'bg-blue-500/20 text-blue-400 border-blue-500/30 shadow-sm' : 'bg-blue-50 text-blue-700 border-blue-200 shadow-sm')
+                                : (isDarkMode ? 'bg-slate-800 text-slate-500 border-slate-700 hover:bg-slate-700' : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50')
                                 }`}
                         >
                             Cả năm
@@ -438,10 +440,9 @@ export default function VehicleChargingHistory() {
                                 key={month}
                                 onClick={() => setFilterMonth(month)}
                                 className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${filterMonth === month
-                                    ? 'bg-blue-50 text-blue-700 border-blue-200 shadow-sm'
-                                    : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50'
-                                    }`}
-                            >
+                                    ? (isDarkMode ? 'bg-blue-500/20 text-blue-400 border-blue-500/30 shadow-sm' : 'bg-blue-50 text-blue-700 border-blue-200 shadow-sm')
+                                    : (isDarkMode ? 'bg-slate-800 text-slate-500 border-slate-700 hover:bg-slate-700' : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50')
+                                    }`}>
                                 T{month}
                             </button>
                         ))}
@@ -520,11 +521,11 @@ export default function VehicleChargingHistory() {
                 {/* List Container with Timeline */}
                 <div className="relative ml-2 pl-4 border-l border-slate-200 space-y-6 pb-10">
                     {filteredLogs.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-20 px-8 text-center bg-white rounded-[32px] border border-slate-100 shadow-sm">
-                            <div className="mb-4 rounded-3xl bg-slate-200 p-6 shadow-inner">
-                                <Search className="h-10 w-10 text-slate-500" />
+                        <div className={`flex flex-col items-center justify-center py-20 px-8 text-center rounded-[32px] border shadow-sm ${isDarkMode ? 'bg-slate-900 border-slate-800 shadow-none' : 'bg-white border-slate-100 shadow-slate-100/50'}`}>
+                            <div className={`mb-4 rounded-3xl p-6 shadow-inner ${isDarkMode ? 'bg-slate-800' : 'bg-slate-200'}`}>
+                                <Search className={`h-10 w-10 ${isDarkMode ? 'text-slate-600' : 'text-slate-500'}`} />
                             </div>
-                            <p className="mt-2 text-xs font-medium text-slate-400 leading-relaxed uppercase tracking-tighter">Không tìm thấy phiên sạc, không có dữ liệu phiên sạc</p>
+                            <p className={`mt-2 text-xs font-medium leading-relaxed uppercase tracking-tighter ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>Không tìm thấy phiên sạc, không có dữ liệu phiên sạc</p>
                         </div>
                     ) : (
                         filteredLogs.map(log => {
@@ -592,37 +593,37 @@ export default function VehicleChargingHistory() {
 
                                     <div
                                         onClick={() => setEditingLog(log as FuelLogRecord)}
-                                        className="group relative overflow-hidden bg-white rounded-3xl p-4 shadow-md border border-slate-300 transition-all duration-300 hover:shadow-xl hover:translate-x-1 cursor-pointer"
+                                        className={`group relative overflow-hidden rounded-3xl p-4 shadow-md border transition-all duration-300 hover:shadow-xl hover:translate-x-1 cursor-pointer ${isDarkMode ? 'bg-slate-900 border-slate-700 shadow-none hover:bg-slate-800' : 'bg-white border-slate-300 shadow-slate-200'}`}
                                     >
                                         <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-600 opacity-0 group-hover:opacity-100 transition-all duration-300" />
 
                                         {/* Header Row */}
                                         <div className="flex justify-between items-start gap-4 mb-3">
                                             <div className="flex-1 min-w-0">
-                                                <h3 className="text-[15px] font-black text-slate-900 truncate uppercase tracking-tight">{title}</h3>
+                                                <h3 className={`text-[15px] font-black truncate uppercase tracking-tight ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>{title}</h3>
                                                 <div className="flex items-center gap-1.5 mt-1">
                                                     <MapPin className="h-3 w-3 text-slate-400" />
                                                     <p className="text-[11px] font-bold text-slate-400 truncate uppercase tracking-tighter">{subtitle}</p>
                                                 </div>
                                             </div>
                                             <div className="text-right shrink-0">
-                                                <p className="text-[11px] font-black text-slate-900 border border-slate-200 rounded-full px-2.5 py-1 bg-slate-100">{dateStr}</p>
+                                                <p className={`text-[11px] font-black border rounded-full px-2.5 py-1 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-900'}`}>{dateStr}</p>
                                             </div>
                                         </div>
 
                                         {/* Metrics Grid */}
-                                        <div className="grid grid-cols-3 gap-4 mb-5">
+                                        <div className={`grid grid-cols-3 gap-4 mb-5 border-y py-3 ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
                                             <div className="flex flex-col">
                                                 <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Số điện</p>
                                                 <div className="flex items-baseline gap-1">
-                                                    <span className="text-lg font-black text-slate-900">{log.kwh?.toLocaleString('vi-VN', { maximumFractionDigits: 3 }) || 0}</span>
+                                                    <span className={`text-lg font-black ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>{log.kwh?.toLocaleString('vi-VN', { maximumFractionDigits: 3 }) || 0}</span>
                                                     <span className="text-[10px] font-black text-slate-400 uppercase">kWh</span>
                                                 </div>
                                             </div>
-                                            <div className="flex flex-col border-x border-slate-100 px-2">
+                                            <div className={`flex flex-col border-x px-2 ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
                                                 <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Thời gian</p>
                                                 <div className="flex items-baseline gap-1">
-                                                    <span className="text-lg font-black text-slate-900">{formatDuration(parsedDurationMins, true).split(' ')[0]}</span>
+                                                    <span className={`text-lg font-black ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>{formatDuration(parsedDurationMins, true).split(' ')[0]}</span>
                                                     <span className="text-[10px] font-black text-slate-400 uppercase">{formatDuration(parsedDurationMins, true).split(' ')[1] || 'phút'}</span>
                                                 </div>
                                             </div>
@@ -634,7 +635,7 @@ export default function VehicleChargingHistory() {
                                                             {formatNumber(originalCost, 0)}
                                                         </span>
                                                     )}
-                                                    <p className={`text-sm font-black leading-none ${displayCost === 0 ? 'text-emerald-500' : 'text-slate-900'}`}>
+                                                    <p className={`text-sm font-black leading-none ${displayCost === 0 ? 'text-emerald-500' : (isDarkMode ? 'text-slate-100' : 'text-slate-900')}`}>
                                                         {displayCost === 0 ? 'FREE' : formatNumber(displayCost, 0)}
                                                     </p>
                                                 </div>
@@ -646,19 +647,19 @@ export default function VehicleChargingHistory() {
                                             <div className="flex-1">
                                                 <div className="flex justify-between items-center mb-1.5">
                                                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Tỉ lệ sạc</span>
-                                                    <span className="text-[10px] font-black text-green-600">{percentage}%</span>
+                                                    <span className={`text-[10px] font-black ${isDarkMode ? 'text-emerald-400' : 'text-green-600'}`}>{percentage}%</span>
                                                 </div>
-                                                <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
+                                                <div className={`h-1.5 w-full rounded-full overflow-hidden border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-200/50'}`}>
                                                     <div
                                                         className="h-full bg-green-600 rounded-full transition-all duration-700 shadow-sm"
                                                         style={{ width: `${percentage}%` }}
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-1.5 shrink-0 bg-emerald-50 px-3 py-1.5 rounded-2xl border border-emerald-100">
-                                                <span className="text-[10px] font-black text-emerald-700">{startTime}</span>
-                                                <ChevronRight className="h-2.5 w-2.5 text-emerald-300" />
-                                                <span className="text-[10px] font-black text-emerald-700">{endTime}</span>
+                                            <div className={`flex items-center gap-1.5 shrink-0 px-3 py-1.5 rounded-2xl border ${isDarkMode ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-emerald-50 border-emerald-100 text-emerald-700'}`}>
+                                                <span className="text-[10px] font-black">{startTime}</span>
+                                                <ChevronRight className="h-2.5 w-2.5 opacity-50" />
+                                                <span className="text-[10px] font-black">{endTime}</span>
                                             </div>
                                         </div>
 
@@ -682,8 +683,8 @@ export default function VehicleChargingHistory() {
             {/* Details & Edit Modal */}
             {editingLog && (
                 <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] transition-all duration-300 animate-in fade-in" onClick={() => setEditingLog(null)}>
-                    <div className="w-full max-w-md max-h-[80vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl mt-12 sm:mt-0 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300" onClick={e => e.stopPropagation()}>
-                        <div className="bg-blue-600 px-5 pt-3 pb-5 text-white shrink-0">
+                    <div className={`w-full max-w-md max-h-[80vh] flex flex-col rounded-t-3xl sm:rounded-3xl shadow-2xl mt-12 sm:mt-0 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300 border ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-white'}`} onClick={e => e.stopPropagation()}>
+                        <div className={`px-5 pt-3 pb-5 text-white shrink-0 ${isDarkMode ? 'bg-slate-800' : 'bg-blue-600'}`}>
                             {/* Mobile Handle */}
                             <div className="flex w-full justify-center pb-3 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10">
                                 <div className="h-1.5 w-12 rounded-full bg-white/40" />
@@ -757,34 +758,34 @@ export default function VehicleChargingHistory() {
                                 return (
                                     <>
                                         {/* Read-only details */}
-                                        <div className="grid grid-cols-2 gap-y-4 gap-x-4 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                        <div className={`grid grid-cols-2 gap-y-4 gap-x-4 mb-6 p-4 rounded-2xl border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-50 border-slate-100'}`}>
                                             <div>
                                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Thời gian</p>
-                                                <p className="text-sm font-bold text-slate-800">{startTimeModal} → {endTimeModal}</p>
+                                                <p className={`text-sm font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>{startTimeModal} → {endTimeModal}</p>
                                             </div>
                                             <div>
                                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Thời lượng sạc</p>
-                                                <p className="text-sm font-bold text-slate-800">{durationModal}</p>
+                                                <p className={`text-sm font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>{durationModal}</p>
                                             </div>
 
                                             <div className="col-span-2">
                                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Vị trí địa chỉ</p>
-                                                <p className="text-sm font-bold text-slate-800 leading-snug">{editingLog.station_name}{editingLog.location ? ` - ${editingLog.location}` : ''}</p>
+                                                <p className={`text-sm font-bold leading-snug ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>{editingLog.station_name}{editingLog.location ? ` - ${editingLog.location}` : ''}</p>
                                             </div>
 
                                             <div>
                                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Năng lượng</p>
-                                                <p className="text-sm font-bold text-slate-800">{editingLog.kwh ? `${editingLog.kwh.toFixed(2)} kWh` : '--'}</p>
+                                                <p className={`text-sm font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>{editingLog.kwh ? `${editingLog.kwh.toFixed(2)} kWh` : '--'}</p>
                                             </div>
                                             <div>
                                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Tỉ lệ sạc</p>
-                                                <p className="text-sm font-bold text-green-600">~{percentModal}% pin</p>
+                                                <p className={`text-sm font-bold ${isDarkMode ? 'text-emerald-400' : 'text-green-600'}`}>~{percentModal}% pin</p>
                                             </div>
 
                                             <div className="col-span-2">
                                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Chi phí phiên sạc</p>
                                                 <div className="flex flex-wrap items-center gap-2">
-                                                    <span className="text-sm font-black text-blue-600">
+                                                    <span className={`text-sm font-black ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
                                                         {actualCostModal === 0 ? 'Miễn phí' : formatCurrency(actualCostModal)}
                                                     </span>
                                                     {(actualCostModal < originalCostModal || parsedKhuyenMai) && (
@@ -803,7 +804,7 @@ export default function VehicleChargingHistory() {
                                             {cleanNotesModal && (
                                                 <div className="col-span-2">
                                                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Ghi chú</p>
-                                                    <p className="text-sm font-medium text-slate-700">{cleanNotesModal}</p>
+                                                    <p className={`text-sm font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{cleanNotesModal}</p>
                                                 </div>
                                             )}
                                         </div>
@@ -824,10 +825,10 @@ export default function VehicleChargingHistory() {
                                             } catch (error) {
                                                 toast.error('Lỗi khi cập nhật', { id: toastId })
                                             }
-                                        }} className="space-y-4 border-t border-slate-100 pt-5">
-                                            <h4 className="font-bold text-slate-800 text-sm mb-3">Chỉnh sửa ghi chú</h4>
+                                        }} className={`space-y-4 border-t pt-5 ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
+                                            <h4 className={`font-bold text-sm mb-3 ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>Chỉnh sửa ghi chú</h4>
                                             <div>
-                                                <textarea name="notes" rows={4} defaultValue={editingLog.notes || ''} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm focus:border-blue-400 focus:bg-white outline-none transition-colors" placeholder="Dữ liệu import thường lưu trữ tại đây..."></textarea>
+                                                <textarea name="notes" rows={4} defaultValue={editingLog.notes || ''} className={`w-full rounded-xl border px-3 py-2.5 text-sm outline-none transition-colors ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-400 focus:bg-white'}`} placeholder="Dữ liệu import thường lưu trữ tại đây..."></textarea>
                                             </div>
                                             <button type="submit" className="w-full flex items-center justify-center gap-2 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white py-3.5 font-bold transition-all shadow-md shadow-blue-200">
                                                 <Save className="h-5 w-5" />
@@ -845,21 +846,21 @@ export default function VehicleChargingHistory() {
             {/* Filter Modal */}
             {isFilterModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] transition-all duration-300 animate-in fade-in" onClick={() => setIsFilterModalOpen(false)}>
-                    <div className="w-full max-w-md max-h-[80vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl mt-12 sm:mt-0 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300" onClick={e => e.stopPropagation()}>
+                    <div className={`w-full max-w-md max-h-[80vh] flex flex-col rounded-t-3xl sm:rounded-3xl shadow-2xl mt-12 sm:mt-0 safe-area-bottom overflow-hidden animate-in slide-in-from-bottom-full duration-300 border ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-white'}`} onClick={e => e.stopPropagation()}>
                         {/* Mobile Handle */}
-                        <div className="flex w-full justify-center pt-3 pb-1 flex-shrink-0 bg-white sm:hidden scroll-none pointer-events-none sticky top-0 z-10">
-                            <div className="h-1.5 w-12 rounded-full bg-slate-200" />
+                        <div className={`flex w-full justify-center pt-3 pb-1 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10 ${isDarkMode ? 'bg-slate-900' : 'bg-white'}`}>
+                            <div className={`h-1.5 w-12 rounded-full ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`} />
                         </div>
-                        <div className="flex items-center justify-between p-4 border-b border-slate-100 shrink-0">
-                            <h3 className="font-bold text-lg text-slate-800">Tìm kiếm & Lọc</h3>
-                            <button onClick={() => setIsFilterModalOpen(false)} className="rounded-full bg-slate-100 p-2 text-slate-600 hover:bg-slate-200 transition-colors">
+                        <div className={`flex items-center justify-between p-4 border-b shrink-0 ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
+                            <h3 className={`font-bold text-lg ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>Tìm kiếm & Lọc</h3>
+                            <button onClick={() => setIsFilterModalOpen(false)} className={`rounded-full p-2 transition-colors ${isDarkMode ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                                 <X className="h-4 w-4" />
                             </button>
                         </div>
 
                         <div className="p-5 space-y-6 overflow-y-auto">
                             <div>
-                                <label className="mb-2 block text-sm font-semibold text-slate-700">Từ khóa tìm kiếm</label>
+                                <label className={`mb-2 block text-sm font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>Từ khóa tìm kiếm</label>
                                 <div className="relative">
                                     <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                                     <input
@@ -867,14 +868,14 @@ export default function VehicleChargingHistory() {
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                         placeholder="Tên trạm, địa chỉ, ghi chú..."
-                                        className="w-full rounded-xl border border-slate-300 pl-10 pr-3 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                        className={`w-full rounded-xl border pl-10 pr-3 py-3 text-base outline-none transition-all focus:ring-2 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 focus:border-blue-500 focus:ring-blue-500/10' : 'bg-white border-slate-300 text-slate-900 focus:border-blue-500 focus:ring-blue-100'}`}
                                         autoFocus
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="mb-2 block text-sm font-semibold text-slate-700">Tìm kiếm thông minh</label>
+                                <label className={`mb-2 block text-sm font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>Tìm kiếm thông minh</label>
                                 <div className="flex flex-wrap gap-2">
                                     {[
                                         'Chi phí cao nhất',
@@ -886,8 +887,8 @@ export default function VehicleChargingHistory() {
                                             key={suggest}
                                             onClick={() => setSearchTerm(suggest)}
                                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${searchTerm === suggest
-                                                ? 'bg-blue-100 text-blue-700 border-blue-200 shadow-sm'
-                                                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                                                ? (isDarkMode ? 'bg-blue-500/20 text-blue-400 border-blue-500/30 shadow-sm' : 'bg-blue-100 text-blue-700 border-blue-200 shadow-sm')
+                                                : (isDarkMode ? 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50')
                                                 }`}
                                         >
                                             {suggest}
@@ -909,7 +910,7 @@ export default function VehicleChargingHistory() {
                                         setFilterYear('all')
                                         setIsFilterModalOpen(false)
                                     }}
-                                    className="w-full mt-2 rounded-2xl bg-slate-100 text-slate-600 font-bold py-3.5 hover:bg-slate-200 active:scale-[0.98] transition-all"
+                                    className={`w-full mt-2 rounded-2xl font-bold py-3.5 active:scale-[0.98] transition-all ${isDarkMode ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
                                 >
                                     Xóa bộ lọc
                                 </button>

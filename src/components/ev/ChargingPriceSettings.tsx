@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { X, Save, DollarSign, Gift } from 'lucide-react'
-import { getAllFuelPrices, updateFuelPrice, type FuelType, getElectricDiscountSettings, setElectricDiscountSettings } from '../../lib/ev/chargingPriceService'
+import { getAllChargingPrices, updateChargingPrice, type ChargingType, getElectricDiscountSettings, setElectricDiscountSettings } from '../../lib/ev/chargingPriceService'
 import { useNotification } from '../../contexts/notificationContext.helpers'
 
 interface ChargingPriceSettingsProps {
@@ -13,9 +13,9 @@ interface ChargingPriceSettingsProps {
 export function ChargingPriceSettings({ isOpen, onClose, onSave }: ChargingPriceSettingsProps) {
     const { success, error: showError } = useNotification()
     const [loading, setLoading] = useState(false)
-    const [prices, setPrices] = useState<Record<FuelType, number>>({
+    const [prices, setPrices] = useState<Record<ChargingType, number>>({
         electric: 3858,
-    } as Record<FuelType, number>)
+    } as Record<ChargingType, number>)
     const [discountMode, setDiscountMode] = useState<'pct' | 'vnd'>('vnd')
     const [discountValue, setDiscountValue] = useState('')
 
@@ -27,9 +27,9 @@ export function ChargingPriceSettings({ isOpen, onClose, onSave }: ChargingPrice
 
     const loadPrices = async () => {
         try {
-            const currentPrices = await getAllFuelPrices()
+            const currentPrices = await getAllChargingPrices()
             setPrices(currentPrices)
-            const d = getElectricDiscountSettings()
+            const d = await getElectricDiscountSettings()
             setDiscountMode(d.mode)
             setDiscountValue(d.value)
         } catch (error) {
@@ -38,11 +38,11 @@ export function ChargingPriceSettings({ isOpen, onClose, onSave }: ChargingPrice
         }
     }
 
-    const handlePriceChange = (fuelType: FuelType, value: string) => {
+    const handlePriceChange = (chargingType: ChargingType, value: string) => {
         const numValue = parseInt(value) || 0
         setPrices((prev) => ({
             ...prev,
-            [fuelType]: numValue,
+            [chargingType]: numValue,
         }))
     }
 
@@ -55,10 +55,10 @@ export function ChargingPriceSettings({ isOpen, onClose, onSave }: ChargingPrice
         setLoading(true)
         try {
             // Only update electricity price to database
-            await updateFuelPrice('electric', prices.electric)
+            await updateChargingPrice('electric', prices.electric)
 
-            // Save discount settings
-            setElectricDiscountSettings({
+            // Save discount settings to database
+            await setElectricDiscountSettings({
                 mode: discountMode,
                 value: discountValue.replace(/[^\d]/g, '')
             })
@@ -93,7 +93,7 @@ export function ChargingPriceSettings({ isOpen, onClose, onSave }: ChargingPrice
                     <div className="flex flex-col">
                         <h3 className="text-lg font-black text-slate-800 flex items-center gap-2 tracking-tight">
                             <DollarSign className="h-5 w-5 text-emerald-500" />
-                            Giá sạc tại trạm Vinfast
+                            Đơn giá sạc tại trạm Vinfast
                         </h3>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Cấu hình tham số sạc pin</p>
                     </div>
@@ -112,7 +112,6 @@ export function ChargingPriceSettings({ isOpen, onClose, onSave }: ChargingPrice
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
                             <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.15em]">Đơn giá sạc điện</h4>
-                            <span className="text-[9px] font-black uppercase tracking-wider text-blue-500 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100/50">Thiết lập chung</span>
                         </div>
 
                         <div className="bg-slate-50/50 p-4 rounded-3xl border border-slate-100 shadow-sm transition-all hover:bg-white hover:border-blue-200">
@@ -124,23 +123,23 @@ export function ChargingPriceSettings({ isOpen, onClose, onSave }: ChargingPrice
                                     type="number"
                                     value={prices.electric}
                                     onChange={(e) => handlePriceChange('electric', e.target.value)}
-                                    className="w-full rounded-2xl border-2 border-slate-100 bg-white px-5 py-4 pr-20 text-2xl font-black text-slate-800 transition-all focus:border-blue-400 focus:outline-none focus:ring-8 focus:ring-blue-50/50"
+                                    className="w-full rounded-3xl border-2 border-slate-100 bg-white px-5 py-4 pr-20 text-2xl font-black text-slate-800 transition-all focus:border-blue-400 focus:outline-none focus:ring-8 focus:ring-blue-50/50"
                                     min="0"
                                     step="100"
                                     placeholder="0"
                                 />
-                                <span className="absolute right-5 top-1/2 -translate-y-1/2 text-sm font-black text-slate-400 bg-slate-50 px-2 py-1 rounded-lg">
+                                <span className="absolute right-5 top-1/2 -translate-y-1/2 text-sm font-black text-slate-500 bg-slate-50 px-2 py-1 rounded-3xl">
                                     đ/kWh
                                 </span>
                             </div>
                         </div>
 
                         {/* Info Tip */}
-                        <div className="rounded-2xl bg-blue-50/50 border border-blue-100/30 p-4 flex gap-3">
-                            <div className="h-5 w-5 bg-blue-500 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                        <div className="rounded-3xl bg-red-50/50 border border-dashed border-red-500 p-4 flex gap-3">
+                            <div className="h-5 w-5 bg-red-500 rounded-full flex items-center justify-center shrink-0 mt-0.5">
                                 <span className="text-[10px] font-bold text-white">i</span>
                             </div>
-                            <p className="text-xs font-medium leading-relaxed text-blue-800/80">
+                            <p className="text-xs font-medium leading-relaxed text-red-600/80">
                                 <strong>Giá điện</strong> và <strong>mức ưu đãi</strong> bạn thiết lập tại đây sẽ được hệ thống tự động áp dụng khi ghi chép lịch sử sạc mới.
                             </p>
                         </div>
@@ -153,14 +152,14 @@ export function ChargingPriceSettings({ isOpen, onClose, onSave }: ChargingPrice
                                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.15em]">Giảm giá & Ưu đãi</h4>
                                 <p className="text-[10px] text-slate-400 font-medium mt-0.5 italic">Áp dụng mặc định cho sạc mới</p>
                             </div>
-                            <div className="flex rounded-xl overflow-hidden border border-red-100 p-1 bg-red-50/30">
+                            <div className="flex rounded-3xl overflow-hidden border border-red-100 p-1 bg-red-50/30">
                                 <button
                                     onClick={() => { setDiscountMode('pct'); setDiscountValue('') }}
-                                    className={`px-4 py-1.5 text-[10px] font-black rounded-lg transition-all duration-300 ${discountMode === 'pct' ? 'bg-red-500 text-white shadow-md' : 'text-slate-400 hover:text-red-500'
+                                    className={`px-4 py-1.5 text-[10px] font-black rounded-3xl transition-all duration-300 ${discountMode === 'pct' ? 'bg-red-500 text-white shadow-md' : 'text-slate-400 hover:text-red-500'
                                         }`}>%</button>
                                 <button
                                     onClick={() => { setDiscountMode('vnd'); setDiscountValue('') }}
-                                    className={`px-4 py-1.5 text-[10px] font-black rounded-lg transition-all duration-300 ${discountMode === 'vnd' ? 'bg-red-500 text-white shadow-md' : 'text-slate-400 hover:text-red-500'
+                                    className={`px-4 py-1.5 text-[10px] font-black rounded-3xl transition-all duration-300 ${discountMode === 'vnd' ? 'bg-red-500 text-white shadow-md' : 'text-slate-400 hover:text-red-500'
                                         }`}>VNĐ</button>
                             </div>
                         </div>
@@ -183,7 +182,7 @@ export function ChargingPriceSettings({ isOpen, onClose, onSave }: ChargingPrice
                                         setDiscountValue(raw)
                                     }
                                 }}
-                                className="w-full rounded-xl border-2 border-red-50 bg-red-50/10 px-5 py-2 pl-14 pr-16 text-2xl font-black text-red-600 transition-all focus:border-red-300 focus:bg-white focus:outline-none focus:ring-8 focus:ring-red-50/50 placeholder:text-red-200"
+                                className="w-full rounded-3xl border-2 border-red-50 bg-red-50/10 px-5 py-2 pl-14 pr-16 text-2xl font-black text-red-600 transition-all focus:border-red-300 focus:bg-white focus:outline-none focus:ring-8 focus:ring-red-50/50 placeholder:text-red-200"
                                 placeholder={discountMode === 'pct' ? 'Ví dụ: 50' : 'Số tiền...'}
                             />
                             <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs font-black text-red-300 bg-red-50 px-2 py-1 rounded-lg">
@@ -198,7 +197,7 @@ export function ChargingPriceSettings({ isOpen, onClose, onSave }: ChargingPrice
                     <button
                         onClick={handleSave}
                         disabled={loading}
-                        className="w-full rounded-2xl bg-emerald-500 px-6 py-4 font-black text-sm text-white transition-all hover:bg-emerald-600 active:scale-95 shadow-xl shadow-emerald-100 disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2.5"
+                        className="w-full rounded-3xl bg-emerald-500 px-6 py-4 font-black text-sm text-white transition-all hover:bg-emerald-600 active:scale-95 shadow-xl shadow-emerald-100 disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2.5"
                     >
                         {loading ? (
                             <>

@@ -5,15 +5,13 @@ import { useSwipeBack } from './hooks/useSwipeBack'
 import { NotificationProvider } from './contexts/NotificationContext'
 import { DialogProvider } from './contexts/DialogContext'
 import ToastStackLimiter from './components/ui/ToastStackLimiter'
-import { isInstalledPWA } from './utils/nativeAppBehavior'
 import { useSystemSetting } from './hooks/useSystemSettings'
 import ErrorBoundary from './components/ErrorBoundary'
 import { ProtectedRoute } from './components/ProtectedRoute'
-
-
-
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { queryClient, persister } from './lib/react-query'
+import { AppearanceProvider, useAppearance } from './contexts/AppearanceContext'
+import { VehicleFooterNav } from './components/ev/VehicleFooterNav'
 
 const DashboardPage = lazy(() => import('./pages/ev'))
 const SettingsPage = lazy(() => import('./pages/Settings'))
@@ -36,75 +34,43 @@ const EVCalculatorPage = lazy(() => import('./pages/ev/EVCalculator'))
 const DataManagementPage = lazy(() => import('./pages/ev/DataManagement'))
 const AppearanceSettingsPage = lazy(() => import('./pages/AppearanceSettings'))
 
-import { AppearanceProvider } from './contexts/AppearanceContext'
-
-
 const PageFallback = () => {
   const { value: splashLogo } = useSystemSetting('app_splash_logo', '/EVGo-Logo.png')
+  const { isDarkMode } = useAppearance()
 
   return (
-    <div className="flex h-screen items-center justify-center px-6 transition-colors duration-500" style={{ backgroundColor: 'var(--app-home-bg)' }}>
+    <div className={`flex h-screen items-center justify-center px-6 transition-colors duration-500 ${isDarkMode ? 'bg-slate-950' : 'bg-slate-50'}`}>
       <div className="flex w-full max-w-sm flex-col items-center gap-6">
         <div className="relative h-32 w-32">
-          <div className="absolute -inset-6 rounded-full bg-sky-200/30 blur-[40px]" />
+          <div className={`absolute -inset-6 rounded-full blur-[40px] ${isDarkMode ? 'bg-blue-900/20' : 'bg-sky-200/30'}`} />
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="absolute h-40 w-40 rounded-full border border-sky-200/80 ripple-wave" />
-            <div className="absolute h-48 w-48 rounded-full border border-sky-100/70 ripple-wave-delay-1" />
-            <div className="absolute h-56 w-56 rounded-full border border-sky-50/60 ripple-wave-delay-2" />
+            <div className={`absolute h-40 w-40 rounded-full border ripple-wave ${isDarkMode ? 'border-blue-900/40' : 'border-sky-200/80'}`} />
+            <div className={`absolute h-48 w-48 rounded-full border ripple-wave-delay-1 ${isDarkMode ? 'border-blue-900/30' : 'border-sky-100/70'}`} />
+            <div className={`absolute h-56 w-56 rounded-full border ripple-wave-delay-2 ${isDarkMode ? 'border-blue-900/20' : 'border-sky-50/60'}`} />
           </div>
-          <div className="absolute inset-0 rounded-full bg-sky-200/40 blur-xl animate-waveGlow" />
-          <div
-            className="absolute inset-2 rounded-full bg-sky-100/30 blur-xl animate-waveGlow"
-            style={{ animationDelay: '0.3s' }}
-          />
           <img
             src={splashLogo || '/EVGo-Logo.png'}
             alt="EVGo logo"
             className="relative h-32 w-32 animate-[scalePulse_3s_ease-in-out_infinite]"
           />
         </div>
-        <div className="flex items-center gap-3">
-          {[0, 1, 2, 3, 4].map((dot) => (
-            <span
-              key={dot}
-              className="h-3 w-3 rounded-full bg-sky-500"
-              style={{
-                animation: `dotPulse 1.2s ease-in-out ${dot * 0.12}s infinite`,
-              }}
-            />
-          ))}
-        </div>
       </div>
     </div>
   )
 }
 
-/**
- * RootRedirect: x\u1eed l\u00fd hash token t\u1eeb Supabase email link khi user m\u1edf link t\u1eeb email
- * Supabase g\u1eedi email v\u1edbi link d\u1ea1ng: https://app.com/#access_token=...&type=recovery
- * Component n\u00e0y detect v\u00e0 redirect \u0111\u00fang trang
- */
 function RootRedirect({ hasExistingSession }: { hasExistingSession: boolean }) {
   const hash = window.location.hash
-
-  // Case 1: Recovery token → trang \u0111\u1eb7t l\u1ea1i m\u1eadt kh\u1ea9u
   if (hash.includes('type=recovery') && hash.includes('access_token')) {
-    // Gi\u1eef nguy\u00ean hash \u0111\u1ec3 ResetPassword page c\u00f3 th\u1ec3 \u0111\u1ecdc token
     return <Navigate to={`/reset-password${hash}`} replace />
   }
-
-  // Case 2: L\u1ed7i t\u1eeb Supabase (token h\u1ebft h\u1ea1n, invalid...) → login v\u1edbi th\u00f4ng b\u00e1o
   if (hash.includes('error=')) {
     const params = new URLSearchParams(hash.replace('#', ''))
     const errorCode = params.get('error_code') ?? ''
     const errorDesc = params.get('error_description') ?? ''
-    
-    // Encode error info v\u00e0o search params \u0111\u1ec3 Login page hi\u1ec3n th\u1ecb
     const loginSearch = `?auth_error=${encodeURIComponent(errorCode)}&msg=${encodeURIComponent(errorDesc)}`
     return <Navigate to={`/login${loginSearch}`} replace />
   }
-
-  // Case 3: B\u00ecnh th\u01b0\u1eddng → v\u00e0o app ho\u1eb7c login
   return <Navigate to={hasExistingSession ? '/ev' : '/login'} replace />
 }
 
@@ -113,50 +79,27 @@ function AppContent() {
   const navigate = useNavigate()
   const [initialPath] = useState(() => location.pathname)
 
-  // Kiểm tra hash ngay lúc khởi tạo (trước splash) — token từ email của Supabase nằm trong hash
   const initialHash = useState(() => window.location.hash)[0]
   const hasRecoveryToken = initialHash.includes('type=recovery') || 
                            (initialHash.includes('access_token') && initialHash.includes('type=recovery'))
   const hasHashError = initialHash.includes('error=')
 
-  // Splash chỉ hiện khi đi vào trang login/register bình thường, không hiện khi có token
   const splashEligible = ['/login', '/register', '/'].includes(initialPath) 
                           && !hasRecoveryToken && !hasHashError
   const [showSplash, setShowSplash] = useState(splashEligible)
 
-  // Kiểm tra sận session trong localStorage để quyết định redirect sau splash
   const hasExistingSession = useState(() => {
     try {
-      // Supabase lưu session với key 'bofin-auth-token'
       const stored = localStorage.getItem('bofin-auth-token')
       if (!stored) return false
       const parsed = JSON.parse(stored)
-      // Kiểm tra cấu trúc Supabase session
       return !!parsed?.access_token || !!parsed?.currentSession?.access_token
     } catch {
       return false
     }
   })[0]
 
-
-
-  // Enable swipe back gesture (swipe from left edge to go back)
   useSwipeBack({ enabled: true, threshold: 100, edgeWidth: 50 })
-
-  // Enhanced Android back button handling for PWA
-  useEffect(() => {
-    if (!isInstalledPWA()) return
-
-    // React Router's BrowserRouter automatically handles back button
-    // We just need to ensure proper behavior for PWA
-
-    // Track navigation history for back button
-    const unlisten = () => {
-      // React Router handles this automatically
-    }
-
-    return unlisten
-  }, [location.pathname, navigate])
 
   useEffect(() => {
     if (!splashEligible) return
@@ -166,245 +109,55 @@ function AppContent() {
     return () => clearTimeout(timer)
   }, [splashEligible])
 
+  const showFooter = !['/login', '/register', '/', '/reset-password'].includes(location.pathname)
+
   return (
     <>
       {showSplash ? (
         <PageFallback />
       ) : (
-        <Suspense fallback={null}>
-          <Routes>
-            {/* Root: xử lý thông minh, bao gồm cả hash token từ email Supabase */}
-            <Route path="/" element={<RootRedirect hasExistingSession={hasExistingSession} />} />
-            <Route
-              path="/login"
-              element={
-                <ProtectedRoute requireAuth={false}>
-                  <LoginPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/register"
-              element={
-                <ProtectedRoute requireAuth={false}>
-                  <RegisterPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <DashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <ProtectedRoute>
-                  <SettingsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings/data"
-              element={
-                <ProtectedRoute>
-                  <DataManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings/appearance"
-              element={
-                <ProtectedRoute>
-                  <AppearanceSettingsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/notifications"
-              element={
-                <ProtectedRoute>
-                  <NotificationsPage />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
-              path="/account-info"
-              element={
-                <ProtectedRoute>
-                  <AccountInfoPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ev"
-              element={
-                <ProtectedRoute>
-                  <VehicleManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ev/list"
-              element={
-                <ProtectedRoute>
-                  <VehicleListPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ev/add"
-              element={
-                <ProtectedRoute>
-                  <AddEVPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ev/edit/:id"
-              element={
-                <ProtectedRoute>
-                  <EditEVPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ev/trips"
-              element={
-                <ProtectedRoute>
-                  <VehicleTripsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ev/charging"
-              element={
-                <ProtectedRoute>
-                  <VehicleChargingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ev/maintenance"
-              element={
-                <ProtectedRoute>
-                  <VehicleMaintenancePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ev/expenses"
-              element={
-                <ProtectedRoute>
-                  <VehicleExpensesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ev/reports"
-              element={
-                <ProtectedRoute>
-                  <VehicleReportsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ev/history"
-              element={
-                <ProtectedRoute>
-                  <VehicleChargingHistoryPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/ev/calculator"
-              element={
-                <ProtectedRoute>
-                  <EVCalculatorPage />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Route public — không cần đăng nhập, cần nhận token từ email */}
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
-
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-        </Suspense>
+        <div className="flex h-screen flex-col overflow-hidden">
+          <div className="flex-1 overflow-hidden relative">
+            <Suspense fallback={null}>
+              <Routes>
+                <Route path="/" element={<RootRedirect hasExistingSession={hasExistingSession} />} />
+                <Route path="/login" element={<ProtectedRoute requireAuth={false}><LoginPage /></ProtectedRoute>} />
+                <Route path="/register" element={<ProtectedRoute requireAuth={false}><RegisterPage /></ProtectedRoute>} />
+                <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+                <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+                <Route path="/settings/data" element={<ProtectedRoute><DataManagementPage /></ProtectedRoute>} />
+                <Route path="/settings/appearance" element={<ProtectedRoute><AppearanceSettingsPage /></ProtectedRoute>} />
+                <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+                <Route path="/account-info" element={<ProtectedRoute><AccountInfoPage /></ProtectedRoute>} />
+                <Route path="/ev" element={<ProtectedRoute><VehicleManagementPage /></ProtectedRoute>} />
+                <Route path="/ev/list" element={<ProtectedRoute><VehicleListPage /></ProtectedRoute>} />
+                <Route path="/ev/add" element={<ProtectedRoute><AddEVPage /></ProtectedRoute>} />
+                <Route path="/ev/edit/:id" element={<ProtectedRoute><EditEVPage /></ProtectedRoute>} />
+                <Route path="/ev/trips" element={<ProtectedRoute><VehicleTripsPage /></ProtectedRoute>} />
+                <Route path="/ev/charging" element={<ProtectedRoute><VehicleChargingPage /></ProtectedRoute>} />
+                <Route path="/ev/maintenance" element={<ProtectedRoute><VehicleMaintenancePage /></ProtectedRoute>} />
+                <Route path="/ev/expenses" element={<ProtectedRoute><VehicleExpensesPage /></ProtectedRoute>} />
+                <Route path="/ev/reports" element={<ProtectedRoute><VehicleReportsPage /></ProtectedRoute>} />
+                <Route path="/ev/history" element={<ProtectedRoute><VehicleChargingHistoryPage /></ProtectedRoute>} />
+                <Route path="/ev/calculator" element={<ProtectedRoute><EVCalculatorPage /></ProtectedRoute>} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="*" element={<Navigate to="/login" replace />} />
+              </Routes>
+            </Suspense>
+          </div>
+          
+          {showFooter && (
+            <div className="flex-none">
+              <VehicleFooterNav onAddClick={() => navigate('/ev/charging')} />
+            </div>
+          )}
+        </div>
       )}
       <Toaster
         position="top-center"
-        containerClassName="!top-4"
         toastOptions={{
           duration: 3000,
-          style: {
-            borderRadius: '10px',
-            padding: '5px 12px',
-            maxWidth: '450px',
-            fontSize: '12px',
-            fontWeight: '500',
-            lineHeight: '1.4',
-            background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
-            color: '#ffffff',
-            border: '1px solid rgba(14, 165, 233, 0.3)',
-          },
-          success: {
-            duration: 3000,
-            style: {
-              borderRadius: '10px',
-              padding: '5px 12px',
-              maxWidth: '500px',
-              fontSize: '12px',
-              fontWeight: '500',
-              lineHeight: '1.4',
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-              color: '#ffffff',
-              border: '1px solid rgba(16, 185, 129, 0.3)',
-            },
-            iconTheme: {
-              primary: '#ffffff',
-              secondary: '#10b981',
-            },
-          },
-          error: {
-            duration: 3000,
-            style: {
-              borderRadius: '10px',
-              padding: '5px 12px',
-              maxWidth: '500px',
-              fontSize: '12px',
-              fontWeight: '500',
-              lineHeight: '1.4',
-              background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-              color: '#ffffff',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-            },
-            iconTheme: {
-              primary: '#ffffff',
-              secondary: '#ef4444',
-            },
-          },
-          loading: {
-            duration: Infinity,
-            style: {
-              borderRadius: '10px',
-              padding: '5px 12px',
-              maxWidth: '450px',
-              fontSize: '12px',
-              fontWeight: '500',
-              lineHeight: '1.4',
-              background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-              color: '#ffffff',
-              border: '1px solid rgba(59, 130, 246, 0.3)',
-            },
-            iconTheme: {
-              primary: '#ffffff',
-              secondary: '#3b82f6',
-            },
-          },
+          style: { borderRadius: '10px', fontSize: '12px' },
         }}
       />
       <ToastStackLimiter />
@@ -431,5 +184,3 @@ function App() {
 }
 
 export default App
-
-

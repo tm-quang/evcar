@@ -1,19 +1,12 @@
 import { useState, useEffect } from 'react'
 import { MapPin, Navigation, Loader2, ExternalLink, X, ChevronRight, Plus, Trash2, Map } from 'lucide-react'
 import { reverseGeocode } from '../../utils/geocoding'
+import { fetchSavedStations, createSavedStation, deleteSavedStation, type SavedStation } from '../../lib/ev/savedStationService'
 
 export type SimpleLocationData = {
     address: string
     lat: number
     lng: number
-}
-
-type SavedStation = {
-    id: string
-    name: string
-    address: string
-    lat?: number
-    lng?: number
 }
 
 type SimpleLocationInputProps = {
@@ -37,21 +30,19 @@ export function SimpleLocationInput({
     const [isLoadingLocation, setIsLoadingLocation] = useState(false)
     const [manualInput, setManualInput] = useState('')
     const [savedStations, setSavedStations] = useState<SavedStation[]>([])
+    const [loadingSaved, setLoadingSaved] = useState(false)
 
     // State for creating new saved station
     const [isAddingSaved, setIsAddingSaved] = useState(false)
     const [newSavedName, setNewSavedName] = useState('')
     const [newSavedAddress, setNewSavedAddress] = useState('')
 
-    // Load saved stations from local storage
+    // Load saved stations from Supabase
     useEffect(() => {
-        try {
-            const saved = localStorage.getItem('bofin_saved_stations')
-            if (saved) setSavedStations(JSON.parse(saved))
-        } catch (e) {
-            console.error('Error loading saved stations', e)
+        if (isModalOpen) {
+            loadSavedStations()
         }
-    }, [])
+    }, [isModalOpen])
 
     useEffect(() => {
         if (isModalOpen) {
@@ -62,9 +53,16 @@ export function SimpleLocationInput({
         }
     }, [isModalOpen, value])
 
-    const saveStationsToStorage = (stations: SavedStation[]) => {
-        setSavedStations(stations)
-        localStorage.setItem('bofin_saved_stations', JSON.stringify(stations))
+    const loadSavedStations = async () => {
+        setLoadingSaved(true)
+        try {
+            const stations = await fetchSavedStations()
+            setSavedStations(stations)
+        } catch (e) {
+            console.error('Error loading saved stations', e)
+        } finally {
+            setLoadingSaved(false)
+        }
     }
 
     const handleGetCurrentLocation = async (isForSave: boolean = false) => {
@@ -89,6 +87,28 @@ export function SimpleLocationInput({
                     if (isForSave) {
                         setNewSavedAddress(address)
                     } else {
+                        // TỰ ĐỘNG LƯU VÀO CSDL NẾU CHƯA CÓ
+                        const isDuplicate = savedStations.some(s => 
+                            s.address.toLowerCase().replace(/\s+/g, '') === address.toLowerCase().replace(/\s+/g, '')
+                        )
+
+                        if (!isDuplicate) {
+                            try {
+                                const newStation = await createSavedStation({
+                                    name: address, // Tên mặc định là địa chỉ
+                                    address: address,
+                                    lat: lat,
+                                    lng: lng
+                                })
+                                if (newStation) {
+                                    setSavedStations(prev => [newStation, ...prev])
+                                    console.log('Auto-saved new station:', address)
+                                }
+                            } catch (e) {
+                                console.error('Error auto-saving station:', e)
+                            }
+                        }
+
                         onChange(address, { address, lat, lng })
                         setIsModalOpen(false)
                     }
@@ -141,22 +161,60 @@ export function SimpleLocationInput({
         setIsModalOpen(false)
     }
 
-    const handleAddNewSaved = () => {
-        if (!newSavedName.trim() || !newSavedAddress.trim()) return
-        const newStation: SavedStation = {
-            id: Date.now().toString(),
-            name: newSavedName.trim(),
-            address: newSavedAddress.trim()
+    const handleAddNewSaved = async () => {
+        const name = newSavedName.trim()
+        const address = newSavedAddress.trim()
+
+        if (!name || !address) return
+        
+        // 1. Kiểm tra trùng lặp thông minh
+        const isDuplicateName = savedStations.some(s => 
+            s.name.toLowerCase().replace(/\s+/g, '') === name.toLowerCase().replace(/\s+/g, '')
+        )
+        const isDuplicateAddress = savedStations.some(s => 
+            s.address.toLowerCase().replace(/\s+/g, '') === address.toLowerCase().replace(/\s+/g, '')
+        )
+
+        if (isDuplicateName) {
+            alert(`Tên trạm "${name}" đã tồn tại trong danh sách của bạn.`)
+            return
         }
-        saveStationsToStorage([...savedStations, newStation])
-        setIsAddingSaved(false)
-        setNewSavedName('')
-        setNewSavedAddress('')
+
+        if (isDuplicateAddress) {
+            const existing = savedStations.find(s => s.address.toLowerCase().replace(/\s+/g, '') === address.toLowerCase().replace(/\s+/g, ''))
+            if (!confirm(`Địa chỉ này đã được lưu với tên "${existing?.name}". Bạn vẫn muốn lưu thêm trạm mới này chứ?`)) {
+                return
+            }
+        }
+        
+        try {
+            const newStation = await createSavedStation({
+                name,
+                address
+            })
+            
+            if (newStation) {
+                setSavedStations(prev => [newStation, ...prev])
+                setIsAddingSaved(false)
+                setNewSavedName('')
+                setNewSavedAddress('')
+            }
+        } catch (e) {
+            console.error('Error adding saved station', e)
+            alert('Không thể lưu trạm sạc. Vui lòng thử lại.')
+        }
     }
 
-    const handleDeleteSaved = (id: string, e: React.MouseEvent) => {
+    const handleDeleteSaved = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation()
-        saveStationsToStorage(savedStations.filter(s => s.id !== id))
+        if (!confirm('Bạn có chắc chắn muốn xóa trạm sạc này?')) return
+
+        try {
+            await deleteSavedStation(id)
+            setSavedStations(prev => prev.filter(s => s.id !== id))
+        } catch (e) {
+            console.error('Error deleting saved station', e)
+        }
     }
 
     const handleOpenInMaps = () => {
@@ -202,6 +260,31 @@ export function SimpleLocationInput({
                                 {locationData.lat.toFixed(6)}, {locationData.lng.toFixed(6)}
                             </p>
                         </div>
+                        
+                        {/* Smart Save Button */}
+                        {!savedStations.some(s => s.address === locationData.address) && (
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    const name = prompt('Đặt tên cho trạm sạc này:', locationData.address)
+                                    if (name) {
+                                        try {
+                                            const newStation = await createSavedStation({
+                                                name: name.trim(),
+                                                address: locationData.address
+                                            })
+                                            if (newStation) {
+                                                setSavedStations(prev => [newStation, ...prev])
+                                                alert('Đã lưu vào danh sách trạm thường dùng!')
+                                            }
+                                        } catch (e) { console.error(e) }
+                                    }
+                                }}
+                                className="flex items-center gap-1 text-[10px] font-black bg-blue-600 text-white px-2 py-1 rounded-lg shadow-sm active:scale-95 transition-all"
+                            >
+                                <Plus className="h-3 w-3" /> LƯU TRẠM
+                            </button>
+                        )}
                     </div>
 
                     <button
@@ -281,25 +364,25 @@ export function SimpleLocationInput({
                             <div>
                                 <div className="flex items-center justify-between mb-3 px-1">
                                     <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Trạm sạc thường dùng</p>
-                                    <button onClick={() => setIsAddingSaved(true)} className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1.5 rounded-lg flex items-center gap-1 hover:bg-blue-100 transition">
+                                    <button onClick={() => setIsAddingSaved(true)} className="text-xs font-bold text-white bg-blue-600 px-2.5 py-1.5 rounded-3xl flex items-center gap-1 hover:bg-blue-100 transition">
                                         <Plus className="h-3 w-3" /> Thêm mới
                                     </button>
                                 </div>
 
                                 {/* Add New Saved Station Form */}
                                 {isAddingSaved && (
-                                    <div className="bg-white border border-blue-100 shadow-sm p-4 rounded-2xl mb-4 space-y-3 animate-in fade-in slide-in-from-top-2">
+                                    <div className="bg-white border border-blue-100 shadow-sm p-4 rounded-3xl mb-4 space-y-3 animate-in fade-in slide-in-from-top-2">
                                         <p className="text-sm font-bold text-blue-800 mb-1">Thêm trạm sạc mới</p>
                                         <input
                                             placeholder="Tên trạm (VD: Trạm sạc Vincom)"
                                             value={newSavedName} onChange={e => setNewSavedName(e.target.value)}
-                                            className="w-full bg-slate-50 border border-slate-200 focus:bg-white rounded-xl px-3 py-2.5 text-sm focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-100 transition"
+                                            className="w-full bg-slate-50 border border-slate-200 focus:bg-white rounded-2xl px-3 py-2.5 text-sm focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-100 transition"
                                         />
                                         <div className="flex gap-2">
                                             <input
                                                 placeholder="Nhập địa chỉ..."
                                                 value={newSavedAddress} onChange={e => setNewSavedAddress(e.target.value)}
-                                                className="flex-1 bg-slate-50 border border-slate-200 focus:bg-white rounded-xl px-3 py-2.5 text-sm focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-100 transition"
+                                                className="flex-1 bg-slate-50 border border-slate-200 focus:bg-white rounded-2xl px-3 py-2.5 text-sm focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-100 transition"
                                             />
                                             <button
                                                 onClick={() => handleGetCurrentLocation(true)}
@@ -323,8 +406,13 @@ export function SimpleLocationInput({
                                 )}
 
                                 {/* Saved List */}
-                                {savedStations.length === 0 ? (
-                                    <div className="bg-white border border-slate-200 border-dashed rounded-2xl p-6 text-center">
+                                {loadingSaved ? (
+                                    <div className="flex flex-col items-center justify-center py-8">
+                                        <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-2" />
+                                        <p className="text-xs text-slate-500 font-medium">Đang tải danh sách...</p>
+                                    </div>
+                                ) : savedStations.length === 0 ? (
+                                    <div className="bg-white border-2 border-slate-300 border-dashed rounded-3xl p-6 text-center">
                                         <Map className="h-8 w-8 text-slate-300 mx-auto mb-2" />
                                         <p className="text-sm font-medium text-slate-500">Chưa có trạm sạc nào được lưu</p>
                                         <p className="text-xs text-slate-400 mt-1">Lưu các trạm thường dùng để chọn nhanh hơn</p>

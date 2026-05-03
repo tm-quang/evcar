@@ -6,12 +6,14 @@ export type AppearanceSettings = {
   home_bg_color: string
   accent_color: string
   font_family: string
+  nav_style?: 'classic' | 'pill'
 }
 
 const defaultSettings: AppearanceSettings = {
   home_bg_color: '#F7F9FC',
   accent_color: '#2563eb',
   font_family: "'Roboto', sans-serif",
+  nav_style: 'pill',
 }
 
 interface AppearanceContextType {
@@ -22,6 +24,8 @@ interface AppearanceContextType {
   isDarkMode: boolean
   toggleDarkMode: () => void
   setDarkMode: (value: boolean) => void
+  navStyle: 'classic' | 'pill'
+  setNavStyle: (style: 'classic' | 'pill') => void
 }
 
 const AppearanceContext = createContext<AppearanceContextType | undefined>(undefined)
@@ -64,9 +68,17 @@ export const AppearanceProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [isLoading, setIsLoading] = useState(true)
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     try {
-      return localStorage.getItem('evngo-dark-mode') === 'true'
+      const stored = localStorage.getItem('evngo-dark-mode')
+      return stored === null ? true : stored === 'true'
     } catch {
-      return false
+      return true
+    }
+  })
+  const [navStyle, setNavStyleState] = useState<'classic' | 'pill'>(() => {
+    try {
+      return (localStorage.getItem('evngo-nav-style') as 'classic' | 'pill') || 'pill'
+    } catch {
+      return 'pill'
     }
   })
 
@@ -79,6 +91,12 @@ export const AppearanceProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       localStorage.setItem('evngo-dark-mode', String(isDarkMode))
     } catch { /* ignore */ }
   }, [isDarkMode])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('evngo-nav-style', navStyle)
+    } catch { /* ignore */ }
+  }, [navStyle])
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -165,8 +183,13 @@ export const AppearanceProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setIsDarkMode(value)
   }
 
+  const setNavStyle = (style: 'classic' | 'pill') => {
+    setNavStyleState(style)
+    updateSettings({ nav_style: style })
+  }
+
   return (
-    <AppearanceContext.Provider value={{ settings, updateSettings, resetSettings, isLoading, isDarkMode, toggleDarkMode, setDarkMode }}>
+    <AppearanceContext.Provider value={{ settings, updateSettings, resetSettings, isLoading, isDarkMode, toggleDarkMode, setDarkMode, navStyle, setNavStyle }}>
       {children}
     </AppearanceContext.Provider>
   )

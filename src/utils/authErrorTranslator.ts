@@ -8,12 +8,12 @@ export const translateAuthError = (errorMessage: string): string => {
   if (lowerMessage.includes('invalid login credentials') || 
       lowerMessage.includes('invalid credentials') ||
       lowerMessage.includes('email or password is incorrect')) {
-    return 'Email hoặc mật khẩu không đúng. Vui lòng kiểm tra lại.'
+    return 'Email/Số điện thoại hoặc mật khẩu không đúng. Vui lòng kiểm tra lại.'
   }
   
   // User not found
   if (lowerMessage.includes('user not found') || lowerMessage.includes('no user found')) {
-    return 'Không tìm thấy tài khoản. Vui lòng kiểm tra lại email.'
+    return 'Không tìm thấy tài khoản. Vui lòng kiểm tra lại thông tin.'
   }
   
   // Email already exists

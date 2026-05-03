@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Car, Bike, Zap, Check } from 'lucide-react'
 import { createVehicle, updateVehicle, type VehicleRecord } from '../../lib/ev/vehicleService'
 import { useNotification } from '../../contexts/notificationContext.helpers'
+import { useAppearance } from '../../contexts/AppearanceContext'
 import HeaderBar from '../../components/layout/HeaderBar'
 import { ModalFooterButtons } from '../../components/ui/ModalFooterButtons'
 import { ImageUpload } from '../../components/ev/ImageUpload'
@@ -41,6 +42,7 @@ const VINFAST_MODELS = {
 export default function AddEV({ vehicle, onSuccess }: AddEVProps) {
     const navigate = useNavigate()
     const { success, error: showError } = useNotification()
+    const { isDarkMode } = useAppearance()
     const [loading, setLoading] = useState(false)
 
     const [formData, setFormData] = useState({
@@ -157,7 +159,7 @@ export default function AddEV({ vehicle, onSuccess }: AddEVProps) {
     }
 
     return (
-        <div className="flex h-full flex-col overflow-hidden text-slate-900" style={{ backgroundColor: 'var(--app-home-bg)' }}>
+        <div className={`flex h-full flex-col overflow-hidden ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`} style={{ backgroundColor: isDarkMode ? '#0F172A' : '#F8FAFC' }}>
             <HeaderBar
                 variant="page"
                 title={vehicle ? 'Cập nhật xe' : 'Thêm xe mới'}
@@ -168,17 +170,17 @@ export default function AddEV({ vehicle, onSuccess }: AddEVProps) {
                     <form onSubmit={handleSubmit} id="vehicle-form" className="space-y-6">
                         {/* Header Section */}
                         <div className="text-center py-2">
-                            <div className="mb-3 inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-600 shadow-md shadow-emerald-200">
+                            <div className={`mb-3 inline-flex h-16 w-16 items-center justify-center rounded-full shadow-md ${isDarkMode ? 'bg-blue-600 shadow-none' : 'bg-emerald-600 shadow-emerald-200'}`}>
                                 <Zap className="h-8 w-8 text-white" />
                             </div>
-                            <h2 className="text-2xl font-black text-slate-800 tracking-tight">
+                            <h2 className={`text-2xl font-black tracking-tight ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
                                 {vehicle ? 'Cập nhật thông tin xe' : 'Thêm xe mới của bạn'}
                             </h2>
-                            <p className="text-sm font-medium text-slate-500 mt-1">Quản lý phương tiện thông minh & hiệu quả</p>
+                            <p className={`text-sm font-medium mt-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Quản lý phương tiện thông minh & hiệu quả</p>
                         </div>
 
                         {/* Image Upload Card */}
-                        <div className="rounded-3xl bg-white p-6 shadow-xl shadow-md border border-slate-300">
+                        <div className={`rounded-3xl p-6 shadow-md border ${isDarkMode ? 'bg-slate-900 border-slate-800 shadow-none' : 'bg-white border-slate-300 shadow-slate-100'}`}>
                             <h3 className="mb-4 text-sm font-black uppercase tracking-widest text-slate-400">Hình ảnh phương tiện</h3>
                             <ImageUpload
                                 value={formData.image_url}
@@ -188,7 +190,7 @@ export default function AddEV({ vehicle, onSuccess }: AddEVProps) {
                         </div>
 
                         {/* Vehicle Type Card */}
-                        <div className="rounded-3xl bg-white p-6 shadow-xl shadow-md border border-slate-300">
+                        <div className={`rounded-3xl p-6 shadow-md border ${isDarkMode ? 'bg-slate-900 border-slate-800 shadow-none' : 'bg-white border-slate-300 shadow-slate-100'}`}>
                             <h3 className="mb-4 text-sm font-black uppercase tracking-widest text-slate-400">Loại phương tiện</h3>
                             <div className="grid grid-cols-2 gap-4">
                                 {[
@@ -204,11 +206,11 @@ export default function AddEV({ vehicle, onSuccess }: AddEVProps) {
                                             setSelectedVariant(null)
                                         }}
                                         className={`flex flex-col items-center gap-3 rounded-3xl border-2 p-5 transition-all active:scale-95 ${formData.vehicle_type === type
-                                            ? 'border-blue-500 bg-blue-50/50'
-                                            : 'border-slate-100 bg-slate-50/50 hover:border-slate-300'
+                                            ? (isDarkMode ? 'border-blue-500 bg-blue-500/10' : 'border-blue-500 bg-blue-50/50')
+                                            : (isDarkMode ? 'border-slate-800 bg-slate-800/50 hover:border-slate-700' : 'border-slate-100 bg-slate-50/50 hover:border-slate-300')
                                             }`}
                                     >
-                                        <div className={`flex h-12 w-12 items-center justify-center rounded-[2rem] shadow-inner ${formData.vehicle_type === type ? 'bg-blue-600 text-white' : 'bg-white text-slate-400'
+                                        <div className={`flex h-12 w-12 items-center justify-center rounded-[2rem] shadow-inner ${formData.vehicle_type === type ? 'bg-blue-600 text-white' : (isDarkMode ? 'bg-slate-700 text-slate-500' : 'bg-white text-slate-400')
                                             }`}>
                                             <Icon className="h-6 w-6" />
                                         </div>
@@ -221,7 +223,7 @@ export default function AddEV({ vehicle, onSuccess }: AddEVProps) {
                         </div>
 
                         {/* Quick Selection Card */}
-                        <div className="rounded-3xl bg-white p-6 shadow-xl shadow-md border border-slate-300">
+                        <div className={`rounded-3xl p-6 shadow-md border ${isDarkMode ? 'bg-slate-900 border-slate-800 shadow-none' : 'bg-white border-slate-300 shadow-slate-100'}`}>
                             <h3 className="mb-4 text-sm font-black uppercase tracking-widest text-slate-400">Chọn nhanh mẫu xe</h3>
 
                             <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto pb-4 scrollbar-hide">
@@ -231,8 +233,8 @@ export default function AddEV({ vehicle, onSuccess }: AddEVProps) {
                                         type="button"
                                         onClick={() => handleModelSelect(m.name)}
                                         className={`flex shrink-0 snap-center flex-col items-center justify-center min-w-[100px] rounded-3xl border-2 px-4 py-3 transition-all ${selectedModelName === m.name
-                                            ? 'border-emerald-500 bg-emerald-100'
-                                            : 'border-slate-100 bg-white hover:border-emerald-300'
+                                            ? (isDarkMode ? 'border-emerald-500 bg-emerald-500/20' : 'border-emerald-500 bg-emerald-100')
+                                            : (isDarkMode ? 'border-slate-800 bg-slate-800 hover:border-slate-700' : 'border-slate-100 bg-white hover:border-emerald-300')
                                             }`}
                                     >
                                         <span className={`text-sm font-extrabold ${selectedModelName === m.name ? 'text-emerald-600' : 'text-slate-600'}`}>
@@ -252,8 +254,8 @@ export default function AddEV({ vehicle, onSuccess }: AddEVProps) {
                                                 type="button"
                                                 onClick={() => handleVariantSelect(v)}
                                                 className={`flex items-center gap-2 rounded-3xl px-4 py-2.5 text-xs font-bold transition-all border-2 ${selectedVariant === v
-                                                    ? 'bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-200'
-                                                    : 'bg-slate-50 border-slate-50 text-slate-600 hover:border-emerald-200'
+                                                    ? (isDarkMode ? 'bg-emerald-600 border-emerald-600 text-white shadow-none' : 'bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-200')
+                                                    : (isDarkMode ? 'bg-slate-800 border-slate-800 text-slate-400 hover:border-emerald-500/50' : 'bg-slate-50 border-slate-50 text-slate-600 hover:border-emerald-200')
                                                     }`}
                                             >
                                                 {v}
@@ -266,7 +268,7 @@ export default function AddEV({ vehicle, onSuccess }: AddEVProps) {
                         </div>
 
                         {/* Detailed Info Card */}
-                        <div className="rounded-3xl bg-white p-7 shadow-xl shadow-md border border-slate-300 space-y-6">
+                        <div className={`rounded-3xl p-7 shadow-md border space-y-6 ${isDarkMode ? 'bg-slate-900 border-slate-800 shadow-none' : 'bg-white border-slate-300 shadow-slate-100'}`}>
                             <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">Thông tin cơ bản</h3>
 
                             <div className="space-y-5">
@@ -280,7 +282,7 @@ export default function AddEV({ vehicle, onSuccess }: AddEVProps) {
                                         value={formData.license_plate}
                                         onChange={(e) => setFormData({ ...formData, license_plate: e.target.value.toUpperCase() })}
                                         placeholder="Ví dụ: 68A-123.45"
-                                        className="w-full rounded-2xl bg-slate-50 border-2 border-transparent px-5 py-4 text-base font-bold text-slate-800 transition-all focus:bg-white focus:border-blue-500 focus:outline-none placeholder:font-medium placeholder:text-slate-400 shadow-inner"
+                                        className={`w-full rounded-2xl border-2 border-transparent px-5 py-4 text-base font-bold transition-all focus:outline-none shadow-inner ${isDarkMode ? 'bg-slate-800 text-slate-100 placeholder:text-slate-600 focus:border-blue-500' : 'bg-slate-50 text-slate-800 focus:bg-white focus:border-blue-500 placeholder:text-slate-400'}`}
                                     />
                                 </div>
 
@@ -291,7 +293,7 @@ export default function AddEV({ vehicle, onSuccess }: AddEVProps) {
                                             type="text"
                                             value={formData.brand}
                                             onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                                            className="w-full rounded-2xl bg-slate-50 border-2 border-transparent px-5 py-4 text-base font-bold text-slate-800 transition-all focus:bg-white focus:border-blue-500 focus:outline-none shadow-inner"
+                                            className={`w-full rounded-2xl border-2 border-transparent px-5 py-4 text-base font-bold transition-all focus:outline-none shadow-inner ${isDarkMode ? 'bg-slate-800 text-slate-100 focus:border-blue-500' : 'bg-slate-50 text-slate-800 focus:bg-white focus:border-blue-500'}`}
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -301,7 +303,7 @@ export default function AddEV({ vehicle, onSuccess }: AddEVProps) {
                                             required
                                             value={formData.model}
                                             onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                                            className="w-full rounded-2xl bg-slate-50 border-2 border-transparent px-5 py-4 text-base font-bold text-slate-800 transition-all focus:bg-white focus:border-blue-500 focus:outline-none shadow-inner"
+                                            className={`w-full rounded-2xl border-2 border-transparent px-5 py-4 text-base font-bold transition-all focus:outline-none shadow-inner ${isDarkMode ? 'bg-slate-800 text-slate-100 focus:border-blue-500' : 'bg-slate-50 text-slate-800 focus:bg-white focus:border-blue-500'}`}
                                         />
                                     </div>
                                 </div>
@@ -313,7 +315,7 @@ export default function AddEV({ vehicle, onSuccess }: AddEVProps) {
                                             type="number"
                                             value={formData.year}
                                             onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
-                                            className="w-full rounded-2xl bg-slate-50 border-2 border-transparent px-5 py-4 text-base font-bold text-slate-800 transition-all focus:bg-white focus:border-blue-500 focus:outline-none shadow-inner"
+                                            className={`w-full rounded-2xl border-2 border-transparent px-5 py-4 text-base font-bold transition-all focus:outline-none shadow-inner ${isDarkMode ? 'bg-slate-800 text-slate-100 focus:border-blue-500' : 'bg-slate-50 text-slate-800 focus:bg-white focus:border-blue-500'}`}
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -323,7 +325,7 @@ export default function AddEV({ vehicle, onSuccess }: AddEVProps) {
                                             value={formData.color}
                                             onChange={(e) => setFormData({ ...formData, color: e.target.value })}
                                             placeholder="Nhập màu xe"
-                                            className="w-full rounded-2xl bg-slate-50 border-2 border-transparent px-5 py-4 text-base font-bold text-slate-800 transition-all focus:bg-white focus:border-blue-500 focus:outline-none shadow-inner"
+                                            className={`w-full rounded-2xl border-2 border-transparent px-5 py-4 text-base font-bold transition-all focus:outline-none shadow-inner ${isDarkMode ? 'bg-slate-800 text-slate-100 placeholder:text-slate-600 focus:border-blue-500' : 'bg-slate-50 text-slate-800 focus:bg-white focus:border-blue-500 placeholder:text-slate-400'}`}
                                         />
                                     </div>
                                 </div>
@@ -339,7 +341,7 @@ export default function AddEV({ vehicle, onSuccess }: AddEVProps) {
                                             value={formData.current_odometer}
                                             onChange={(e) => setFormData({ ...formData, current_odometer: parseInt(e.target.value) || 0 })}
                                             min="0"
-                                            className="w-full rounded-2xl bg-slate-50 border-2 border-transparent px-5 py-4 pr-16 text-2xl font-black text-blue-600 transition-all focus:bg-white focus:border-blue-500 focus:outline-none shadow-inner"
+                                            className={`w-full rounded-2xl border-2 border-transparent px-5 py-4 pr-16 text-2xl font-black transition-all focus:outline-none shadow-inner ${isDarkMode ? 'bg-slate-800 text-blue-400 focus:border-blue-500' : 'bg-slate-50 text-blue-600 focus:bg-white focus:border-blue-500'}`}
                                         />
                                         <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400">
                                             <div className="rounded-full bg-blue-50 p-2">
@@ -352,7 +354,7 @@ export default function AddEV({ vehicle, onSuccess }: AddEVProps) {
                         </div>
 
                         {/* Papers & Reminders Card */}
-                        <div className="rounded-3xl bg-white p-7 shadow-xl shadow-md border border-slate-300 space-y-6">
+                        <div className={`rounded-3xl p-7 shadow-md border space-y-6 ${isDarkMode ? 'bg-slate-900 border-slate-800 shadow-none' : 'bg-white border-slate-300 shadow-slate-100'}`}>
                             <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">Giấy tờ & Bảo dưỡng</h3>
 
                             <div className="grid grid-cols-2 gap-4">
@@ -362,7 +364,7 @@ export default function AddEV({ vehicle, onSuccess }: AddEVProps) {
                                         type="date"
                                         value={formData.insurance_expiry_date}
                                         onChange={(e) => setFormData({ ...formData, insurance_expiry_date: e.target.value })}
-                                        className="w-full rounded-2xl bg-slate-50 px-4 py-3.5 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 shadow-inner"
+                                        className={`w-full rounded-2xl px-4 py-3.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 shadow-inner ${isDarkMode ? 'bg-slate-800 text-slate-100' : 'bg-slate-50 text-slate-700'}`}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -371,7 +373,7 @@ export default function AddEV({ vehicle, onSuccess }: AddEVProps) {
                                         type="date"
                                         value={formData.inspection_expiry_date}
                                         onChange={(e) => setFormData({ ...formData, inspection_expiry_date: e.target.value })}
-                                        className="w-full rounded-2xl bg-slate-50 px-4 py-3.5 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 shadow-inner"
+                                        className={`w-full rounded-2xl px-4 py-3.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 shadow-inner ${isDarkMode ? 'bg-slate-800 text-slate-100' : 'bg-slate-50 text-slate-700'}`}
                                     />
                                 </div>
                             </div>
@@ -384,13 +386,13 @@ export default function AddEV({ vehicle, onSuccess }: AddEVProps) {
                                         placeholder="Số km"
                                         value={formData.next_maintenance_km || ''}
                                         onChange={(e) => setFormData({ ...formData, next_maintenance_km: parseInt(e.target.value) || undefined })}
-                                        className="rounded-2xl bg-slate-50 px-4 py-3.5 text-sm font-bold text-slate-700 focus:outline-none shadow-inner"
+                                        className={`rounded-2xl px-4 py-3.5 text-sm font-bold focus:outline-none shadow-inner ${isDarkMode ? 'bg-slate-800 text-slate-100' : 'bg-slate-50 text-slate-700'}`}
                                     />
                                     <input
                                         type="date"
                                         value={formData.next_maintenance_date}
                                         onChange={(e) => setFormData({ ...formData, next_maintenance_date: e.target.value })}
-                                        className="rounded-2xl bg-slate-50 px-4 py-3.5 text-sm font-bold text-slate-700 focus:outline-none shadow-inner"
+                                        className={`rounded-2xl px-4 py-3.5 text-sm font-bold focus:outline-none shadow-inner ${isDarkMode ? 'bg-slate-800 text-slate-100' : 'bg-slate-50 text-slate-700'}`}
                                     />
                                 </div>
                             </div>

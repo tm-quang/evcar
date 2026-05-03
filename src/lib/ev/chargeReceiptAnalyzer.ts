@@ -91,11 +91,11 @@ function optimizeImageForOCR(file: File): Promise<string> {
 function parseEVReceipt(rawText: string): ChargeReceiptData {
     const result: ChargeReceiptData = {}
     const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean)
-    const full = rawText
+    const full = rawText.replace(/\s+/g, ' ') // Flatten for better multi-line regex
 
     // ── DATE ────────────────────────────────────────────────
     const datePatterns: { re: RegExp; fn: (m: RegExpMatchArray) => string }[] = [
-        // "24 Th2, 2026" or "18 Th4, 2026"
+        // "3 Th5, 2026" or "24 Th12, 2026"
         {
             re: /(\d{1,2})\s+Th(?:áng)?\s*(\d{1,2})[,.]?\s*(\d{4})/i,
             fn: m => `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`,
@@ -105,11 +105,6 @@ function parseEVReceipt(rawText: string): ChargeReceiptData {
             re: /(\d{1,2})\/(\d{1,2})\/(\d{4})/,
             fn: m => `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`,
         },
-        // ISO "2026-02-24"
-        {
-            re: /(\d{4}-\d{2}-\d{2})/,
-            fn: m => m[1],
-        },
     ]
     for (const { re, fn } of datePatterns) {
         const m = full.match(re)
@@ -117,105 +112,96 @@ function parseEVReceipt(rawText: string): ChargeReceiptData {
     }
 
     // ── TIME (start & end of charging) ─────────────────────────────
-    // Prefer explicit "Cắm sạc từ: 20:02 - 20:34"
-    const timeRe = /(?:cắm sạc từ|bắt đầu|thời gian)[^\d]*(\d{1,2}:\d{2})(?:[^\d]+(\d{1,2}:\d{2}))?/i
-    const timeMatch = full.match(timeRe)
-    if (timeMatch) {
-        result.time = timeMatch[1]
-        if (timeMatch[2]) result.endTime = timeMatch[2]
+    // Pattern 1: "Cắm sạc từ: 15:29 - 15:57"
+    const durationRe = /(?:cắm sạc từ|thời gian sạc|từ)[^\d]*(\d{1,2}[:h]\d{2})(?:\s*-\s*(\d{1,2}[:h]\d{2}))?/i
+    const durationMatch = full.match(durationRe)
+    
+    if (durationMatch) {
+        result.time = durationMatch[1].replace('h', ':')
+        if (durationMatch[2]) result.endTime = durationMatch[2].replace('h', ':')
     } else {
-        // Fallback: search for stand alone time format like 21:21
-        const fallback = full.match(/\b(\d{1,2}:\d{2})\b/)
-        if (fallback) result.time = fallback[1]
+        // Pattern 2: Start time often near the date "3 Th5, 2026 - 15:29"
+        const startTimeNearDate = full.match(/\d{4}\s*-\s*(\d{1,2}:\d{2})/i)
+        if (startTimeNearDate) {
+            result.time = startTimeNearDate[1]
+        }
     }
 
     // ── KWH ─────────────────────────────────────────────────
-    // "27,1 kWh" or "27.1 kWh"
-    const kwhMatch = full.match(/(\d+[,.]?\d*)\s*kWh/i)
+    // "19,16 kWh" or "19.16 kWh" or "Số điện đã sạc: 19,16"
+    const kwhMatch = full.match(/(\d+[.,]\d+)\s*kWh/i) || 
+                     full.match(/số điện đã sạc[^\d]*(\d+[.,]\d+)/i) ||
+                     full.match(/(\d+[.,]\d+)\s*kw/i)
     if (kwhMatch) result.kwh = parseFloat(kwhMatch[1].replace(',', '.'))
 
     // ── MONEY helper ─────────────────────────────────────────
-    // Correctly parses line like "Phí sạc thực tế 20:02 - 20:34 92.978 đ" without picking up 20:02
     const parseMoney = (s: string): number | undefined => {
-        // Erase any time-like pattern HH:MM to avoid matching it as a number
-        const sNoTime = s.replace(/\b\d{1,2}:\d{2}\b/g, '')
-        // Extract all numeric substrings
-        const matches = [...sNoTime.matchAll(/\d[0-9.,]*/g)]
+        // Remove times (HH:MM) and common noise words to isolate money numbers
+        const sClean = s.replace(/\b\d{1,2}[:h]\d{2}\b/g, '')
+                        .replace(/[đdđ]$/i, '')
+                        .replace(/[:\-]/g, ' ')
+        
+        const matches = [...sClean.matchAll(/\d[0-9.,]*/g)]
         if (!matches.length) return undefined
         
-        // Take the last extracted number
+        // Take the most significant number (usually the longest one containing dots/commas)
+        // In receipts, the money value is often the last number in the label line
         const lastMatch = matches[matches.length - 1][0]
         const clean = lastMatch.replace(/\./g, '').replace(',', '.')
         const n = parseFloat(clean)
         return isNaN(n) ? undefined : Math.round(n)
     }
 
-    // ── TOTAL PAYMENT (after discounts) ─────────────────────
+    // ── CHARGE AMOUNT (Gross fee before discount) ────────────
     for (const line of lines) {
-        if (/tổng thanh toán/i.test(line)) {
-            const v = parseMoney(line.replace(/tổng thanh toán/i, ''))
-            if (v !== undefined) { result.totalPayment = v; break }
-        }
-    }
-
-    // ── CHARGE AMOUNT (before discounts / gross fee) ─────────
-    for (const line of lines) {
-        if (/phí sạc thực tế|charge.*fee|phí điện|tạm tính/i.test(line)) {
+        if (/phí sạc thực tế|phí sạc|tổng[:\s]*$/i.test(line) || (/^tổng\b/i.test(line) && !/thanh toán/i.test(line))) {
             const v = parseMoney(line)
-            if (v !== undefined && v > 0) { result.chargeAmount = v; break }
-        }
-    }
-    // Fallback if not found: "Tổng ... 104.552" (excluding "Tổng thanh toán")
-    if (result.chargeAmount === undefined) {
-        for (const line of lines) {
-            if (/^tổng\s/i.test(line) && !/thanh toán/i.test(line)) {
-                const v = parseMoney(line)
-                if (v !== undefined && v > 0) { result.chargeAmount = v; break }
+            if (v !== undefined && v > 500) { 
+                result.chargeAmount = v
+                break
             }
         }
     }
 
-    // ── STATION NAME / ADDRESS ───────────────────────────────
+    // ── TOTAL PAYMENT (Net fee after discount) ───────────────
     for (const line of lines) {
-        if (/địa chỉ[:\s]/i.test(line)) {
-            // Take multiple lines if it wrapped but let's just grab the whole line text cleanly
-            result.stationName = line.replace(/địa chỉ[:\s]*/i, '').trim()
-            break
+        if (/tổng thanh toán/i.test(line)) {
+            const v = parseMoney(line)
+            if (v !== undefined) { result.totalPayment = v; break }
         }
     }
-    if (!result.stationName && /vinfast/i.test(full)) {
-        result.stationName = 'Trạm sạc VinFast'
+
+    // ── STATION NAME / ADDRESS ───────────────────────────────
+    for (let i = 0; i < lines.length; i++) {
+        if (/địa chỉ[:\s]/i.test(lines[i])) {
+            let addr = lines[i].replace(/địa chỉ[:\s]*/i, '').trim()
+            // Check if address continues on the next line (often the case for long addresses)
+            if (i + 1 < lines.length && !/[:\-]/.test(lines[i+1]) && lines[i+1].length > 5) {
+                addr += ' ' + lines[i+1]
+            }
+            result.stationName = addr
+            break
+        }
     }
 
     // ── UNIT PRICE (back-calculated) ─────────────────────────
     const cost = result.chargeAmount ?? result.totalPayment
     if (cost !== undefined && cost > 0 && result.kwh && result.kwh > 0) {
         result.unitPrice = Math.round(cost / result.kwh)
-        // Adjust for common price points slightly off due to float rounding
-        if (Math.abs(result.unitPrice - 3858) < 5) result.unitPrice = 3858
-        else if (Math.abs(result.unitPrice - 3355) < 5) result.unitPrice = 3355
+        if (Math.abs(result.unitPrice - 3858) < 10) result.unitPrice = 3858
+        else if (Math.abs(result.unitPrice - 3355) < 10) result.unitPrice = 3355
     }
 
     // ── SUMMARY ─────────────────────────────────────────────
     const parts: string[] = []
-    if (result.date)
-        parts.push(`Ngày ${new Date(result.date).toLocaleDateString('vi-VN')}`)
+    if (result.date) parts.push(`Ngày ${result.date.split('-').reverse().join('/')}`)
     if (result.kwh) parts.push(`${result.kwh} kWh`)
-    if (result.totalPayment !== undefined)
-        parts.push(`${result.totalPayment.toLocaleString('vi-VN')} đ`)
-    else if (result.chargeAmount !== undefined)
-        parts.push(`${result.chargeAmount.toLocaleString('vi-VN')} đ`)
-        
-    if (result.stationName) {
-        // truncate station name in summary
-        let name = result.stationName
-        if (name.length > 25) name = name.substring(0, 25) + '...'
-        parts.push(name)
-    }
-
+    if (result.chargeAmount !== undefined) parts.push(`${result.chargeAmount.toLocaleString('vi-VN')}đ`)
+    if (result.endTime && result.time) parts.push(`${result.time}-${result.endTime}`)
+    
     result.summary = parts.length
-        ? `Đọc được: ${parts.join(' · ')}`
-        : 'OCR hoàn tất — kiểm tra lại dữ liệu nhé'
+        ? `Đã đọc: ${parts.join(' · ')}`
+        : 'Không tìm thấy dữ liệu sạc rõ ràng'
 
     return result
 }

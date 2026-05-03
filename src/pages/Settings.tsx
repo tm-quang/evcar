@@ -13,9 +13,10 @@ import {
   LuSun,
   LuDatabase,
   LuDownload,
+  LuLayoutList,
 } from 'react-icons/lu'
 
-import { VehicleFooterNav } from '../components/ev/VehicleFooterNav'
+
 import HeaderBar from '../components/layout/HeaderBar'
 import { NotificationSettingsModal } from '../components/settings/NotificationSettingsModal'
 import { CalculatorModal } from '../components/settings/CalculatorModal'
@@ -34,7 +35,7 @@ const SettingsPage = () => {
   const [isNotificationSettingsOpen, setIsNotificationSettingsOpen] = useState(false)
   const [isCalculatorModalOpen, setIsCalculatorModalOpen] = useState(false)
   const { success } = useNotification()
-  const { isDarkMode, toggleDarkMode } = useAppearance()
+  const { isDarkMode, toggleDarkMode, navStyle, setNavStyle } = useAppearance()
 
   const systemToggles: Record<string, boolean> = {
     notifications: true,
@@ -284,6 +285,35 @@ const SettingsPage = () => {
                 </label>
               </div>
 
+              {/* Menu Style Toggle */}
+              <div className={`flex items-center justify-between gap-4 rounded-3xl p-4 transition-all ${cardClass}`}>
+                <div className="flex items-center gap-3">
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-3xl shadow-inner ${isDarkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-600'
+                    }`}>
+                    <LuLayoutList className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className={`font-bold ${textPrimary}`}>Kiểu Menu</p>
+                    <p className={`text-xs ${textSecondary}`}>
+                      {navStyle === 'pill' ? 'Kiểu Pill mới' : 'Kiểu truyền thống'}
+                    </p>
+                  </div>
+                </div>
+
+                <label className="relative inline-flex cursor-pointer items-center">
+                  <input
+                    type="checkbox"
+                    checked={navStyle === 'pill'}
+                    onChange={() => setNavStyle(navStyle === 'classic' ? 'pill' : 'classic')}
+                    className="peer sr-only"
+                  />
+                  <div className={`peer h-6 w-11 rounded-full transition-colors after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white ${isDarkMode
+                    ? 'bg-slate-700 peer-checked:bg-purple-500'
+                    : 'bg-slate-200 peer-checked:bg-purple-500'
+                    }`} />
+                </label>
+              </div>
+
               {/* Notifications */}
               <div className={`flex items-center justify-between gap-4 rounded-3xl p-4 transition-all ${cardClass}`}>
                 <div className="flex items-center gap-3">
@@ -371,7 +401,7 @@ const SettingsPage = () => {
         </div>
       </main>
 
-      <VehicleFooterNav onAddClick={() => navigate('/ev/charging')} />
+
 
       <CalculatorModal
         isOpen={isCalculatorModalOpen}

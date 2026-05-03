@@ -18,13 +18,13 @@ export async function getTripPricePerKm(vehicleId: string): Promise<number> {
             return localPrice ? Number(localPrice) : defaultPrice
         }
 
-        // We attempt to use the fuel_price_settings table as a key-value store 
-        // using a special fuel_type 'trip_price_[vehicleId]'
+        // We attempt to use the charging_price_settings table as a key-value store 
+        // using a special charging_type 'trip_price_[vehicleId]'
         const { data, error } = await supabase
-            .from('fuel_price_settings')
+            .from('charging_price_settings')
             .select('price')
             .eq('user_id', user.id)
-            .eq('fuel_type', `trip_price_${vehicleId}`)
+            .eq('charging_type', `trip_price_${vehicleId}`)
             .maybeSingle()
 
         if (error || !data) {
@@ -60,16 +60,16 @@ export async function updateTripPricePerKm(
         }
 
         const { error } = await supabase
-            .from('fuel_price_settings')
+            .from('charging_price_settings')
             .upsert(
                 {
                     user_id: user.id,
-                    fuel_type: `trip_price_${vehicleId}`, // Abuse fuel_type constraint if it is loose text
+                    charging_type: `trip_price_${vehicleId}`, // Abuse charging_type constraint if it is loose text
                     price: price,
                     updated_at: new Date().toISOString(),
                 },
                 {
-                    onConflict: 'user_id,fuel_type',
+                    onConflict: 'user_id,charging_type',
                 }
             )
 

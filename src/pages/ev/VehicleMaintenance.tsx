@@ -9,12 +9,13 @@ import { createMaintenance, deleteMaintenance, updateVehicle, type VehicleRecord
 import { useVehicles, useVehicleMaintenance, vehicleKeys } from '../../lib/ev/useVehicleQueries'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNotification } from '../../contexts/notificationContext.helpers'
+import { useVehicleStore } from '../../store/useVehicleStore'
 import HeaderBar from '../../components/layout/HeaderBar'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
-import { VehicleFooterNav } from '../../components/ev/VehicleFooterNav'
-import { useVehicleStore } from '../../store/useVehicleStore'
+
 import { LoadingOverlay } from '../../components/ui/LoadingOverlay'
 import { DateRangePickerModal } from '../../components/ui/DateRangePickerModal'
+import { useAppearance } from '../../contexts/AppearanceContext'
 
 const fmt = (v: number) =>
     new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 0 }).format(v) + ' đ'
@@ -25,8 +26,8 @@ const MAINT_TYPES = {
 }
 
 const BADGE: Record<string, string> = {
-    blue: 'bg-blue-100 text-blue-700',
-    red: 'bg-red-100 text-red-700',
+    blue: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400',
+    red: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400',
 }
 
 // Quick-pick service items
@@ -98,6 +99,7 @@ export default function VehicleMaintenance() {
     const queryClient = useQueryClient()
     const { data: vehicles = [] } = useVehicles()
 
+    const { isDarkMode } = useAppearance()
     const { selectedVehicleId } = useVehicleStore()
     const [showAddModal, setShowAddModal] = useState(false)
     const [showSettingsModal, setShowSettingsModal] = useState(false)
@@ -163,8 +165,11 @@ export default function VehicleMaintenance() {
         }
     }
 
+    const textPrimary = isDarkMode ? 'text-slate-100' : 'text-slate-900'
+    const textSecondary = isDarkMode ? 'text-slate-400' : 'text-slate-500'
+
     return (
-        <div className="flex h-screen flex-col overflow-hidden" style={{ backgroundColor: 'var(--app-home-bg)' }}>
+        <div className="flex h-screen flex-col overflow-hidden" style={{ backgroundColor: isDarkMode ? '#0F172A' : '#F8FAFC' }}>
             <HeaderBar
                 variant="page"
                 title="Bảo Dưỡng Xe"
@@ -172,13 +177,13 @@ export default function VehicleMaintenance() {
                     <div className="flex gap-2">
                         <button
                             onClick={() => setShowSettingsModal(true)}
-                            className="flex items-center justify-center rounded-full bg-white p-2 border border-slate-200 shadow-sm hover:bg-slate-50 active:scale-95 transition-all"
+                            className={`flex items-center justify-center rounded-full p-2 border shadow-sm transition-all active:scale-95 ${isDarkMode ? 'bg-slate-800 border-slate-700 hover:bg-slate-700' : 'bg-white border-slate-200 hover:bg-slate-50'}`}
                         >
-                            <Settings className="h-5 w-5 text-slate-600" />
+                            <Settings className={`h-5 w-5 ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`} />
                         </button>
                         <button
                             onClick={() => setShowAddModal(true)}
-                            className="flex items-center justify-center rounded-full bg-slate-800 p-2 shadow-md hover:bg-slate-900 active:scale-95 transition-all"
+                            className={`flex items-center justify-center rounded-full p-2 shadow-md transition-all active:scale-95 ${isDarkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-800 hover:bg-slate-900'}`}
                         >
                             <Plus className="h-5 w-5 text-white" />
                         </button>
@@ -191,7 +196,7 @@ export default function VehicleMaintenance() {
                 {/* ── Hero Stats Card ───────────────────────────────────── */}
                 {selectedVehicle && (
                     <div className="mb-4 space-y-3">
-                        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-800 to-slate-700 p-5 text-white shadow-xl shadow-slate-200">
+                        <div className={`relative overflow-hidden rounded-3xl p-5 text-white shadow-xl ${isDarkMode ? 'bg-[#1E293B] shadow-black/40 border border-slate-700' : 'bg-gradient-to-br from-slate-800 to-slate-700 shadow-slate-200'}`}>
                             {/* Decorative elements */}
                             <div className="absolute -right-6 -top-6 h-32 w-32 rounded-full bg-white/5 blur-2xl" />
                             <div className="absolute -left-6 -bottom-6 h-24 w-24 rounded-full bg-amber-500/10 blur-xl" />
@@ -224,41 +229,41 @@ export default function VehicleMaintenance() {
 
                         {/* Mini stats row */}
                         <div className="grid grid-cols-3 gap-2">
-                            <div className="flex flex-col items-center rounded-xl bg-white p-3 shadow-sm">
-                                <div className="mb-1 rounded-lg bg-gray-100 p-1.5">
-                                    <Wrench className="h-4 w-4 text-gray-600" />
+                            <div className={`flex flex-col items-center rounded-xl p-3 shadow-sm ${isDarkMode ? 'bg-slate-800 border border-slate-700' : 'bg-white'}`}>
+                                <div className={`mb-1 rounded-lg p-1.5 ${isDarkMode ? 'bg-slate-700' : 'bg-gray-100'}`}>
+                                    <Wrench className={`h-4 w-4 ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`} />
                                 </div>
-                                <p className="text-sm font-bold text-slate-800">
+                                <p className={`text-sm font-bold ${textPrimary}`}>
                                     {avgCostPerSession > 0 ? `${Math.round(avgCostPerSession / 1000)}k` : '--'}
                                 </p>
-                                <p className="text-center text-[10px] leading-tight text-slate-500">TB/lần</p>
+                                <p className={`text-center text-[10px] leading-tight ${textSecondary}`}>TB/lần</p>
                             </div>
-                            <div className="flex flex-col items-center rounded-xl bg-white p-3 shadow-sm">
-                                <div className="mb-1 rounded-lg bg-blue-100 p-1.5">
-                                    <Activity className="h-4 w-4 text-blue-600" />
+                            <div className={`flex flex-col items-center rounded-xl p-3 shadow-sm ${isDarkMode ? 'bg-slate-800 border border-slate-700' : 'bg-white'}`}>
+                                <div className={`mb-1 rounded-lg p-1.5 ${isDarkMode ? 'bg-blue-500/20' : 'bg-blue-100'}`}>
+                                    <Activity className={`h-4 w-4 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                                 </div>
-                                <p className="text-sm font-bold text-slate-800">{thisMonthLogs.length}</p>
-                                <p className="text-center text-[10px] leading-tight text-slate-500">Tháng này</p>
+                                <p className={`text-sm font-bold ${textPrimary}`}>{thisMonthLogs.length}</p>
+                                <p className={`text-center text-[10px] leading-tight ${textSecondary}`}>Tháng này</p>
                             </div>
-                            <div className="flex flex-col items-center rounded-xl bg-white p-3 shadow-sm">
-                                <div className="mb-1 rounded-lg bg-green-100 p-1.5">
-                                    <TrendingUp className="h-4 w-4 text-green-600" />
+                            <div className={`flex flex-col items-center rounded-xl p-3 shadow-sm ${isDarkMode ? 'bg-slate-800 border border-slate-700' : 'bg-white'}`}>
+                                <div className={`mb-1 rounded-lg p-1.5 ${isDarkMode ? 'bg-emerald-500/20' : 'bg-emerald-100'}`}>
+                                    <TrendingUp className={`h-4 w-4 ${isDarkMode ? 'text-emerald-400' : 'text-green-600'}`} />
                                 </div>
-                                <p className="text-sm font-bold text-slate-800">
+                                <p className={`text-sm font-bold ${textPrimary}`}>
                                     {thisMonthCost > 0 ? `${Math.round(thisMonthCost / 1000)}k` : '--'}
                                 </p>
-                                <p className="text-center text-[10px] leading-tight text-slate-500">Chi tháng</p>
+                                <p className={`text-center text-[10px] leading-tight ${textSecondary}`}>Chi tháng</p>
                             </div>
                         </div>
 
                         {/* Month cost badge */}
                         {thisMonthCost > 0 && (
-                            <div className="flex items-center justify-between rounded-xl bg-gray-50 border border-gray-200 px-4 py-2.5">
+                            <div className={`flex items-center justify-between rounded-xl px-4 py-2.5 border transition-all ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-gray-50 border-gray-200'}`}>
                                 <div className="flex items-center gap-2">
-                                    <Calendar className="h-4 w-4 text-gray-600" />
-                                    <span className="text-sm font-medium text-gray-700">Chi phí bảo dưỡng tháng này</span>
+                                    <Calendar className={`h-4 w-4 ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`} />
+                                    <span className={`text-sm font-medium ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>Chi phí bảo dưỡng tháng này</span>
                                 </div>
-                                <span className="text-sm font-bold text-gray-700">{fmt(thisMonthCost)}</span>
+                                <span className={`text-sm font-bold ${isDarkMode ? 'text-slate-100' : 'text-gray-700'}`}>{fmt(thisMonthCost)}</span>
                             </div>
                         )}
                     </div>
@@ -266,13 +271,13 @@ export default function VehicleMaintenance() {
 
                 {/* ── Next Maintenance Info ─────────────────────────────── */}
                 {selectedVehicle?.next_maintenance_km && (
-                    <div className="mb-4 flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
-                        <div className="rounded-xl bg-gray-100 p-2">
-                            <Gauge className="h-4 w-4 text-gray-600" />
+                    <div className={`mb-4 flex items-center gap-3 rounded-2xl border px-4 py-3 transition-all ${isDarkMode ? 'bg-slate-800/50 border-slate-700 shadow-sm shadow-black/20' : 'bg-gray-50 border-gray-200'}`}>
+                        <div className={`rounded-xl p-2 ${isDarkMode ? 'bg-slate-700' : 'bg-gray-100'}`}>
+                            <Gauge className={`h-4 w-4 ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`} />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-gray-800">Bảo dưỡng tiếp theo</p>
-                            <p className="text-xs text-gray-600">Tại {selectedVehicle.next_maintenance_km.toLocaleString()} km
+                            <p className={`text-sm font-bold ${textPrimary}`}>Bảo dưỡng tiếp theo</p>
+                            <p className={`text-xs ${textSecondary}`}>Tại {selectedVehicle.next_maintenance_km.toLocaleString()} km
                                 {selectedVehicle.current_odometer && (
                                     <span className="ml-1 font-semibold">
                                         · còn {Math.max(0, selectedVehicle.next_maintenance_km - selectedVehicle.current_odometer).toLocaleString()} km
@@ -280,14 +285,14 @@ export default function VehicleMaintenance() {
                                 )}
                             </p>
                         </div>
-                        <ArrowRight className="h-4 w-4 text-gray-500 shrink-0" />
+                        <ArrowRight className={`h-4 w-4 shrink-0 ${isDarkMode ? 'text-slate-500' : 'text-gray-500'}`} />
                     </div>
                 )}
 
                 {/* ── Add Button ───────────────────────────────────────── */}
                 <button
                     onClick={() => setShowAddModal(true)}
-                    className="w-full mb-6 flex items-center justify-center gap-3 rounded-2xl bg-slate-800 px-4 py-4 font-black text-white shadow-xl shadow-slate-200 transition-all hover:scale-[1.02] hover:bg-slate-900 active:scale-95 uppercase tracking-widest text-xs"
+                    className={`w-full mb-6 flex items-center justify-center gap-3 rounded-2xl px-4 py-4 font-black text-white shadow-xl transition-all hover:scale-[1.02] active:scale-95 uppercase tracking-widest text-xs ${isDarkMode ? 'bg-blue-600 shadow-black/40 hover:bg-blue-700' : 'bg-slate-800 shadow-slate-200 hover:bg-slate-900'}`}
                 >
                     <Plus className="h-5 w-5" />
                     Thêm nhật ký mới
@@ -295,13 +300,13 @@ export default function VehicleMaintenance() {
 
                 {/* ── Filter Bar ───────────────────────────────────────── */}
                 <div className="mb-3 space-y-2">
-                    <div className="flex rounded-xl bg-slate-200/50 p-1 gap-1 shadow-inner">
+                    <div className={`flex rounded-xl p-1 gap-1 shadow-inner ${isDarkMode ? 'bg-slate-800/80' : 'bg-slate-200/50'}`}>
                         {PERIOD_TABS.map(tab => (
                             <button key={tab.id} type="button"
                                 onClick={() => { setFilterPeriod(tab.id); setPeriodOffset(0) }}
                                 className={`flex-1 rounded-lg py-2 text-xs font-black uppercase tracking-tighter transition-all ${filterPeriod === tab.id
-                                    ? 'bg-white text-slate-800 shadow-sm'
-                                    : 'text-slate-500 hover:text-slate-700'
+                                    ? (isDarkMode ? 'bg-slate-700 text-blue-400 shadow-sm' : 'bg-white text-slate-800 shadow-sm')
+                                    : (isDarkMode ? 'text-slate-500 hover:text-slate-400' : 'text-slate-500 hover:text-slate-700')
                                     }`}>
                                 {tab.label}
                             </button>
@@ -312,30 +317,30 @@ export default function VehicleMaintenance() {
                         <div className="flex items-center gap-2">
                             <button type="button"
                                 onClick={() => setPeriodOffset(o => o - 1)}
-                                className="rounded-xl border border-slate-300 bg-white p-1.5 text-slate-600 hover:bg-slate-100 active:scale-95 transition-all">
+                                className={`rounded-xl border p-1.5 transition-all active:scale-95 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700' : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-100'}`}>
                                 <ChevronLeft className="h-4 w-4" />
                             </button>
                             <div
                                 onClick={() => setIsRangePickerOpen(true)}
-                                className="flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-center cursor-pointer hover:bg-slate-50 transition-colors"
+                                className={`flex-1 rounded-xl border px-3 py-2 text-center cursor-pointer transition-colors ${isDarkMode ? 'bg-slate-800 border-slate-700 hover:bg-slate-700' : 'bg-white border-slate-300 hover:bg-slate-50'}`}
                             >
-                                <p className="text-md font-bold text-gray-700">{periodRange.label}</p>
+                                <p className={`text-md font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>{periodRange.label}</p>
                             </div>
                             <button type="button"
                                 onClick={() => setPeriodOffset(o => Math.min(0, o + 1))}
                                 disabled={periodOffset >= 0 && filterPeriod !== 'custom'}
-                                className="rounded-xl border border-slate-300 bg-white p-1.5 text-slate-600 hover:bg-slate-100 active:scale-95 transition-all">
+                                className={`rounded-xl border p-1.5 transition-all active:scale-95 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700' : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-100'}`}>
                                 <ChevronRight className="h-4 w-4" />
                             </button>
                         </div>
                     )}
 
                     {filteredLogs.length > 0 && (
-                        <div className="flex items-center justify-between rounded-xl bg-gray-50 border border-gray-100 px-3 py-2">
-                            <span className="text-xs text-slate-500">
-                                <span className="font-bold text-slate-700">{filteredLogs.length}</span> lần bảo dưỡng
+                        <div className={`flex items-center justify-between rounded-xl px-3 py-2 border transition-all ${isDarkMode ? 'bg-slate-800/40 border-slate-700' : 'bg-gray-50 border-gray-100'}`}>
+                            <span className={`text-xs ${textSecondary}`}>
+                                <span className={`font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{filteredLogs.length}</span> lần bảo dưỡng
                             </span>
-                            <span className="text-sm font-black text-gray-700">{fmt(periodTotalCost)}</span>
+                            <span className={`text-sm font-black ${isDarkMode ? 'text-slate-100' : 'text-gray-700'}`}>{fmt(periodTotalCost)}</span>
                         </div>
                     )}
                 </div>
@@ -344,21 +349,21 @@ export default function VehicleMaintenance() {
                 {loading ? (
                     <div className="space-y-3">
                         {[1, 2, 3].map(i => (
-                            <div key={i} className="animate-pulse overflow-hidden rounded-2xl bg-white p-4 shadow-sm">
-                                <div className="mb-3 h-4 w-2/3 rounded-lg bg-slate-100" />
-                                <div className="h-16 w-full rounded-xl bg-slate-50" />
+                            <div key={i} className={`animate-pulse overflow-hidden rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}>
+                                <div className={`mb-3 h-4 w-2/3 rounded-lg ${isDarkMode ? 'bg-slate-700' : 'bg-slate-100'}`} />
+                                <div className={`h-16 w-full rounded-xl ${isDarkMode ? 'bg-slate-700/50' : 'bg-slate-50'}`} />
                             </div>
                         ))}
                     </div>
                 ) : filteredLogs.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center rounded-3xl bg-white border border-slate-100 py-14 shadow-sm">
-                        <div className="mb-4 rounded-3xl bg-gray-200 p-6 shadow-md">
-                            <Wrench className="h-12 w-12 text-gray-600" />
+                    <div className={`flex flex-col items-center justify-center rounded-3xl py-14 shadow-sm border transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'}`}>
+                        <div className={`mb-4 rounded-3xl p-6 shadow-md ${isDarkMode ? 'bg-slate-700 text-slate-400' : 'bg-gray-200 text-gray-600'}`}>
+                            <Wrench className="h-12 w-12" />
                         </div>
-                        <p className="font-semibold text-slate-600">
+                        <p className={`font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                             {filterPeriod === 'all' ? 'Chưa có nhật ký bảo dưỡng' : `Không có dữ liệu trong ${periodRange.label.toLowerCase()}`}
                         </p>
-                        <p className="mt-1 text-sm text-slate-400">
+                        <p className={`mt-1 text-sm ${textSecondary}`}>
                             {filterPeriod !== 'all' ? 'Thử chọn khung thời gian khác' : 'Thêm bảo dưỡng đầu tiên ngay'}
                         </p>
                     </div>
@@ -378,12 +383,12 @@ export default function VehicleMaintenance() {
                                     {/* Date separator */}
                                     <div className="mb-2 flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <div className="h-2 w-2 rounded-full bg-gray-400" />
-                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">{dayLabel}</span>
+                                            <div className={`h-2 w-2 rounded-full ${isDarkMode ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]' : 'bg-gray-400'}`} />
+                                            <span className={`text-xs font-black uppercase tracking-wider ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>{dayLabel}</span>
                                         </div>
-                                        <span className="text-xs font-semibold text-slate-400">{fmt(dayTotal)}</span>
+                                        <span className={`text-xs font-bold ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>{fmt(dayTotal)}</span>
                                     </div>
-                                    <div className="space-y-2 pl-4 border-l-2 border-gray-100">
+                                    <div className={`space-y-2 pl-4 border-l-2 ${isDarkMode ? 'border-slate-800' : 'border-gray-100'}`}>
                                         {dayLogs.map(log => {
                                             const type = MAINT_TYPES[log.maintenance_type as keyof typeof MAINT_TYPES] || MAINT_TYPES.scheduled
                                             const TypeIcon = type.icon
@@ -391,7 +396,7 @@ export default function VehicleMaintenance() {
                                             const parts = log.parts_cost || 0
                                             const labor = log.labor_cost || 0
                                             return (
-                                                <div key={log.id} className="overflow-hidden rounded-2xl bg-white shadow-md transition-all hover:shadow-lg border border-slate-100">
+                                                <div key={log.id} className={`overflow-hidden rounded-2xl shadow-md transition-all hover:shadow-lg border ${isDarkMode ? 'bg-slate-800 border-slate-700 shadow-black/20' : 'bg-white border-slate-100 shadow-sm'}`}>
                                                     {/* Top accent bar */}
                                                     <div className={`h-1 w-full ${type.accent === 'blue' ? 'bg-blue-400' : 'bg-red-400'}`} />
 
@@ -403,26 +408,26 @@ export default function VehicleMaintenance() {
                                                         >
                                                             <div>
                                                                 <div className="flex items-center gap-2 mb-0.5">
-                                                                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${BADGE[type.accent as keyof typeof BADGE]}`}>
+                                                                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${isDarkMode ? (type.accent === 'blue' ? 'bg-blue-500/20 text-blue-400' : 'bg-red-500/20 text-red-400') : BADGE[type.accent as keyof typeof BADGE]}`}>
                                                                         {type.label}
                                                                     </span>
-                                                                    <span className="text-xs text-slate-400">{log.odometer.toLocaleString()} km</span>
+                                                                    <span className={`text-xs ${textSecondary}`}>{log.odometer.toLocaleString()} km</span>
                                                                 </div>
                                                                 <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                                                    <span className="flex items-center gap-1 text-xs text-slate-500">
+                                                                    <span className={`flex items-center gap-1 text-xs ${textSecondary}`}>
                                                                         <TypeIcon className="h-3 w-3" />
                                                                         {type.label}
                                                                     </span>
                                                                     {log.service_provider && (
-                                                                        <span className="flex items-center gap-1 text-xs text-slate-400 truncate max-w-[120px]">
+                                                                        <span className={`flex items-center gap-1 text-xs truncate max-w-[120px] ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>
                                                                             <Store className="h-3 w-3 shrink-0" />{log.service_provider}
                                                                         </span>
                                                                     )}
                                                                 </div>
                                                             </div>
                                                             <div className="flex items-center gap-2 shrink-0 ml-2">
-                                                                <span className="text-base font-black text-gray-600">{fmt(log.total_cost || 0)}</span>
-                                                                {isExpanded ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
+                                                                <span className={`text-base font-black ${isDarkMode ? 'text-slate-100' : 'text-gray-600'}`}>{fmt(log.total_cost || 0)}</span>
+                                                                {isExpanded ? <ChevronUp className={`h-4 w-4 ${textSecondary}`} /> : <ChevronDown className={`h-4 w-4 ${textSecondary}`} />}
                                                             </div>
                                                         </button>
 
@@ -430,24 +435,24 @@ export default function VehicleMaintenance() {
                                                         {log.service_items && log.service_items.length > 0 && !isExpanded && (
                                                             <div className="mt-2.5 flex flex-wrap gap-1">
                                                                 {log.service_items.slice(0, 3).map((item, i) => (
-                                                                    <span key={i} className="rounded-lg bg-slate-100 px-2 py-0.5 text-[10px] text-slate-600">{item}</span>
+                                                                    <span key={i} className={`rounded-lg px-2 py-0.5 text-[10px] font-medium ${isDarkMode ? 'bg-slate-700/50 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>{item}</span>
                                                                 ))}
                                                                 {log.service_items.length > 3 && (
-                                                                    <span className="rounded-lg bg-slate-100 px-2 py-0.5 text-[10px] text-slate-500">+{log.service_items.length - 3}</span>
+                                                                    <span className={`rounded-lg px-2 py-0.5 text-[10px] font-medium ${isDarkMode ? 'bg-slate-700/50 text-slate-500' : 'bg-slate-100 text-slate-500'}`}>+{log.service_items.length - 3}</span>
                                                                 )}
                                                             </div>
                                                         )}
 
                                                         {/* Expanded content */}
                                                         {isExpanded && (
-                                                            <div className="mt-3 space-y-3 border-t border-slate-100 pt-3">
+                                                            <div className={`mt-3 space-y-3 border-t pt-3 ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`}>
                                                                 {/* Service items */}
                                                                 {log.service_items && log.service_items.length > 0 && (
                                                                     <div>
                                                                         <p className="mb-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Hạng mục thực hiện</p>
                                                                         <div className="flex flex-wrap gap-1.5">
                                                                             {log.service_items.map((item, i) => (
-                                                                                <span key={i} className="flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                                                                                <span key={i} className={`flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium ${isDarkMode ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-700'}`}>
                                                                                     <CheckCircle2 className="h-3 w-3 text-green-500" />
                                                                                     {item}
                                                                                 </span>
@@ -458,13 +463,13 @@ export default function VehicleMaintenance() {
 
                                                                 {/* Cost breakdown */}
                                                                 <div className="grid grid-cols-2 gap-2">
-                                                                    <div className="rounded-xl bg-slate-50 px-3 py-2">
+                                                                    <div className={`rounded-xl px-3 py-2 ${isDarkMode ? 'bg-slate-900/50' : 'bg-slate-50'}`}>
                                                                         <p className="text-[10px] text-slate-400">Phụ tùng</p>
-                                                                        <p className="text-sm font-bold text-slate-700">{fmt(parts)}</p>
+                                                                        <p className={`text-sm font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{fmt(parts)}</p>
                                                                     </div>
-                                                                    <div className="rounded-xl bg-slate-50 px-3 py-2">
+                                                                    <div className={`rounded-xl px-3 py-2 ${isDarkMode ? 'bg-slate-900/50' : 'bg-slate-50'}`}>
                                                                         <p className="text-[10px] text-slate-400">Nhân công</p>
-                                                                        <p className="text-sm font-bold text-slate-700">{fmt(labor)}</p>
+                                                                        <p className={`text-sm font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{fmt(labor)}</p>
                                                                     </div>
                                                                 </div>
 
@@ -474,14 +479,14 @@ export default function VehicleMaintenance() {
                                                                 )}
 
                                                                 {/* Total + Delete */}
-                                                                <div className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2">
-                                                                    <span className="text-xs font-medium text-gray-700">Tổng cộng</span>
-                                                                    <span className="text-base font-black text-gray-700">{fmt(log.total_cost || 0)}</span>
+                                                                <div className={`flex items-center justify-between rounded-xl px-3 py-2 ${isDarkMode ? 'bg-slate-900/50' : 'bg-gray-50'}`}>
+                                                                    <span className={`text-xs font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-700'}`}>Tổng cộng</span>
+                                                                    <span className={`text-base font-black ${isDarkMode ? 'text-slate-100' : 'text-gray-700'}`}>{fmt(log.total_cost || 0)}</span>
                                                                 </div>
 
                                                                 <button
                                                                     onClick={() => setDeleteConfirmId(log.id)}
-                                                                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 py-2 text-sm font-semibold text-red-600 hover:bg-red-100 transition-all"
+                                                                    className={`flex w-full items-center justify-center gap-2 rounded-xl border py-2 text-sm font-semibold transition-all ${isDarkMode ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20' : 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100'}`}
                                                                 >
                                                                     <Trash2 className="h-4 w-4" /> Xóa nhật ký
                                                                 </button>
@@ -501,7 +506,7 @@ export default function VehicleMaintenance() {
                 <div className="h-[150px] w-full flex-shrink-0"></div>
             </main>
 
-            <VehicleFooterNav onAddClick={() => setShowAddModal(true)} addLabel="Bảo dưỡng" isElectricVehicle={selectedVehicle?.fuel_type === 'electric'} />
+
 
             {showSettingsModal && selectedVehicle && (
                 <MaintenanceSettingsModal
@@ -630,10 +635,12 @@ function AddMaintenanceModal({ vehicle, onClose, onSuccess }: {
         }
     }
 
+    const { isDarkMode } = useAppearance()
+
     return (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] pointer-events-none">
-            <div className="w-full max-w-md max-h-[92vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl pointer-events-auto mt-12 sm:mt-0 safe-area-bottom overflow-hidden">
-                <div className="sticky top-0 z-10 bg-slate-800 px-5 pt-3 pb-4 text-white">
+            <div className={`w-full max-w-md max-h-[92vh] flex flex-col rounded-t-3xl sm:rounded-3xl shadow-2xl pointer-events-auto mt-12 sm:mt-0 safe-area-bottom overflow-hidden ${isDarkMode ? 'bg-slate-900 border border-slate-800' : 'bg-white'}`}>
+                <div className={`sticky top-0 z-10 px-5 pt-3 pb-4 text-white ${isDarkMode ? 'bg-slate-800 shadow-lg shadow-black/20' : 'bg-slate-800'}`}>
                     <div className="flex w-full justify-center pb-3 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10">
                         <div className="h-1.5 w-12 rounded-full bg-white/40" />
                     </div>
@@ -652,27 +659,27 @@ function AddMaintenanceModal({ vehicle, onClose, onSuccess }: {
                 <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
                     <div className="grid grid-cols-2 gap-3">
                         <div>
-                            <label className="mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wide">Ngày</label>
+                            <label className={`mb-1.5 block text-xs font-bold uppercase tracking-wide ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Ngày</label>
                             <input type="date" value={form.maintenance_date}
                                 onChange={e => setForm({ ...form, maintenance_date: e.target.value })}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium focus:border-gray-400 focus:bg-white focus:outline-none" />
+                                className={`w-full rounded-xl border px-3 py-2.5 text-sm font-medium focus:outline-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' : 'bg-slate-50 border-slate-200 focus:border-gray-400 focus:bg-white focus:ring-2 focus:ring-gray-100'}`} />
                         </div>
                         <div>
-                            <label className="mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wide">Số km (ODO)</label>
+                            <label className={`mb-1.5 block text-xs font-bold uppercase tracking-wide ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Số km (ODO)</label>
                             <input type="number" value={form.odometer}
                                 onChange={e => setForm({ ...form, odometer: parseInt(e.target.value) })}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium focus:border-gray-400 focus:bg-white focus:outline-none" />
+                                className={`w-full rounded-xl border px-3 py-2.5 text-sm font-medium focus:outline-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' : 'bg-slate-50 border-slate-200 focus:border-gray-400 focus:bg-white focus:ring-2 focus:ring-gray-100'}`} />
                         </div>
                     </div>
 
                     <div>
-                        <label className="mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wide">Loại bảo dưỡng</label>
+                        <label className={`mb-1.5 block text-xs font-bold uppercase tracking-wide ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Loại bảo dưỡng</label>
                         <div className="flex gap-2">
                             {Object.entries(MAINT_TYPES).map(([key, { label, accent }]) => (
                                 <button key={key} onClick={() => setForm({ ...form, maintenance_type: key as any })}
                                     className={`flex-1 rounded-xl border py-2.5 text-sm font-bold transition-all ${form.maintenance_type === key
-                                        ? accent === 'blue' ? 'border-blue-400 bg-blue-50 text-blue-700' : 'border-red-400 bg-red-50 text-red-700'
-                                        : 'border-slate-200 bg-slate-50 text-slate-500'}`}>
+                                        ? (isDarkMode ? (accent === 'blue' ? 'border-blue-500 bg-blue-500/20 text-blue-400' : 'border-red-500 bg-red-500/20 text-red-400') : (accent === 'blue' ? 'border-blue-400 bg-blue-50 text-blue-700' : 'border-red-400 bg-red-50 text-red-700'))
+                                        : (isDarkMode ? 'border-slate-700 bg-slate-800 text-slate-500' : 'border-slate-200 bg-slate-50 text-slate-500')}`}>
                                     {label}
                                 </button>
                             ))}
@@ -680,15 +687,15 @@ function AddMaintenanceModal({ vehicle, onClose, onSuccess }: {
                     </div>
 
                     <div>
-                        <label className="mb-2 block text-xs font-bold text-slate-500 uppercase tracking-wide">
-                            Hạng mục thực hiện {selectedItems.length > 0 && <span className="text-gray-600">({selectedItems.length})</span>}
+                        <label className={`mb-2 block text-xs font-bold uppercase tracking-wide ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                            Hạng mục thực hiện {selectedItems.length > 0 && <span className={isDarkMode ? 'text-slate-300' : 'text-gray-600'}>({selectedItems.length})</span>}
                         </label>
                         <div className="flex flex-wrap gap-2 mb-2">
                             {SERVICE_PRESETS.map(item => (
                                 <button key={item} onClick={() => toggleItem(item)}
                                     className={`flex items-center gap-1 rounded-xl border px-3 py-1.5 text-xs font-medium transition-all ${selectedItems.includes(item)
-                                        ? 'border-slate-800 bg-slate-50 text-slate-800'
-                                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'}`}>
+                                        ? (isDarkMode ? 'border-blue-500 bg-blue-500/10 text-blue-400' : 'border-slate-800 bg-slate-50 text-slate-800')
+                                        : (isDarkMode ? 'border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-600' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300')}`}>
                                     {selectedItems.includes(item) && <CheckCircle2 className="h-3 w-3" />}
                                     {item}
                                 </button>
@@ -698,91 +705,91 @@ function AddMaintenanceModal({ vehicle, onClose, onSuccess }: {
                             <input value={customItem} onChange={e => setCustomItem(e.target.value)}
                                 onKeyDown={e => e.key === 'Enter' && addCustomItem()}
                                 placeholder="Thêm hạng mục khác..."
-                                className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-gray-400 focus:bg-white focus:outline-none" />
-                            <button onClick={addCustomItem} className="rounded-xl bg-gray-100 px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-200">
+                                className={`flex-1 rounded-xl border px-3 py-2 text-sm focus:outline-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' : 'bg-slate-50 border-slate-200 focus:border-gray-400 focus:bg-white focus:ring-2 focus:ring-gray-100'}`} />
+                            <button onClick={addCustomItem} className={`rounded-xl px-4 py-2 text-xs font-black uppercase tracking-wider transition-all active:scale-95 ${isDarkMode ? 'bg-slate-700 text-slate-300 hover:bg-slate-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
                                 + Thêm
                             </button>
                         </div>
                     </div>
 
                     <div>
-                        <label className="mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wide">Chi phí</label>
+                        <label className={`mb-1.5 block text-xs font-bold uppercase tracking-wide ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Chi phí</label>
                         <div className="grid grid-cols-2 gap-3">
                             <div className="relative">
-                                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                <DollarSign className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`} />
                                 <input type="number" value={form.parts_cost}
                                     onChange={e => setForm({ ...form, parts_cost: e.target.value })}
                                     placeholder="Phụ tùng"
-                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 py-2.5 text-sm font-medium focus:border-gray-400 focus:bg-white focus:outline-none" />
+                                    className={`w-full rounded-xl border pl-9 pr-3 py-2.5 text-sm font-medium focus:outline-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' : 'bg-slate-50 border-slate-200 focus:border-gray-400 focus:bg-white focus:ring-2 focus:ring-gray-100'}`} />
                             </div>
                             <div className="relative">
-                                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                <DollarSign className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`} />
                                 <input type="number" value={form.labor_cost}
                                     onChange={e => setForm({ ...form, labor_cost: e.target.value })}
                                     placeholder="Nhân công"
-                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 py-2.5 text-sm font-medium focus:border-gray-400 focus:bg-white focus:outline-none" />
+                                    className={`w-full rounded-xl border pl-9 pr-3 py-2.5 text-sm font-medium focus:outline-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' : 'bg-slate-50 border-slate-200 focus:border-gray-400 focus:bg-white focus:ring-2 focus:ring-gray-100'}`} />
                             </div>
                         </div>
                         {total > 0 && (
-                            <div className="mt-2 flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2">
-                                <span className="text-xs font-medium text-gray-700">Tổng cộng</span>
-                                <span className="text-base font-black text-gray-700">{fmt(total)}</span>
+                            <div className={`mt-2 flex items-center justify-between rounded-xl px-3 py-2 ${isDarkMode ? 'bg-slate-800/50' : 'bg-gray-50'}`}>
+                                <span className={`text-xs font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-700'}`}>Tổng cộng</span>
+                                <span className={`text-base font-black ${isDarkMode ? 'text-slate-100' : 'text-gray-700'}`}>{fmt(total)}</span>
                             </div>
                         )}
                     </div>
 
                     <div>
-                        <label className="mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wide">Nơi thực hiện</label>
+                        <label className={`mb-1.5 block text-xs font-bold uppercase tracking-wide ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Nơi thực hiện</label>
                         <div className="relative">
-                            <Store className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <Store className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`} />
                             <input type="text" value={form.service_provider}
                                 onChange={e => setForm({ ...form, service_provider: e.target.value })}
                                 placeholder="Tên garage / tiệm..."
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 py-2.5 text-sm focus:border-gray-400 focus:bg-white focus:outline-none" />
+                                className={`w-full rounded-xl border pl-9 pr-3 py-2.5 text-sm focus:outline-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' : 'bg-slate-50 border-slate-200 focus:border-gray-400 focus:bg-white focus:ring-2 focus:ring-gray-100'}`} />
                         </div>
                     </div>
 
-                    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                    <div className={`rounded-2xl border p-4 transition-all ${isDarkMode ? 'bg-slate-800/40 border-slate-700 shadow-inner' : 'bg-gray-50 border-gray-200'}`}>
                         <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2">
-                                <AlertTriangle className="h-4 w-4 text-gray-600" />
-                                <p className="text-sm font-bold text-gray-700">Nhắc bảo dưỡng tiếp theo</p>
+                                <AlertTriangle className={`h-4 w-4 ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`} />
+                                <p className={`text-sm font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>Nhắc bảo dưỡng tiếp theo</p>
                             </div>
-                            <button type="button" onClick={calculateReminders} className="text-xs text-gray-700 font-bold underline bg-gray-100 px-2 py-1 rounded-md">
+                            <button type="button" onClick={calculateReminders} className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl transition-all active:scale-95 ${isDarkMode ? 'bg-slate-700 text-blue-400 hover:bg-slate-600' : 'bg-white border border-slate-200 text-gray-700 shadow-sm'}`}>
                                 Gợi ý mốc
                             </button>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <label className="mb-1 block text-xs font-medium text-gray-700">Tại số km</label>
+                                <label className={`mb-1.5 block text-[10px] font-black uppercase tracking-wide ${isDarkMode ? 'text-slate-500' : 'text-gray-500'}`}>Tại số km</label>
                                 <input type="number" value={form.next_reminder_km}
                                     onChange={e => setForm({ ...form, next_reminder_km: e.target.value })}
                                     placeholder={form.odometer ? String(form.odometer + (vehicle.maintenance_interval_km || 5000)) : ''}
-                                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus:border-gray-400 focus:outline-none" />
+                                    className={`w-full rounded-xl border px-3 py-2 text-sm focus:outline-none transition-all ${isDarkMode ? 'bg-slate-900 border-slate-700 text-slate-100 focus:border-blue-500 placeholder:text-slate-700' : 'bg-white border-gray-200 focus:border-gray-400'}`} />
                             </div>
                             <div>
-                                <label className="mb-1 block text-xs font-medium text-gray-700">Hoặc ngày</label>
+                                <label className={`mb-1.5 block text-[10px] font-black uppercase tracking-wide ${isDarkMode ? 'text-slate-500' : 'text-gray-500'}`}>Hoặc ngày</label>
                                 <input type="date" value={form.next_reminder_date}
                                     onChange={e => setForm({ ...form, next_reminder_date: e.target.value })}
-                                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus:border-gray-400 focus:outline-none" />
+                                    className={`w-full rounded-xl border px-3 py-2 text-sm focus:outline-none transition-all ${isDarkMode ? 'bg-slate-900 border-slate-700 text-slate-100 focus:border-blue-500' : 'bg-white border-gray-200 focus:border-gray-400'}`} />
                             </div>
                         </div>
                     </div>
 
                     <div>
-                        <label className="mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wide">Ghi chú</label>
+                        <label className={`mb-1.5 block text-xs font-bold uppercase tracking-wide ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Ghi chú</label>
                         <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })}
                             rows={2} placeholder="Ghi chú thêm..."
-                            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm focus:border-gray-400 focus:bg-white focus:outline-none resize-none" />
+                            className={`w-full rounded-xl border px-3 py-2.5 text-sm focus:outline-none resize-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' : 'bg-slate-50 border-slate-200 focus:border-gray-400 focus:bg-white focus:ring-2 focus:ring-gray-100'}`} />
                     </div>
 
                     <div className="flex gap-3 pb-2">
                         <button onClick={onClose}
-                            className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 py-3.5 text-sm font-semibold text-slate-600 hover:bg-slate-100">
+                            className={`flex-1 rounded-2xl border py-3.5 text-sm font-semibold transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}`}>
                             Hủy
                         </button>
                         <button onClick={handleSubmit} disabled={loading}
-                            className="flex-[2] flex items-center justify-center gap-2 rounded-2xl bg-slate-800 py-3.5 text-sm font-bold text-white shadow-lg shadow-slate-200 hover:bg-slate-900 disabled:opacity-50 active:scale-95 transition-all">
+                            className={`flex-[2] flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-bold text-white shadow-lg transition-all disabled:opacity-50 active:scale-95 ${isDarkMode ? 'bg-blue-600 shadow-black/40 hover:bg-blue-700' : 'bg-slate-800 shadow-slate-200 hover:bg-slate-900'}`}>
                             <Save className="h-4 w-4" /> Lưu bảo dưỡng
                         </button>
                     </div>
@@ -798,6 +805,7 @@ function MaintenanceSettingsModal({ vehicle, onClose, onSuccess }: {
     onClose: () => void
     onSuccess: () => void
 }) {
+    const { isDarkMode } = useAppearance()
     const { success, error: showError } = useNotification()
     const [loading, setLoading] = useState(false)
     const [intervalKm, setIntervalKm] = useState(vehicle.maintenance_interval_km ? String(vehicle.maintenance_interval_km) : '')
@@ -821,8 +829,8 @@ function MaintenanceSettingsModal({ vehicle, onClose, onSuccess }: {
 
     return (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-[3px] pointer-events-none">
-            <div className="w-full max-w-md flex flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl pointer-events-auto mt-12 sm:mt-0 safe-area-bottom overflow-hidden">
-                <div className="sticky top-0 z-10 bg-slate-800 px-5 pt-3 pb-4 text-white">
+            <div className={`w-full max-w-md flex flex-col rounded-t-3xl sm:rounded-3xl shadow-2xl pointer-events-auto mt-12 sm:mt-0 safe-area-bottom overflow-hidden ${isDarkMode ? 'bg-slate-900 border border-slate-800' : 'bg-white'}`}>
+                <div className={`sticky top-0 z-10 px-5 pt-3 pb-4 text-white ${isDarkMode ? 'bg-slate-800 shadow-lg shadow-black/20' : 'bg-slate-800'}`}>
                     <div className="flex w-full justify-center pb-3 flex-shrink-0 sm:hidden scroll-none pointer-events-none sticky top-0 z-10">
                         <div className="h-1.5 w-12 rounded-full bg-white/40" />
                     </div>
@@ -840,34 +848,34 @@ function MaintenanceSettingsModal({ vehicle, onClose, onSuccess }: {
 
                 <div className="px-5 py-6 space-y-6">
                     <div>
-                        <label className="mb-2 block text-xs font-bold text-slate-500 uppercase tracking-wide">Chu kỳ theo số km (ODO)</label>
+                        <label className={`mb-2 block text-xs font-bold uppercase tracking-wide ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Chu kỳ theo số km (ODO)</label>
                         <div className="relative">
-                            <Gauge className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <Gauge className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`} />
                             <input type="number" value={intervalKm} onChange={e => setIntervalKm(e.target.value)}
                                 placeholder="Ví dụ: 5000"
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 py-3 text-sm font-bold focus:border-slate-400 focus:bg-white focus:outline-none" />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">km</span>
+                                className={`w-full rounded-xl border pl-9 pr-3 py-3 text-sm font-bold focus:outline-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' : 'bg-slate-50 border-slate-200 focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-gray-100'}`} />
+                            <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>km</span>
                         </div>
                     </div>
 
                     <div>
-                        <label className="mb-2 block text-xs font-bold text-slate-500 uppercase tracking-wide">Chu kỳ theo thời gian (tháng)</label>
+                        <label className={`mb-2 block text-xs font-bold uppercase tracking-wide ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Chu kỳ theo thời gian (tháng)</label>
                         <div className="relative">
-                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <Clock className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`} />
                             <input type="number" value={intervalMonths} onChange={e => setIntervalMonths(e.target.value)}
                                 placeholder="Ví dụ: 6"
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 py-3 text-sm font-bold focus:border-slate-400 focus:bg-white focus:outline-none" />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">tháng</span>
+                                className={`w-full rounded-xl border pl-9 pr-3 py-3 text-sm font-bold focus:outline-none transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' : 'bg-slate-50 border-slate-200 focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-gray-100'}`} />
+                            <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>tháng</span>
                         </div>
                     </div>
 
                     <div className="flex gap-3 pt-2">
                         <button onClick={onClose}
-                            className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 py-4 text-sm font-semibold text-slate-600 hover:bg-slate-100">
+                            className={`flex-1 rounded-2xl border py-4 text-sm font-semibold transition-all ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}`}>
                             Hủy
                         </button>
                         <button onClick={handleSave} disabled={loading}
-                            className="flex-[2] flex items-center justify-center gap-2 rounded-2xl bg-slate-800 py-4 text-sm font-bold text-white shadow-lg shadow-slate-200 hover:bg-slate-900 icon-white disabled:opacity-50 active:scale-95 transition-all">
+                            className={`flex-[2] flex items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold text-white shadow-lg transition-all disabled:opacity-50 active:scale-95 ${isDarkMode ? 'bg-blue-600 shadow-black/40 hover:bg-blue-700' : 'bg-slate-800 shadow-slate-200 hover:bg-slate-900'}`}>
                             <Save className="h-4 w-4" /> Lưu cài đặt
                         </button>
                     </div>
