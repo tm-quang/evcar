@@ -32,6 +32,7 @@ const VehicleReportsPage = lazy(() => import('./pages/ev/VehicleReports'))
 const VehicleChargingHistoryPage = lazy(() => import('./pages/ev/VehicleChargingHistory'))
 const EVCalculatorPage = lazy(() => import('./pages/ev/EVCalculator'))
 const DataManagementPage = lazy(() => import('./pages/ev/DataManagement'))
+const UpgradePage = lazy(() => import('./pages/Upgrade'))
 const AppearanceSettingsPage = lazy(() => import('./pages/AppearanceSettings'))
 
 const PageFallback = () => {
@@ -39,19 +40,14 @@ const PageFallback = () => {
   const { isDarkMode } = useAppearance()
 
   return (
-    <div className={`flex h-screen items-center justify-center px-6 transition-colors duration-500 ${isDarkMode ? 'bg-slate-950' : 'bg-slate-50'}`}>
+    <div className={`flex h-screen items-center justify-center px-6 ${isDarkMode ? 'bg-slate-950' : 'bg-slate-50'}`}>
       <div className="flex w-full max-w-sm flex-col items-center gap-6">
         <div className="relative h-32 w-32">
-          <div className={`absolute -inset-6 rounded-full blur-[40px] ${isDarkMode ? 'bg-blue-900/20' : 'bg-sky-200/30'}`} />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className={`absolute h-40 w-40 rounded-full border ripple-wave ${isDarkMode ? 'border-blue-900/40' : 'border-sky-200/80'}`} />
-            <div className={`absolute h-48 w-48 rounded-full border ripple-wave-delay-1 ${isDarkMode ? 'border-blue-900/30' : 'border-sky-100/70'}`} />
-            <div className={`absolute h-56 w-56 rounded-full border ripple-wave-delay-2 ${isDarkMode ? 'border-blue-900/20' : 'border-sky-50/60'}`} />
-          </div>
+          <div className="absolute inset-0 flex items-center justify-center" />
           <img
             src={splashLogo || '/EVGo-Logo.png'}
             alt="EVGo logo"
-            className="relative h-32 w-32 animate-[scalePulse_3s_ease-in-out_infinite]"
+            className="relative h-32 w-32"
           />
         </div>
       </div>
@@ -80,12 +76,12 @@ function AppContent() {
   const [initialPath] = useState(() => location.pathname)
 
   const initialHash = useState(() => window.location.hash)[0]
-  const hasRecoveryToken = initialHash.includes('type=recovery') || 
-                           (initialHash.includes('access_token') && initialHash.includes('type=recovery'))
+  const hasRecoveryToken = initialHash.includes('type=recovery') ||
+    (initialHash.includes('access_token') && initialHash.includes('type=recovery'))
   const hasHashError = initialHash.includes('error=')
 
-  const splashEligible = ['/login', '/register', '/'].includes(initialPath) 
-                          && !hasRecoveryToken && !hasHashError
+  const splashEligible = ['/login', '/register', '/'].includes(initialPath)
+    && !hasRecoveryToken && !hasHashError
   const [showSplash, setShowSplash] = useState(splashEligible)
 
   const hasExistingSession = useState(() => {
@@ -109,7 +105,7 @@ function AppContent() {
     return () => clearTimeout(timer)
   }, [splashEligible])
 
-  const showFooter = !['/login', '/register', '/', '/reset-password'].includes(location.pathname)
+  const showFooter = !['/login', '/register', '/', '/reset-password', '/account-info', '/upgrade'].includes(location.pathname)
 
   return (
     <>
@@ -141,14 +137,15 @@ function AppContent() {
                 <Route path="/ev/history" element={<ProtectedRoute><VehicleChargingHistoryPage /></ProtectedRoute>} />
                 <Route path="/ev/calculator" element={<ProtectedRoute><EVCalculatorPage /></ProtectedRoute>} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/upgrade" element={<ProtectedRoute><UpgradePage /></ProtectedRoute>} />
                 <Route path="*" element={<Navigate to="/login" replace />} />
               </Routes>
             </Suspense>
           </div>
-          
+
           {showFooter && (
             <div className="flex-none">
-              <VehicleFooterNav onAddClick={() => navigate('/ev/charging')} />
+              <VehicleFooterNav onAddClick={() => navigate('/ev/charging', { state: { openAddModal: true } })} />
             </div>
           )}
         </div>
@@ -157,7 +154,7 @@ function AppContent() {
         position="top-center"
         toastOptions={{
           duration: 3000,
-          style: { borderRadius: '10px', fontSize: '12px' },
+          style: { borderRadius: '15px', fontSize: '12px' },
         }}
       />
       <ToastStackLimiter />

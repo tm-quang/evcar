@@ -9,6 +9,7 @@ import { useNotification } from '../contexts/notificationContext.helpers'
 import { AccountInfoSkeleton } from '../components/skeletons'
 import { compressImageForAvatar, isFileSizeAcceptable } from '../utils/imageCompression'
 import { ModalFooterButtons } from '../components/ui/ModalFooterButtons'
+import { useAppearance } from '../contexts/AppearanceContext'
 
 const AccountInfoPage = () => {
   const navigate = useNavigate()
@@ -24,6 +25,7 @@ const AccountInfoPage = () => {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [pendingAvatarFile, setPendingAvatarFile] = useState<File | null>(null)
 
+  const { isDarkMode } = useAppearance()
   const [formData, setFormData] = useState({
     full_name: '',
     phone: '',
@@ -272,18 +274,24 @@ const AccountInfoPage = () => {
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden text-slate-900" style={{ backgroundColor: 'var(--app-home-bg)' }}>
+    <div className={`flex h-full flex-col overflow-hidden ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`} style={{ backgroundColor: 'var(--app-home-bg)' }}>
       <HeaderBar variant="page" title="Thông tin tài khoản" />
       <main className="flex-1 overflow-y-auto overscroll-contain pb-24">
         <div className="mx-auto flex w-full max-w-md flex-col gap-3 px-4 pt-2 pb-4 sm:pt-2 sm:pb-4">
           {/* Tab Selector */}
-          <div className="flex gap-2 rounded-xl bg-white p-1 shadow-md border border-slate-300">
+          <div 
+            className="flex gap-2 rounded-xl p-1 shadow-md border" 
+            style={{ 
+              backgroundColor: 'var(--app-card-bg)',
+              borderColor: 'var(--app-card-border)'
+            }}
+          >
             <button
               type="button"
               onClick={() => setActiveTab('info')}
               className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition ${activeTab === 'info'
                 ? 'bg-sky-500 text-white shadow-md'
-                : 'text-slate-600 hover:text-slate-900'
+                : isDarkMode ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600 hover:text-slate-900'
                 }`}
             >
               Thông tin cá nhân
@@ -293,7 +301,7 @@ const AccountInfoPage = () => {
               onClick={() => setActiveTab('password')}
               className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition ${activeTab === 'password'
                 ? 'bg-sky-500 text-white shadow-md'
-                : 'text-slate-600 hover:text-slate-900'
+                : isDarkMode ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600 hover:text-slate-900'
                 }`}
             >
               Đổi mật khẩu
@@ -309,7 +317,15 @@ const AccountInfoPage = () => {
           {isLoading ? (
             <AccountInfoSkeleton />
           ) : activeTab === 'info' ? (
-            <form onSubmit={handleSubmitInfo} id="account-form" className="space-y-4 rounded-3xl bg-white p-5 shadow-md sm:p-6 border border-slate-300">
+            <form 
+              onSubmit={handleSubmitInfo} 
+              id="account-form" 
+              className="space-y-4 rounded-3xl p-5 shadow-md sm:p-6 border"
+              style={{ 
+                backgroundColor: 'var(--app-card-bg)',
+                borderColor: 'var(--app-card-border)'
+              }}
+            >
               {/* Avatar */}
               <div className="flex flex-col items-center gap-4">
                 <div className="relative">
@@ -317,15 +333,15 @@ const AccountInfoPage = () => {
                     <img
                       src={avatarPreview || profile?.avatar_url || ''}
                       alt="Avatar"
-                      className="h-24 w-24 rounded-full object-cover ring-4 ring-slate-100 sm:h-28 sm:w-28"
+                      className={`h-24 w-24 rounded-full object-cover ring-4 sm:h-28 sm:w-28 ${isDarkMode ? 'ring-slate-800' : 'ring-slate-100'}`}
                     />
                   ) : (
-                    <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-blue-600 text-white ring-4 ring-slate-100 sm:h-28 sm:w-28">
+                    <div className={`flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-blue-600 text-white ring-4 sm:h-28 sm:w-28 ${isDarkMode ? 'ring-slate-800' : 'ring-slate-100'}`}>
                       <FaUser className="h-12 w-12 sm:h-14 sm:w-14" />
                     </div>
                   )}
                   {(isAvatarProcessing || isAvatarUploading) && (
-                    <div className="absolute inset-0 flex items-center justify-center rounded-full bg-white/70 text-xs font-semibold text-slate-700">
+                    <div className={`absolute inset-0 flex items-center justify-center rounded-full text-xs font-semibold ${isDarkMode ? 'bg-slate-900/70 text-slate-200' : 'bg-white/70 text-slate-700'}`}>
                       {isAvatarProcessing ? 'Đang xử lý ảnh...' : 'Đang tải ảnh lên...'}
                     </div>
                   )}
@@ -353,7 +369,7 @@ const AccountInfoPage = () => {
                   />
                 </div>
                 {pendingAvatarFile && !isAvatarProcessing && !isAvatarUploading && (
-                  <p className="text-xs text-slate-500">
+                  <p className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                     Ảnh sẽ được cập nhật sau khi bạn nhấn "Lưu thay đổi".
                   </p>
                 )}
@@ -371,7 +387,7 @@ const AccountInfoPage = () => {
 
               {/* Full Name */}
               <div>
-                <label htmlFor="full_name" className="mb-2 block text-xs font-semibold text-slate-700 sm:text-sm">
+                <label htmlFor="full_name" className={`mb-2 block text-xs font-semibold sm:text-sm ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                   <FaUser className="mr-1.5 inline h-4 w-4" />
                   Họ và tên
                 </label>
@@ -381,13 +397,18 @@ const AccountInfoPage = () => {
                   value={formData.full_name}
                   onChange={(e) => setFormData((prev) => ({ ...prev, full_name: e.target.value }))}
                   placeholder="Nhập họ và tên"
-                  className="w-full rounded-2xl border-2 border-slate-200 bg-white p-3.5 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
+                  className="w-full rounded-2xl border-2 p-3.5 text-sm transition-all focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
+                  style={{
+                    backgroundColor: 'var(--app-input-bg)',
+                    borderColor: 'var(--app-input-border)',
+                    color: 'var(--app-text-primary)'
+                  }}
                 />
               </div>
 
               {/* Email (read-only) */}
               <div>
-                <label htmlFor="email" className="mb-2 block text-xs font-semibold text-slate-700 sm:text-sm">
+                <label htmlFor="email" className={`mb-2 block text-xs font-semibold sm:text-sm ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                   <FaEnvelope className="mr-1.5 inline h-4 w-4" />
                   Email
                 </label>
@@ -396,14 +417,19 @@ const AccountInfoPage = () => {
                   id="email"
                   value={userEmail}
                   disabled
-                  className="w-full rounded-2xl border-2 border-slate-200 bg-slate-50 p-3.5 text-sm text-slate-500 sm:p-4"
+                  className="w-full rounded-2xl border-2 p-3.5 text-sm sm:p-4"
+                  style={{
+                    backgroundColor: isDarkMode ? 'var(--app-home-bg)' : 'var(--app-home-bg)',
+                    borderColor: 'var(--app-input-border)',
+                    color: 'var(--app-text-muted)'
+                  }}
                 />
-                <p className="mt-1 text-xs text-slate-400">Email không thể thay đổi</p>
+                <p className={`mt-1 text-xs ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>Email không thể thay đổi</p>
               </div>
 
               {/* Phone */}
               <div>
-                <label htmlFor="phone" className="mb-2 block text-xs font-semibold text-slate-700 sm:text-sm">
+                <label htmlFor="phone" className={`mb-2 block text-xs font-semibold sm:text-sm ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                   <FaPhone className="mr-1.5 inline h-4 w-4" />
                   Số điện thoại
                 </label>
@@ -413,13 +439,18 @@ const AccountInfoPage = () => {
                   value={formData.phone}
                   onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
                   placeholder="Nhập số điện thoại"
-                  className="w-full rounded-2xl border-2 border-slate-200 bg-white p-3.5 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
+                  className="w-full rounded-2xl border-2 p-3.5 text-sm transition-all focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
+                  style={{
+                    backgroundColor: 'var(--app-input-bg)',
+                    borderColor: 'var(--app-input-border)',
+                    color: 'var(--app-text-primary)'
+                  }}
                 />
               </div>
 
               {/* Date of Birth */}
               <div>
-                <label htmlFor="date_of_birth" className="mb-2 block text-xs font-semibold text-slate-700 sm:text-sm">
+                <label htmlFor="date_of_birth" className={`mb-2 block text-xs font-semibold sm:text-sm ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                   Ngày sinh
                 </label>
                 <input
@@ -427,16 +458,30 @@ const AccountInfoPage = () => {
                   id="date_of_birth"
                   value={formData.date_of_birth}
                   onChange={(e) => setFormData((prev) => ({ ...prev, date_of_birth: e.target.value }))}
-                  className="w-full rounded-2xl border-2 border-slate-200 bg-white p-3.5 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
+                  className="w-full rounded-2xl border-2 p-3.5 text-sm transition-all focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
+                  style={{
+                    backgroundColor: 'var(--app-input-bg)',
+                    borderColor: 'var(--app-input-border)',
+                    color: 'var(--app-text-primary)',
+                    colorScheme: isDarkMode ? 'dark' : 'light'
+                  }}
                 />
               </div>
 
             </form>
           ) : (
-            <form onSubmit={handleSubmitPassword} id="password-form" className="space-y-4 rounded-3xl bg-white p-5 shadow-md sm:p-6 border border-slate-300">
+            <form 
+              onSubmit={handleSubmitPassword} 
+              id="password-form" 
+              className="space-y-4 rounded-3xl p-5 shadow-md sm:p-6 border"
+              style={{ 
+                backgroundColor: 'var(--app-card-bg)',
+                borderColor: 'var(--app-card-border)'
+              }}
+            >
               {/* Current Password */}
               <div>
-                <label htmlFor="currentPassword" className="mb-2 block text-xs font-semibold text-slate-700 sm:text-sm">
+                <label htmlFor="currentPassword" className={`mb-2 block text-xs font-semibold sm:text-sm ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                   <FaLock className="mr-1.5 inline h-4 w-4" />
                   Mật khẩu hiện tại
                 </label>
@@ -447,7 +492,12 @@ const AccountInfoPage = () => {
                     value={passwordData.currentPassword}
                     onChange={(e) => setPasswordData((prev) => ({ ...prev, currentPassword: e.target.value }))}
                     placeholder="Nhập mật khẩu hiện tại"
-                    className="w-full rounded-2xl border-2 border-slate-200 bg-white p-3.5 pr-12 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
+                    className="w-full rounded-2xl border-2 p-3.5 pr-12 text-sm transition-all focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
+                    style={{
+                      backgroundColor: 'var(--app-input-bg)',
+                      borderColor: 'var(--app-input-border)',
+                      color: 'var(--app-text-primary)'
+                    }}
                     required
                   />
                   <button
@@ -462,7 +512,7 @@ const AccountInfoPage = () => {
 
               {/* New Password */}
               <div>
-                <label htmlFor="newPassword" className="mb-2 block text-xs font-semibold text-slate-700 sm:text-sm">
+                <label htmlFor="newPassword" className={`mb-2 block text-xs font-semibold sm:text-sm ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                   Mật khẩu mới
                 </label>
                 <div className="relative">
@@ -472,7 +522,12 @@ const AccountInfoPage = () => {
                     value={passwordData.newPassword}
                     onChange={(e) => setPasswordData((prev) => ({ ...prev, newPassword: e.target.value }))}
                     placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)"
-                    className="w-full rounded-2xl border-2 border-slate-200 bg-white p-3.5 pr-12 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
+                    className="w-full rounded-2xl border-2 p-3.5 pr-12 text-sm transition-all focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
+                    style={{
+                      backgroundColor: 'var(--app-input-bg)',
+                      borderColor: 'var(--app-input-border)',
+                      color: 'var(--app-text-primary)'
+                    }}
                     required
                     minLength={6}
                   />
@@ -488,7 +543,7 @@ const AccountInfoPage = () => {
 
               {/* Confirm Password */}
               <div>
-                <label htmlFor="confirmPassword" className="mb-2 block text-xs font-semibold text-slate-700 sm:text-sm">
+                <label htmlFor="confirmPassword" className={`mb-2 block text-xs font-semibold sm:text-sm ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                   Xác nhận mật khẩu mới
                 </label>
                 <div className="relative">
@@ -496,9 +551,14 @@ const AccountInfoPage = () => {
                     type={showPasswords.confirm ? 'text' : 'password'}
                     id="confirmPassword"
                     value={passwordData.confirmPassword}
-                    onChange={(e) => setPasswordData((prev) => ({ ...prev, confirmPassword: e.target.value }))}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, confirmPassword: e.target.value }))}
                     placeholder="Nhập lại mật khẩu mới"
-                    className="w-full rounded-2xl border-2 border-slate-200 bg-white p-3.5 pr-12 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
+                    className="w-full rounded-2xl border-2 p-3.5 pr-12 text-sm transition-all focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:p-4"
+                    style={{
+                      backgroundColor: 'var(--app-input-bg)',
+                      borderColor: 'var(--app-input-border)',
+                      color: 'var(--app-text-primary)'
+                    }}
                     required
                     minLength={6}
                   />

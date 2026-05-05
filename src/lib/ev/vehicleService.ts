@@ -330,7 +330,9 @@ export async function fetchFuelLogs(vehicleId?: string): Promise<FuelLogRecord[]
         query = query.eq('vehicle_id', vehicleId)
     }
 
-    const { data, error } = await query.order('refuel_date', { ascending: false })
+    const { data, error } = await query
+        .order('refuel_date', { ascending: false })
+        .order('created_at', { ascending: false })
 
     if (error) throw error
     return data || []

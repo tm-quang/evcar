@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { X, Save, DollarSign, Gift } from 'lucide-react'
-import { getAllChargingPrices, updateChargingPrice, type ChargingType, getElectricDiscountSettings, setElectricDiscountSettings } from '../../lib/ev/chargingPriceService'
+import { getAllChargingPrices, saveElectricChargingSettings, type ChargingType, getElectricDiscountSettings } from '../../lib/ev/chargingPriceService'
 import { useNotification } from '../../contexts/notificationContext.helpers'
 
 interface ChargingPriceSettingsProps {
@@ -54,13 +54,11 @@ export function ChargingPriceSettings({ isOpen, onClose, onSave }: ChargingPrice
 
         setLoading(true)
         try {
-            // Only update electricity price to database
-            await updateChargingPrice('electric', prices.electric)
-
-            // Save discount settings to database
-            await setElectricDiscountSettings({
-                mode: discountMode,
-                value: discountValue.replace(/[^\d]/g, '')
+            // Save both electricity price and discount settings in one atomic operation
+            await saveElectricChargingSettings({
+                price: prices.electric,
+                discountMode: discountMode,
+                discountValue: discountValue.replace(/[^\d]/g, '')
             })
 
             success('Đã cập nhật cài đặt thành công!')

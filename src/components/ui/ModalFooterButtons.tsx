@@ -26,15 +26,15 @@ export const ModalFooterButtons: React.FC<ModalFooterButtonsProps> = ({
   fixed = false,
 }) => {
   const footerClasses = fixed
-    ? `fixed bottom-0 left-0 right-0 z-40 shrink-0 bg-[#F7F9FC] px-4 py-4 shadow-lg sm:px-6 ${className}`
-    : `shrink-0 bg-[#F7F9FC] px-4 py-3 sm:px-6 ${className}`
+    ? `fixed bottom-0 left-0 right-0 z-40 shrink-0 px-4 py-4 shadow-lg sm:px-6 ${className}`
+    : `shrink-0 px-4 py-3 sm:px-6 ${className}`
 
   const containerClasses = fixed
     ? 'mx-auto flex w-full max-w-md gap-3'
     : 'flex gap-2 sm:gap-3'
 
   return (
-    <div className={footerClasses}>
+    <div className={footerClasses} style={{ backgroundColor: 'var(--app-home-bg)' }}>
       <div className={containerClasses}>
         <button
           type="button"

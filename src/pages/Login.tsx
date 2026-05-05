@@ -4,7 +4,6 @@ import { FaExclamationTriangle, FaLink } from 'react-icons/fa'
 import { AuthFooter } from '../components/auth/AuthFooter'
 import { BrandBadge } from '../components/auth/BrandBadge'
 import { LoginForm } from '../components/auth/LoginForm'
-import { AuroraBackground } from '../components/layout/AuroraBackground'
 import { useSupabaseHealth } from '../hooks/useSupabaseHealth'
 
 // Translate Supabase error codes sang tiếng Việt
@@ -54,17 +53,12 @@ export const LoginPage = () => {
     : null
 
   return (
-    <AuroraBackground>
-      <div className="flex min-h-full w-full flex-col items-center justify-between gap-3">
-        <div className="flex w-full flex-shrink-0 flex-col items-center gap-4 sm:gap-6 pt-14 sm:pt-16 md:pt-20">
-          <BrandBadge />
-
-          <div className="text-center mt-2 sm:mt-4">
-            <h1 className="text-xl font-bold text-slate-800 drop-shadow-sm sm:text-2xl md:text-3xl">
-              {authError ? 'Đặt lại mật khẩu' : 'Chào mừng trở lại!'}
-            </h1>
+    <div className="flex h-full flex-col overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+      <div className="relative z-10 flex h-full w-full flex-col overflow-y-auto overscroll-contain px-4">
+        <div className="mx-auto flex w-full max-w-md flex-col items-center justify-between gap-3 min-h-full py-4">
+          <div className="flex w-full flex-shrink-0 flex-col items-center gap-4 sm:gap-6 pt-14 sm:pt-16 md:pt-20">
+            <BrandBadge />
           </div>
-        </div>
 
         <div className="flex w-full flex-1 flex-col items-center justify-center gap-3 py-4">
           {/* Banner lỗi từ email link */}
@@ -113,8 +107,9 @@ export const LoginPage = () => {
           <AuthFooter prompt="Chưa có tài khoản?" linkTo="/register" linkLabel="Đăng ký ngay" />
         </div>
       </div>
-    </AuroraBackground>
-  )
+    </div>
+  </div>
+)
 }
 
 export default LoginPage

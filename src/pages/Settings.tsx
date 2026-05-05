@@ -14,6 +14,7 @@ import {
   LuDatabase,
   LuDownload,
   LuLayoutList,
+  LuGem,
 } from 'react-icons/lu'
 
 
@@ -165,6 +166,30 @@ const SettingsPage = () => {
                 </>
               )}
             </div>
+          </section>
+
+          {/* Upgrade Section */}
+          <section>
+            <button
+              onClick={() => navigate('/upgrade')}
+              className="relative w-full overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-blue-600 to-sky-500 p-5 text-white shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all group"
+            >
+              <div className="absolute top-0 right-0 -mt-2 -mr-2 h-20 w-20 rounded-full bg-white/10 blur-xl group-hover:scale-150 transition-transform duration-700" />
+              <div className="relative z-10 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="rounded-2xl bg-white/20 p-3 backdrop-blur-sm group-hover:rotate-12 transition-transform">
+                    <LuGem className="h-6 w-6 text-amber-300" />
+                  </div>
+                  <div className="text-left">
+                    <h4 className="text-lg font-black tracking-tight">Nâng cấp Premium</h4>
+                    <p className="text-xs font-medium opacity-80">Chỉ 30.000đ/tháng • Đầy đủ tính năng</p>
+                  </div>
+                </div>
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
+                  <LuChevronRight className="h-5 w-5" />
+                </div>
+              </div>
+            </button>
           </section>
 
           {/* Main Grid Menu */}
@@ -387,7 +412,6 @@ const SettingsPage = () => {
               </div>
               <div className="text-left">
                 <h4 className="text-base font-black">Quét mã QR</h4>
-                <p className="text-xs opacity-80">Đồng bộ dữ liệu</p>
               </div>
             </div>
             <LuChevronRight className="h-5 w-5 opacity-60" />

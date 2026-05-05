@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
     Plus, Calendar, MapPin, Settings, Zap, Droplet,
     BatteryCharging, Activity, TrendingUp, Clock, ChevronDown, ChevronUp,
@@ -64,7 +64,7 @@ function getVehicleChargingConfig() {
 function ElectricStatsCard({ logs }: { logs: FuelLogRecord[] }) {
     const navigate = useNavigate()
     const totalKwh = logs.reduce((sum, log) => sum + (log.kwh || log.liters || 0), 0)
-    const totalCost = logs.reduce((sum, log) => sum + (log.total_cost || log.total_amount || 0), 0)
+    const totalCost = logs.reduce((sum, log) => sum + Math.round(Number(log.total_cost || log.total_amount || 0)), 0)
     const sessions = logs.length
 
     // Cost per session average
@@ -77,7 +77,7 @@ function ElectricStatsCard({ logs }: { logs: FuelLogRecord[] }) {
         return d.getMonth() === thisMonth.getMonth() && d.getFullYear() === thisMonth.getFullYear()
     })
     const monthKwh = monthLogs.reduce((sum, log) => sum + (log.kwh || log.liters || 0), 0)
-    const monthCost = monthLogs.reduce((sum, log) => sum + (log.total_cost || log.total_amount || 0), 0)
+    const monthCost = monthLogs.reduce((sum, log) => sum + Math.round(Number(log.total_cost || log.total_amount || 0)), 0)
 
 
 
@@ -108,7 +108,9 @@ function ElectricStatsCard({ logs }: { logs: FuelLogRecord[] }) {
                         <p className="text-[10px] font-black uppercase tracking-widest opacity-70">kWh đã sạc</p>
                     </div>
                     <div className="text-right">
-                        <p className="text-3xl font-black tracking-tight">{formatCurrency(totalCost)}</p>
+                        <p className="text-3xl font-black tracking-tight">
+                            {totalCost <= 0 ? 'FREE' : formatCurrency(totalCost)}
+                        </p>
                         <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Tổng chi phí</p>
                     </div>
                 </div>
@@ -220,7 +222,7 @@ function ChargeLogCard({
         if (!mins || mins <= 0) return '--'
         const h = Math.floor(mins / 60)
         const m = mins % 60
-        if (h > 0) return `${h} giờ ${m} p`
+        if (h > 0) return `${h}h ${m}m`
         return `${m} phút`
     }
 
@@ -283,8 +285,8 @@ function ChargeLogCard({
                         <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Sạc</p>
                     </div>
                     <div className={`rounded-2xl p-3 text-center ${isDarkMode ? 'bg-slate-800/50' : 'bg-slate-50 shadow-inner'}`}>
-                        <p className={`text-lg font-black ${textPrimary}`}>
-                            {formatCurrency(cost)}
+                        <p className={`text-lg font-black ${textPrimary} ${Math.round(cost) <= 0 ? 'text-emerald-500' : ''}`}>
+                            {Math.round(cost) <= 0 ? 'FREE' : formatCurrency(cost)}
                         </p>
                         <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">VND</p>
                     </div>
@@ -373,6 +375,15 @@ export default function VehicleCharging() {
         const fuelType = FUEL_TYPES[log.fuel_type]
         return fuelType?.category === activeTab
     })
+
+    const location = useLocation()
+    useEffect(() => {
+        if (location.state?.openAddModal) {
+            setShowAddModal(true)
+            // Clear location state after opening
+            window.history.replaceState({}, document.title)
+        }
+    }, [location.state])
 
 
 
@@ -526,6 +537,14 @@ export default function VehicleCharging() {
             })
         }
     }
+    // Sort newest first before grouping
+    filteredLogs = [...filteredLogs].sort((a, b) => {
+        const dateA = new Date(a.refuel_date).getTime()
+        const dateB = new Date(b.refuel_date).getTime()
+        if (dateB !== dateA) return dateB - dateA
+        if (a.refuel_time && b.refuel_time) return b.refuel_time.localeCompare(a.refuel_time)
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
 
     // Group logs by date (newest first)
     const groupedLogs = filteredLogs.reduce<Record<string, typeof filteredLogs>>((acc, log) => {
@@ -537,7 +556,7 @@ export default function VehicleCharging() {
     const sortedDates = Object.keys(groupedLogs).sort((a, b) => b.localeCompare(a))
 
     // Period stats
-    const periodTotalCost = filteredLogs.reduce((s, l) => s + (l.total_cost || l.total_amount || 0), 0)
+    const periodTotalCost = filteredLogs.reduce((s, l) => s + Math.round(Number(l.total_cost || l.total_amount || 0)), 0)
     const periodTotalKwh = filteredLogs.reduce((s, l) => s + (l.kwh || l.liters || 0), 0)
 
     const PERIOD_TABS: { id: FilterPeriod; label: string }[] = [
@@ -733,7 +752,7 @@ export default function VehicleCharging() {
                                 const dayLabel = isToday ? 'Hôm nay'
                                     : isYesterday ? 'Hôm qua'
                                         : d.toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric', month: 'numeric' })
-                                const dayTotal = dayLogs.reduce((s, l) => s + (l.total_cost || l.total_amount || 0), 0)
+                                const dayTotal = dayLogs.reduce((s, l) => s + Math.round(Number(l.total_cost || l.total_amount || 0)), 0)
                                 return (
                                     <div key={dateKey}>
                                         {/* Date separator */}
@@ -968,7 +987,7 @@ function AddChargeModal({
 
     const quantity = parseFloat(formData.quantity) || 0
     const unitPrice = parseFloat(formData.unit_price) || 0
-    const chargeAmount = quantity * unitPrice                        // Phí sạc thực tế
+    const chargeAmount = Math.round(quantity * unitPrice)                        // Phí sạc thực tế (làm tròn VND)
 
     // Discount: interpret formData.discount as % or VND depending on mode
     const discountRaw = parseFloat(formData.discount) || 0
@@ -978,7 +997,7 @@ function AddChargeModal({
     const discountPct = chargeAmount > 0
         ? (discountMode === 'pct' ? discountRaw : (discount / chargeAmount) * 100)
         : 0
-    const totalPayment = Math.max(0, chargeAmount - discount)      // Tổng thanh toán
+    const totalPayment = Math.max(0, Math.round(chargeAmount - discount))      // Tổng thanh toán (làm tròn VND)
 
     // Duration = end_time - start_time
     const duration = useMemo(() => {
@@ -1417,7 +1436,7 @@ function AddChargeModal({
                             <div className="rounded-2xl bg-green-500 px-4 py-3 text-white">
                                 <div className="flex items-center justify-between">
                                     <span className="inline-flex items-center gap-1.5 text-sm font-semibold opacity-90"><DollarSign className="h-4 w-4" /> Tổng thanh toán</span>
-                                    <p className="text-xl font-black">{formatCurrency(totalPayment)} đ</p>
+                                    <p className="text-xl font-black">{totalPayment <= 0 ? 'FREE' : formatCurrency(totalPayment) + ' đ'}</p>
                                 </div>
                                 {discount > 0 && (
                                     <div className="mt-1.5 flex items-center justify-between rounded-xl bg-white/20 px-3 py-1.5 text-xs">
@@ -1565,9 +1584,9 @@ function BulkDiscountModal({
                     const log = logs.find(l => l.id === id)
                     if (!log) return
 
-                    const chargeAmount = log.total_amount || 0
+                    const chargeAmount = Number(log.total_amount || 0)
                     const disc = discountMode === 'pct' ? Math.round(chargeAmount * val / 100) : val
-                    const newCost = Math.max(0, chargeAmount - disc)
+                    const newCost = Math.max(0, Math.round(chargeAmount - disc))
 
                     let newNotes = log.notes || ''
                     // clean old bulk discount notes if any (simple approach)

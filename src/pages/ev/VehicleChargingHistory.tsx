@@ -93,12 +93,12 @@ export default function VehicleChargingHistory() {
 
                 const getNum = (cell: any, isFloat = false) => {
                     if (!cell) return 0
-                    if (typeof cell.value === 'number') return cell.value
-                    if (cell.value && typeof cell.value.result === 'number') return cell.value.result
+                    if (typeof cell.value === 'number') return isFloat ? cell.value : Math.round(cell.value)
+                    if (cell.value && typeof cell.value.result === 'number') return isFloat ? cell.value.result : Math.round(cell.value.result)
                     const t = (cell.text || '').trim()
                     if (!t) return 0
                     if (isFloat) return parseFloat(t.replace(',', '.')) || 0
-                    return parseInt(t.replace(/\D/g, ''), 10) || 0
+                    return Math.round(parseFloat(t.replace(/\D/g, '')) || 0)
                 }
 
                 const headerRow = worksheet.getRow(1)
@@ -197,8 +197,8 @@ export default function VehicleChargingHistory() {
                     notes: finalNotes.trim() || null,
                     kwh: kwh,
                     unit_price: unitPrice || null,
-                    total_amount: cost, // Keep as cost like the screenshot format represents net flow usually 
-                    total_cost: cost,
+                    total_amount: Math.round(cost), // Keep as cost like the screenshot format represents net flow usually 
+                    total_cost: Math.round(cost),
                     charge_duration_minutes: durationMins || null
                 })
             })
@@ -295,7 +295,20 @@ export default function VehicleChargingHistory() {
             }
         }
 
-        return result
+        // Sort newest first (by date then by created_at or refuel_time)
+        return [...result].sort((a, b) => {
+            const dateA = new Date(a.refuel_date).getTime()
+            const dateB = new Date(b.refuel_date).getTime()
+            if (dateB !== dateA) return dateB - dateA
+
+            // Same date, use time if available
+            if (a.refuel_time && b.refuel_time) {
+                return b.refuel_time.localeCompare(a.refuel_time)
+            }
+
+            // Fallback to created_at
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        })
     }, [logs, filterYear, filterMonth, searchTerm])
 
     // Stats
@@ -310,12 +323,15 @@ export default function VehicleChargingHistory() {
     }, 0)
     const pluggedHours = Math.floor(totalDurationMins / 60)
     const pluggedMins = totalDurationMins % 60
-    const totalCost = filteredLogs.reduce((sum, log) => sum + (log.total_cost ?? log.total_amount ?? 0), 0)
+    const totalCost = filteredLogs.reduce((sum, log) => {
+        const cost = log.total_cost ?? log.total_amount ?? 0
+        return sum + Math.round(Number(cost))
+    }, 0)
 
     // Calculate saved amount (total_amount - total_cost)
     const totalSaved = filteredLogs.reduce((sum, log) => {
-        const amount = log.total_amount || 0
-        const cost = log.total_cost ?? log.total_amount ?? 0
+        const amount = Math.round(Number(log.total_amount || 0))
+        const cost = Math.round(Number(log.total_cost ?? log.total_amount ?? 0))
         return sum + Math.max(0, amount - cost)
     }, 0)
 
@@ -333,7 +349,10 @@ export default function VehicleChargingHistory() {
         if (!mins || mins <= 0) return isShort ? '--' : '0 phút'
         const h = Math.floor(mins / 60)
         const m = mins % 60
-        // Standardize to full words for everything as requested
+        if (isShort) {
+            if (h > 0) return `${h}h ${m}m`
+            return `${m}m`
+        }
         if (h > 0) return `${h} giờ ${m} phút`
         return `${m} phút`
     }
@@ -490,8 +509,14 @@ export default function VehicleChargingHistory() {
                                 <span className="text-[10px] font-black uppercase tracking-[0.15em] text-white/60">Chi phí</span>
                             </div>
                             <p className="text-[25px] font-black leading-none flex items-baseline gap-1.5">
-                                {formatNumber(totalCost, 0)}
-                                <span className="text-[10px] font-black text-white/40 uppercase tracking-wider">VND</span>
+                                {Math.round(totalCost) <= 0 ? (
+                                    <span className="text-emerald-400">0</span>
+                                ) : (
+                                    <>
+                                        {formatNumber(totalCost, 0)}
+                                        <span className="text-[10px] font-black text-white/40 uppercase tracking-wider">VND</span>
+                                    </>
+                                )}
                             </p>
                         </div>
 
@@ -521,7 +546,7 @@ export default function VehicleChargingHistory() {
                 {/* List Container with Timeline */}
                 <div className="relative ml-2 pl-4 border-l border-slate-200 space-y-6 pb-10">
                     {filteredLogs.length === 0 ? (
-                        <div className={`flex flex-col items-center justify-center py-20 px-8 text-center rounded-[32px] border shadow-sm ${isDarkMode ? 'bg-slate-900 border-slate-800 shadow-none' : 'bg-white border-slate-100 shadow-slate-100/50'}`}>
+                        <div className={`flex flex-col items-center justify-center py-20 px-8 text-center rounded-3xl border shadow-sm ${isDarkMode ? 'bg-[#1e293b] border-slate-700 shadow-none' : 'bg-white border-slate-100 shadow-slate-100/50'}`}>
                             <div className={`mb-4 rounded-3xl p-6 shadow-inner ${isDarkMode ? 'bg-slate-800' : 'bg-slate-200'}`}>
                                 <Search className={`h-10 w-10 ${isDarkMode ? 'text-slate-600' : 'text-slate-500'}`} />
                             </div>
@@ -580,8 +605,9 @@ export default function VehicleChargingHistory() {
                             const percentage = Math.round(Math.min(100, Math.max(0, ((log.kwh || 0) / 37.23) * 100)))
 
                             const originalCost = (log.kwh || 0) * (log.unit_price || 3858)
-                            const displayCost = log.total_cost ?? log.total_amount ?? 0
-                            const isDiscounted = displayCost < originalCost || (log.notes?.includes('Khuyến mãi'))
+                            const rawDisplayCost = log.total_cost ?? log.total_amount ?? 0
+                            const displayCost = Math.round(Number(rawDisplayCost))
+                            const isDiscounted = displayCost < Math.round(originalCost) || (log.notes?.includes('Khuyến mãi'))
 
                             return (
                                 <div key={log.id} className="relative">
@@ -593,7 +619,7 @@ export default function VehicleChargingHistory() {
 
                                     <div
                                         onClick={() => setEditingLog(log as FuelLogRecord)}
-                                        className={`group relative overflow-hidden rounded-3xl p-4 shadow-md border transition-all duration-300 hover:shadow-xl hover:translate-x-1 cursor-pointer ${isDarkMode ? 'bg-slate-900 border-slate-700 shadow-none hover:bg-slate-800' : 'bg-white border-slate-300 shadow-slate-200'}`}
+                                        className={`group relative overflow-hidden rounded-3xl p-4 shadow-md border transition-all duration-300 hover:shadow-xl hover:translate-x-1 cursor-pointer ${isDarkMode ? 'bg-[#1e293b] border-slate-700 shadow-none hover:bg-slate-800' : 'bg-white border-slate-300 shadow-slate-200'}`}
                                     >
                                         <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-600 opacity-0 group-hover:opacity-100 transition-all duration-300" />
 
@@ -622,9 +648,8 @@ export default function VehicleChargingHistory() {
                                             </div>
                                             <div className={`flex flex-col border-x px-2 ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
                                                 <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Thời gian</p>
-                                                <div className="flex items-baseline gap-1">
-                                                    <span className={`text-lg font-black ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>{formatDuration(parsedDurationMins, true).split(' ')[0]}</span>
-                                                    <span className="text-[10px] font-black text-slate-400 uppercase">{formatDuration(parsedDurationMins, true).split(' ')[1] || 'phút'}</span>
+                                                <div className="flex items-baseline gap-1 mt-1">
+                                                    <span className={`text-base font-black ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>{formatDuration(parsedDurationMins, true)}</span>
                                                 </div>
                                             </div>
                                             <div className="flex flex-col text-right">
@@ -635,8 +660,8 @@ export default function VehicleChargingHistory() {
                                                             {formatNumber(originalCost, 0)}
                                                         </span>
                                                     )}
-                                                    <p className={`text-sm font-black leading-none ${displayCost === 0 ? 'text-emerald-500' : (isDarkMode ? 'text-slate-100' : 'text-slate-900')}`}>
-                                                        {displayCost === 0 ? 'FREE' : formatNumber(displayCost, 0)}
+                                                    <p className={`text-sm font-black leading-none ${displayCost <= 0 ? 'text-emerald-500' : (isDarkMode ? 'text-slate-100' : 'text-slate-900')}`}>
+                                                        {displayCost <= 0 ? 'FREE' : formatNumber(displayCost, 0)}
                                                     </p>
                                                 </div>
                                             </div>
@@ -786,7 +811,7 @@ export default function VehicleChargingHistory() {
                                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Chi phí phiên sạc</p>
                                                 <div className="flex flex-wrap items-center gap-2">
                                                     <span className={`text-sm font-black ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                                                        {actualCostModal === 0 ? 'Miễn phí' : formatCurrency(actualCostModal)}
+                                                        {Math.round(actualCostModal) <= 0 ? 'FREE' : formatCurrency(actualCostModal)}
                                                     </span>
                                                     {(actualCostModal < originalCostModal || parsedKhuyenMai) && (
                                                         <span className="text-xs font-semibold text-slate-400 line-through">
@@ -830,7 +855,7 @@ export default function VehicleChargingHistory() {
                                             <div>
                                                 <textarea name="notes" rows={4} defaultValue={editingLog.notes || ''} className={`w-full rounded-xl border px-3 py-2.5 text-sm outline-none transition-colors ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-400 focus:bg-white'}`} placeholder="Dữ liệu import thường lưu trữ tại đây..."></textarea>
                                             </div>
-                                            <button type="submit" className="w-full flex items-center justify-center gap-2 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white py-3.5 font-bold transition-all shadow-md shadow-blue-200">
+                                            <button type="submit" className="w-full flex items-center justify-center gap-2 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white py-3.5 font-bold transition-all shadow-md">
                                                 <Save className="h-5 w-5" />
                                                 Lưu cập nhật
                                             </button>
