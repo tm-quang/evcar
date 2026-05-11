@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import {
     Wrench, Plus, Calendar, Trash2, AlertTriangle,
     CheckCircle2, Gauge, ChevronDown, ChevronUp,
@@ -110,6 +111,14 @@ export default function VehicleMaintenance() {
     const [periodOffset, setPeriodOffset] = useState(0)
     const [isRangePickerOpen, setIsRangePickerOpen] = useState(false)
     const [customRange, setCustomRange] = useState({ start: '', end: '' })
+
+    const location = useLocation()
+    useEffect(() => {
+        if (location.state?.openAddModal) {
+            setShowAddModal(true)
+            window.history.replaceState({}, document.title)
+        }
+    }, [location.state])
 
     const effectiveId = selectedVehicleId || vehicles.find(v => v.is_default)?.id || vehicles[0]?.id || ''
     const { data: logs = [], isLoading: loading } = useVehicleMaintenance(effectiveId || undefined)

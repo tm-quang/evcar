@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import {
     Receipt, Calendar, Trash2, MapPin,
     ChevronDown, ChevronUp, DollarSign, FileText,
@@ -15,7 +16,6 @@ import { useNotification } from '../../contexts/notificationContext.helpers'
 import HeaderBar from '../../components/layout/HeaderBar'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { LoadingOverlay } from '../../components/ui/LoadingOverlay'
-import { VehicleFooterNav } from '../../components/ev/VehicleFooterNav'
 
 const fmt = (v: number) =>
     new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 0 }).format(v) + ' đ'
@@ -100,6 +100,15 @@ export default function VehicleExpenses() {
     const { data: logs = [], isLoading: loading } = useVehicleExpenses(effectiveId)
     const selectedVehicle = vehicles.find(v => v.id === effectiveId)
     const isMoto = selectedVehicle?.vehicle_type === 'motorcycle'
+
+    const location = useLocation()
+    useEffect(() => {
+        if (location.state?.openAddModal) {
+            setShowAddModal(true)
+            // Clear location state after opening
+            window.history.replaceState({}, document.title)
+        }
+    }, [location.state])
 
     const cardClass = isDarkMode
         ? 'bg-[#1E293B] border-slate-700 shadow-none'
@@ -458,10 +467,6 @@ export default function VehicleExpenses() {
                 isLoading={deleting}
             />
 
-            <VehicleFooterNav
-                onAddClick={() => setShowAddModal(true)}
-                addLabel="Chi phí"
-            />
         </div>
     )
 }

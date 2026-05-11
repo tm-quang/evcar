@@ -25,7 +25,6 @@ import { useVehicleStore } from '../../store/useVehicleStore'
 import { DateTimePickerModal } from '../../components/ui/DateTimePickerModal'
 import { LoadingOverlay } from '../../components/ui/LoadingOverlay'
 import { useAppearance } from '../../contexts/AppearanceContext'
-import { VehicleFooterNav } from '../../components/ev/VehicleFooterNav'
 
 const FUEL_TYPES = {
     petrol_a95: { label: 'Xăng A95', color: 'gray', category: 'fuel' as const },
@@ -781,13 +780,6 @@ export default function VehicleCharging() {
                 <div className="h-[150px] w-full flex-shrink-0"></div>
             </main >
 
-            {/* Vehicle Footer Nav */}
-            < VehicleFooterNav
-                onAddClick={() => setShowAddModal(true)
-                }
-                isElectricVehicle={isElectricVehicle}
-                addLabel="Sạc pin"
-            />
 
             {/* Add/Edit Modal */}
             {

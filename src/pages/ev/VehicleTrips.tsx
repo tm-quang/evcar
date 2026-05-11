@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { useLocation } from 'react-router-dom'
 import {
     Route, MapPin, Calendar, Trash2, Edit, Car, Bike,
     ChevronDown, Clock, Navigation, TrendingUp, BarChart3,
@@ -21,7 +22,6 @@ import HeaderBar from '../../components/layout/HeaderBar'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { SimpleLocationInput, type SimpleLocationData } from '../../components/ev/SimpleLocationInput'
 import { TripGPSDisplay, getTripCleanNotes } from '../../components/ev/TripGPSDisplay'
-import { VehicleFooterNav } from '../../components/ev/VehicleFooterNav'
 
 import { forwardGeocode, reverseGeocode, parseCoordinates } from '../../utils/geocoding'
 
@@ -476,6 +476,14 @@ export default function VehicleTrips() {
         }
     }, [selectedVehicleId])
 
+    const location = useLocation()
+    useEffect(() => {
+        if (location.state?.openAddModal) {
+            setShowAddModal(true)
+            window.history.replaceState({}, document.title)
+        }
+    }, [location.state])
+
     const [showAddModal, setShowAddModal] = useState(false)
     const [editingTrip, setEditingTrip] = useState<TripRecord | null>(null)
     const [completingTrip, setCompletingTrip] = useState<TripRecord | null>(null)
@@ -906,10 +914,6 @@ export default function VehicleTrips() {
                 />
             )}
 
-            <VehicleFooterNav
-                onAddClick={() => setShowAddModal(true)}
-                addLabel="Lộ trình"
-            />
         </div>
     )
 }

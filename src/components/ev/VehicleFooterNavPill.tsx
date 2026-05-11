@@ -2,6 +2,8 @@ import { memo, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { CarFront, Zap, LayoutList, Settings } from 'lucide-react'
 import { useAppearance } from '../../contexts/AppearanceContext'
+import { QuickAddMenu } from './QuickAddMenu'
+import { useAddButtonConfig } from '../../hooks/useAddButtonConfig'
 
 type VehicleTab = {
     id: string
@@ -20,53 +22,27 @@ export const VehicleFooterNavPill = memo(({ onAddClick, addLabel }: VehicleFoote
     const location = useLocation()
     const { isDarkMode } = useAppearance()
     const [isVisible, setIsVisible] = useState(true)
+    const [isQuickAddOpen, setIsQuickAddOpen] = useState(false)
+    const { config, isHidden } = useAddButtonConfig()
 
     // Auto-hide when modals are open
     useEffect(() => {
         const checkModals = () => {
-            // Find elements that look like modals or overlays
             const overlays = document.querySelectorAll('.fixed.inset-0, [class*="backdrop-blur"], [class*="z-50"], [class*="z-[60]"], [class*="z-[9999]"], [role="dialog"]')
-            
-            // Filter out the footer container and check for visibility
             const activeModals = Array.from(overlays).filter(el => {
-                // If it's the footer itself or its parent, ignore
-                if (el.classList.contains('footer-nav-container') || el.querySelector('.footer-nav-container')) {
-                    return false
-                }
-
+                if (el.classList.contains('footer-nav-container') || el.querySelector('.footer-nav-container')) return false
                 const style = window.getComputedStyle(el)
                 const zIndex = parseInt(style.zIndex) || 0
-                const opacity = parseFloat(style.opacity)
-                const display = style.display
-
-                // Only count if it's visible, has high z-index, and isn't just a tiny element
-                return display !== 'none' && 
-                       opacity > 0 && 
-                       zIndex >= 50 && 
-                       el.getBoundingClientRect().width > 100
+                return style.display !== 'none' && parseFloat(style.opacity) > 0 && zIndex >= 50 && el.getBoundingClientRect().width > 100
             })
-            
             setIsVisible(activeModals.length === 0)
         }
 
         const observer = new MutationObserver(checkModals)
-        observer.observe(document.body, { 
-            childList: true, 
-            subtree: true, 
-            attributes: true, 
-            attributeFilter: ['class', 'style'] 
-        })
-
-        // Initial check
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] })
         checkModals()
-
-        // Periodic check to ensure state consistency
         const interval = setInterval(checkModals, 500)
-
-        return () => {
-            observer.disconnect()
-            clearInterval(interval)
-        }
+        return () => { observer.disconnect(); clearInterval(interval) }
     }, [])
 
 
@@ -83,6 +59,29 @@ export const VehicleFooterNavPill = memo(({ onAddClick, addLabel }: VehicleFoote
         return pathname === path || pathname.startsWith(path)
     }
 
+    const handleAddClick = () => {
+        if (location.pathname === '/ev' || location.pathname === '/dashboard') {
+            setIsQuickAddOpen(true)
+            return
+        }
+
+        if (config) {
+            if (location.pathname === config.path) {
+                if (onAddClick) {
+                    onAddClick()
+                } else {
+                    navigate(config.path, { state: { openAddModal: true }, replace: true })
+                }
+            } else {
+                navigate(config.path, { state: { openAddModal: true } })
+            }
+        } else {
+            onAddClick?.()
+        }
+    }
+
+    const isButtonHidden = isHidden
+
     return (
         <div className={`
             fixed bottom-3 left-0 right-0 z-[100] flex flex-col items-center pointer-events-none px-4 gap-3
@@ -90,17 +89,28 @@ export const VehicleFooterNavPill = memo(({ onAddClick, addLabel }: VehicleFoote
             ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-24 opacity-0'}
             footer-nav-container
         `}>
-            {onAddClick && (
+            <QuickAddMenu 
+                isOpen={isQuickAddOpen} 
+                onClose={() => setIsQuickAddOpen(false)} 
+                anchor="bottom-right"
+            />
+            
+            {!isButtonHidden && (
                 <div className="w-full max-w-[380px] flex justify-end pr-2 pointer-events-none">
                     <button
-                        onClick={onAddClick}
+                        onClick={handleAddClick}
                         className={`pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 text-white bg-blue-600 ${isDarkMode ? 'shadow-black/50' : 'shadow-blue-500/30'}`}
-                        aria-label={addLabel || "Thêm mới"}
+                        aria-label={config?.label || addLabel || "Thêm mới"}
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        {config?.icon ? (
+                            <config.icon className="h-7 w-7" />
+                        ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        )}
                     </button>
                 </div>
             )}
+
             <div
                 className={`
                     pointer-events-auto flex items-center justify-between p-1 px-1 rounded-[32px] 

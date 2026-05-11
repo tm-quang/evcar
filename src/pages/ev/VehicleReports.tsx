@@ -39,7 +39,6 @@ import { useVehicles, useVehicleStats, useVehicleMonthlyStats } from '../../lib/
 import { useVehicleStore } from '../../store/useVehicleStore'
 import { useAppearance } from '../../contexts/AppearanceContext'
 import HeaderBar from '../../components/layout/HeaderBar'
-import { VehicleFooterNav } from '../../components/ev/VehicleFooterNav'
 
 
 const formatNumber = (value: number, decimals = 0) =>
@@ -900,7 +899,6 @@ export default function VehicleReports() {
                 <div className="h-20" />
             </main>
 
-            <VehicleFooterNav />
         </div>
     )
 }

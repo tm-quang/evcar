@@ -4,6 +4,8 @@ import { Home, Settings, LayoutList, Zap } from 'lucide-react'
 import { LuClipboardPen } from 'react-icons/lu'
 import { useAppearance } from '../../contexts/AppearanceContext'
 import { VehicleFooterNavPill } from './VehicleFooterNavPill'
+import { QuickAddMenu } from './QuickAddMenu'
+import { useAddButtonConfig } from '../../hooks/useAddButtonConfig'
 
 type VehicleFooterNavProps = {
     onAddClick?: () => void
@@ -29,6 +31,8 @@ export function VehicleFooterNav({
     const { isDarkMode, navStyle } = useAppearance()
     const [addAnimating, setAddAnimating] = useState(false)
     const [animatingTab, setAnimatingTab] = useState<string | null>(null)
+    const [isQuickAddOpen, setIsQuickAddOpen] = useState(false)
+    const { config, isHidden } = useAddButtonConfig()
 
     const [isVisible, setIsVisible] = useState(true)
 
@@ -73,7 +77,7 @@ export function VehicleFooterNav({
     const tabs: VehicleTab[] = [
         { id: 'home', label: 'Trang chủ', icon: Home, path: '/ev' },
         { id: 'fuel', label: 'Sạc pin', icon: Zap, path: '/ev/charging' },
-        { id: 'add', label: addLabel, icon: LuClipboardPen, prominent: true },
+        { id: 'add', label: config?.label || addLabel, icon: LuClipboardPen, prominent: true },
         { id: 'expenses', label: 'Chi phí', icon: LayoutList, path: '/ev/expenses' },
         { id: 'settings', label: 'Cài đặt', icon: Settings, path: '/settings' },
     ]
@@ -88,7 +92,29 @@ export function VehicleFooterNav({
     const handleClick = (tab: VehicleTab) => {
         if (tab.prominent) {
             triggerAddAnimation()
-            onAddClick?.()
+            
+            // If on Dashboard, show popup
+            if (location.pathname === '/ev' || location.pathname === '/dashboard') {
+                setIsQuickAddOpen(true)
+                return
+            }
+
+            // Otherwise, perform the context action
+            if (config) {
+                if (location.pathname === config.path) {
+                    // Already on the right page, just trigger the local add click if provided, 
+                    // or use the common navigate with state
+                    if (onAddClick) {
+                        onAddClick()
+                    } else {
+                        navigate(config.path, { state: { openAddModal: true }, replace: true })
+                    }
+                } else {
+                    navigate(config.path, { state: { openAddModal: true } })
+                }
+            } else {
+                onAddClick?.()
+            }
             return
         }
 
@@ -105,8 +131,10 @@ export function VehicleFooterNav({
         }
     }
 
+    const isButtonHidden = isHidden
+
     if (navStyle === 'pill') {
-        return <VehicleFooterNavPill onAddClick={onAddClick} addLabel={addLabel} />
+        return <VehicleFooterNavPill />
     }
 
     return (
@@ -116,29 +144,40 @@ export function VehicleFooterNav({
             ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-24 opacity-0 pointer-events-none'}
         `}>
             <div className="relative w-full max-w-md pointer-events-auto">
+                <QuickAddMenu 
+                    isOpen={isQuickAddOpen} 
+                    onClose={() => setIsQuickAddOpen(false)} 
+                    anchor="center"
+                />
 
                 {/* Center Add Button */}
-                <div className="absolute left-1/2 bottom-[14px] z-30 -translate-x-1/2">
-                    <button
-                        type="button"
-                        onClick={() => handleClick(tabs[2])}
-                        className="group flex h-14 w-14 items-center justify-center rounded-full shadow-xl transition-all hover:scale-110 active:scale-95"
-                        style={{
-                            background: isDarkMode
-                                ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
-                                : 'linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)',
-                            boxShadow: isDarkMode
-                                ? '0 4px 20px rgba(59, 130, 246, 0.4)'
-                                : '0 4px 20px rgba(29, 78, 216, 0.45)',
-                        }}
-                        aria-label="Thêm ghi chép"
-                    >
-                        <LuClipboardPen
-                            className={`h-8 w-8 text-white ${addAnimating ? 'animate-zoom-once' : ''}`}
-                            strokeWidth={2.5}
-                        />
-                    </button>
-                </div>
+                {!isButtonHidden && (
+                    <div className="absolute left-1/2 bottom-[14px] z-30 -translate-x-1/2">
+                        <button
+                            type="button"
+                            onClick={() => handleClick(tabs[2])}
+                            className="group flex h-14 w-14 items-center justify-center rounded-full shadow-xl transition-all hover:scale-110 active:scale-95"
+                            style={{
+                                background: isDarkMode
+                                    ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
+                                    : 'linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)',
+                                boxShadow: isDarkMode
+                                    ? '0 4px 20px rgba(59, 130, 246, 0.4)'
+                                    : '0 4px 20px rgba(29, 78, 216, 0.45)',
+                            }}
+                            aria-label="Thêm ghi chép"
+                        >
+                            {config?.icon ? (
+                                <config.icon className={`h-7 w-7 text-white ${addAnimating ? 'animate-zoom-once' : ''}`} />
+                            ) : (
+                                <LuClipboardPen
+                                    className={`h-8 w-8 text-white ${addAnimating ? 'animate-zoom-once' : ''}`}
+                                    strokeWidth={2.5}
+                                />
+                            )}
+                        </button>
+                    </div>
+                )}
 
                 {/* Background SVG */}
                 <div className="relative h-[100px]">
@@ -149,31 +188,23 @@ export function VehicleFooterNav({
                             preserveAspectRatio="none"
                         >
                             <path
-                                d="M 0,60
-                                   C 0,48.954 8.954,40 20,40
-                                   L 128,40
-                                   C 153,40 173,22 200,22
-                                   C 227,22 247,40 272,40
-                                   L 380,40
-                                   C 391.046,40 400,48.954 400,60
-                                   L 400,100
-                                   L 0,100
-                                   Z"
+                                d={isButtonHidden 
+                                    ? "M 0,60 C 0,48.954 8.954,40 20,40 L 380,40 C 391.046,40 400,48.954 400,60 L 400,100 L 0,100 Z"
+                                    : "M 0,60 C 0,48.954 8.954,40 20,40 L 128,40 C 153,40 173,22 200,22 C 227,22 247,40 272,40 L 380,40 C 391.046,40 400,48.954 400,60 L 400,100 L 0,100 Z"
+                                }
                                 fill="var(--app-home-bg)"
-                                className="transition-colors duration-500"
+                                className="transition-all duration-500"
                             />
                             {isDarkMode && (
                                 <path
-                                    d="M 0,60
-                                       C 0,48.954 8.954,40 20,40
-                                       L 128,40
-                                       C 153,40 173,22 200,22
-                                       C 227,22 247,40 272,40
-                                       L 380,40
-                                       C 391.046,40 400,48.954 400,60"
+                                    d={isButtonHidden
+                                        ? "M 0,60 C 0,48.954 8.954,40 20,40 L 380,40 C 391.046,40 400,48.954 400,60"
+                                        : "M 0,60 C 0,48.954 8.954,40 20,40 L 128,40 C 153,40 173,22 200,22 C 227,22 247,40 272,40 L 380,40 C 391.046,40 400,48.954 400,60"
+                                    }
                                     fill="none"
                                     stroke="#334155"
                                     strokeWidth="0.8"
+                                    className="transition-all duration-500"
                                 />
                             )}
                         </svg>
